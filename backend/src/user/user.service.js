@@ -1,6 +1,6 @@
 import userModel from "./user.schema.js";
-import transporter from "./user.severEmailConnect.js";
-const { sendOTPMessage } = require('./user.serverSMSConnect')
+import transporter from "./user.serverEmailConnect.js";
+import sendOTPMessage from "./user.serverSMSConnect.js";
 
 export class UserService {
   static findUserById = async (userid) => {

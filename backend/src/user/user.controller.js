@@ -1,6 +1,5 @@
 import { UserService } from "./user.service.js";
 import expressAsyncHandler from "express-async-handler";
-import userModel from "./user.schema.js";
 
 class UserController {
   createUser = expressAsyncHandler(async (req, res, next) => {

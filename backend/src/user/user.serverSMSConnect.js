@@ -1,5 +1,6 @@
-require('dotenv').config();
-const twilio = require('twilio');
+import dotenv from "dotenv";
+dotenv.config();
+import twilio from "twilio";
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
@@ -7,8 +8,8 @@ async function sendOTPMessage(userPhone, otp) {
     try {
         const message = await client.messages.create({
             body: `Mã xác thực Web_Cinema của bạn là: ${otp}`,
-            from: process.env.TWILIO_PHONE_NUMBER,  // Số điện thoại Twilio của bạn
-            to: userPhone,  // Số điện thoại người nhận (userPhone)
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: userPhone, 
         });
         console.log("OTP sent:", message.sid);
         return true;
@@ -18,4 +19,4 @@ async function sendOTPMessage(userPhone, otp) {
     }
 }
 
-module.exports = { sendOTPMessage };
+export default sendOTPMessage;
