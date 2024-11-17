@@ -1,74 +1,54 @@
-import dotenv from "dotenv";
-//import twilio from 'twilio';
-import nodemailer from "nodemailer";
 import userModel from "./user.schema.js";
-
-dotenv.config();
-
-/*
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = twilio(accountSid, authToken);
-
-client.verify.v2.services("VA41cda5ad10c08380d139f3526d840c7d")
-      .verifications
-      .create({to: process.env.PHONE_NUMBER, channel: 'sms'})
-      .then(verification => console.log(verification.sid));
-*/
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+import transporter from "./user.severEmailConnect.js";
+const { sendOTPMessage } = require('./user.serverSMSConnect')
 
 export class UserService {
-  static findUserById = async (userId) => {
-    return await userModel.findById(userId);
+  static findUserById = async (userid) => {
+    return await userModel.findById(userid);
   };
 
-  static findUserByEmail = async (userEmail) => {
-    return await userModel.findOne({ userEmail });
+  static findUserByEmail = async (useremail) => {
+    return await userModel.findOne({ useremail });
   };
 
-  static findUserByPhone = async (userPhone) => {
-    return await userModel.findOne({ userPhone });
+  static findUserByPhone = async (userphone) => {
+    return await userModel.findOne({ userphone });
   };
 
-  static createUser = async (userData) => {
-    const { userEmail, userPhone } = userData;
+  static checkExitAndActiveUser = async (identifier) => {
+    const user = (await UserService.findUserByEmail(identifier)) || (await UserService.findUserByPhone(identifier));
+    if (!user) {
+      return { error: "User not found!" };
+    }
+    if (!user.userActive) {
+      return { error: "User has been blocked! Please contact administrator to resolve!" };
+    }
+  };
 
+  static createUser = async (userdata) => {
+    const { userEmail, userPhone } = userdata;
     const existingUserPhone = await this.findUserByPhone(userPhone);
     if (existingUserPhone) {
-      return { error: "Phone number already registered" };
+      return { error: "Phone number already registered!" };
     }
-
     const existingUserEmail = await this.findUserByEmail(userEmail);
     if (existingUserEmail) {
-      return { error: "Email already registered" };
+      return { error: "Email already registered!" };
     }
-
-    return await userModel.create(userData);
+    return await userModel.create(userdata);
   };
 
-  static updateUserById = async (userId, updateData) => {
+  static updateUserById = async (userid, updatedata) => {
     try {
-      const { userEmail, userPhone } = updateData;
-
+      const { userEmail, userPhone } = updatedata;
       const conflicts = await userModel.findOne({
         $or: [{ userPhone }, { userEmail }],
-        _id: { $ne: userId },
+        userId: { $ne: userid },
       });
-
       if (conflicts) {
-        return { error: "Phone number or email already registered" };
+        return { error: "Phone number or email already registered!" };
       }
-
-      return await userModel.findByIdAndUpdate(userId, updateData, {
+      return await userModel.findOneAndUpdate(userid, updatedata, {
         new: true,
       });
     } catch (error) {
@@ -77,34 +57,12 @@ export class UserService {
     }
   };
 
-  static deleteUserById = async (userId) => {
-    return await userModel.findByIdAndDelete(userId);
+  static deleteUserById = async (userid) => {
+    return await userModel.findOneAndDelete({ userid });
   };
 
   static getAllUsers = async () => {
     return await userModel.find({});
-  };
-
-  static storeOTPAndVerificationCode = async (userPhone, otp) => {
-    const otpExpiration = new Date(Date.now() + 5 * 60000); // 5 minutes expiration
-    return await userModel.findOneAndUpdate(
-      { userPhone },
-      { otp, otpExpiration },
-      { verificationCode }
-    );
-  };
-
-  static verifyOTP = async (userPhone, otp) => {
-    const user = await this.findUserByPhone(userPhone);
-    if (!user) return false;
-    if (user.otp === otp && user.otpExpiration > new Date()) {
-      await userModel.updateOne(
-        { userPhone },
-        { $unset: { otp: "", otpExpiration: "" } }
-      );
-      return true;
-    }
-    return false;
   };
 
   static sendEmail = async (to, subject, text) => {
@@ -115,32 +73,47 @@ export class UserService {
         subject: subject,
         text: text,
       });
+      console.log("Email sent successfully!");
       return true;
     } catch (error) {
-      console.error("Error sending email:", error);
+      console.error("Error sending email:", error.message);
       return false;
     }
   };
 
-  static sendVerificationCode = async (contact, code) => {
-    if (contact.includes("@")) {
-      return await this.sendEmail(
-        contact,
-        "Verification Code",
-        `Your verification code is: ${code}`
-      );
-    } else {
-      //const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      //return await this.sendOTP(contact, otp);
-      return "Tính năng đang phát triển";
+  static sendOTP = async (userPhone, otp) => {
+    try {
+      const result = await sendOTPMessage(userPhone, otp);
+      console.log("OTP sent successfully!");
+      return result;
+    } catch (error) {
+      console.error("Error in sending OTP from service:", error);
+      return false;
     }
   };
 
-  static storeVerificationCode = async (userId, code) => {
-    return await userModel.findByIdAndUpdate(
-      userId,
-      { verificationCode: code },
-      { new: true }
-    );
+  static storeConfirmCode = async (identifier, confirmcode) => {
+    const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3 phút từ thời điểm gửi mã
+    const isEmail = identifier.includes("@");
+    if (!isEmail) {
+      return await userModel.findOneAndUpdate(
+        { identifier },
+        {
+          userOTP: confirmcode,
+          userOTPExpirationTime: expirationTime
+        },
+        { new: true }
+      );
+    }
+    else {
+      return await userModel.findOneAndUpdate(
+        { identifier },
+        {
+          userVerificationCode: confirmcode,
+          userVFCodeExpirationTime: expirationTime
+        },
+        { new: true }
+      );
+    }
   };
 }

@@ -3,18 +3,18 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    userId: String,
+    userId: Number,
     userName: String,
-    userGender: Boolean,
     userBirth: Date,
     userEmail: { type: String, unique: true },
     userPhone: { type: String, unique: true },
     userPass: String,
     userActive: { type: Boolean, default: true },
-    otp: { type: String },
-    isVerified: Boolean,
-    otpExpiration: { type: Date },
-    verificationCode: { type: String },
+    userOTP: String,
+    userOTPExpirationTime: Date,
+    userVerificationCode: String,
+    userVFCodeExpirationTime: Date,
+    userIsConfirmed: { type: Boolean, default: false },
   },
   {
     timestamps: true,
