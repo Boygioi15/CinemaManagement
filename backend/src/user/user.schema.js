@@ -10,8 +10,6 @@ const userSchema = new mongoose.Schema(
     userPhone: { type: String, unique: true },
     userPass: String,
     userActive: { type: Boolean, default: true },
-    userOTP: String,
-    userOTPExpirationTime: Date,
     userVerificationCode: String,
     userVFCodeExpirationTime: Date,
     userIsConfirmed: { type: Boolean, default: false },

@@ -1,6 +1,5 @@
 import userModel from "./user.schema.js";
 import transporter from "./user.serverEmailConnect.js";
-import sendOTPMessage from "./user.serverSMSConnect.js";
 
 export class UserService {
   static findUserById = async (userid) => {
@@ -81,49 +80,15 @@ export class UserService {
     }
   };
 
-  static sendOTP = async (userPhone, otp) => {
-    try {
-      const result = await sendOTPMessage(userPhone, otp);
-      console.log("OTP sent successfully!");
-      return result;
-    } catch (error) {
-      console.error("Error in sending OTP from service:", error);
-      return false;
-    }
-  };
-
-  static checkOTP = async (userPhone, otp) => {
-    const user = await this.findUserByPhone(userPhone);
-    if (!user) return false;
-    if (user.userOTP === otp && user.userOTPExpirationTime > new Date()) {
-      await userModel.updateOne({ userPhone }, { $unset: { otp: "", otpExpiration: "" } });
-      return true;
-    }
-    return false;
-  };
-
-  static storeConfirmCode = async (identifier, confirmcode) => {
+  static storeConfirmCode = async (useremail, verification) => {
     const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3 phút từ thời điểm gửi mã
-    const isEmail = identifier.includes("@");
-    if (!isEmail) {
-      return await userModel.findOneAndUpdate(
-        { identifier },
-        {
-          userOTP: confirmcode,
-          userOTPExpirationTime: expirationTime
-        },
-        { new: true }
-      );
-    }
-    else {
-      return await userModel.findOneAndUpdate(
-        { identifier },
-        {
-          userVerificationCode: confirmcode,
-          userVFCodeExpirationTime: expirationTime
-        },
-        { new: true }
-      );
-    }
+    return await userModel.findOneAndUpdate(
+      { useremail },
+      {
+        userVerificationCode: verification,
+        userVFCodeExpirationTime: expirationTime
+      },
+      { new: true }
+    );
   };
 }
