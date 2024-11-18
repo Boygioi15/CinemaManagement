@@ -92,6 +92,16 @@ export class UserService {
     }
   };
 
+  static checkOTP = async (userPhone, otp) => {
+    const user = await this.findUserByPhone(userPhone);
+    if (!user) return false;
+    if (user.userOTP === otp && user.userOTPExpirationTime > new Date()) {
+      await userModel.updateOne({ userPhone }, { $unset: { otp: "", otpExpiration: "" } });
+      return true;
+    }
+    return false;
+  };
+
   static storeConfirmCode = async (identifier, confirmcode) => {
     const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3 phút từ thời điểm gửi mã
     const isEmail = identifier.includes("@");

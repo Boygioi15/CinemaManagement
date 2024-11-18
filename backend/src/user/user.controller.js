@@ -63,32 +63,24 @@ class UserController {
     });
   });
 
-  /*
-    //send phone code
-    requestOTP = expressAsyncHandler(async (req, res, next) => {
-      const { userPhone } = req.body;
-      const user = await UserService.findUserByPhone(userPhone);
-      if (!user) {
-        return res.status(404).json({ msg: "User not found", success: false });
-      }
-  
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      const sent = await UserService.sendOTP(userPhone, otp);
-  
-      if (sent) {
-        await UserService.storeOTP(userPhone, otp);
-        return res
-          .status(200)
-          .json({ msg: "OTP sent successfully", success: true });
-      } else {
-        return res
-          .status(500)
-          .json({ msg: "Failed to send OTP", success: false });
-      }
-    });
-    */
+  requestOTP = expressAsyncHandler(async (req, res, next) => {
+    const { userPhone } = req.body;
+    const user = await UserService.findUserByPhone(userPhone);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found!", success: false });
+    }
 
-  //Login by email or phone with password
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const sent = await UserService.sendOTP(userPhone, otp);
+
+    if (sent) {
+      await UserService.storeConfirmCode(userPhone, otp);
+      return res.status(200).json({ msg: "OTP sent successfully!", success: true });
+    } else {
+      return res.status(500).json({ msg: "Failed to send OTP!", success: false });
+    }
+  });
+
   loginUser = expressAsyncHandler(async (req, res, next) => {
     const { identifier, userPass, userOTP } = req.body;
     const user = await UserService.checkExitAndActiveUser(identifier);
@@ -106,10 +98,9 @@ class UserController {
 
 
     if (userOTP) {
-      const sendOtp = await UserService.sendOtp
-      const isValidOTP = await UserService.verifyOTP(user.userPhone, userOTP);
-      if (!isValidOTP) {
-        return res.status(404).json({ msg: "Invalid OTP!", success: false });
+      const isCheck = await UserService.checkOTP(identifier, userOTP);
+      if(!isCheck){
+        return res.status(404).json({ msg: "Incorrect OTP!", success: false });
       }
       return res.status(200).json({ msg: "Login successful with OTP!", success: true, user });
     }
@@ -129,7 +120,7 @@ class UserController {
     if (!isEmail) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       await UserService.sendOTP(identifier, otp);
-      await UserService.storeOTP(user.userId, otp);
+      await UserService.storeConfirmCode(identifier, otp);
       return res.status(200).json({ msg: "OTP sent successfully!", success: true });
     }
     else {
@@ -144,7 +135,7 @@ class UserController {
       };
       const verificationCode = randomVerificationCode();
       await UserService.sendEmail(identifier, "Verification Code", `Your verification code is: ${verificationCode}`);
-      await UserService.storeVerificationCode(identifier, verificationCode);
+      await UserService.storeConfirmCode(identifier, verificationCode);
       return res.status(200).json({ msg: "Verification code sent successfully!", success: true });
     }
   });
@@ -159,11 +150,11 @@ class UserController {
 
     const isEmail = identifier.includes("@");
     if (!isEmail) {
-      if (user.userOTP !== confirmcode) {
+      if (user.userOTP !== confirmcode || user.userOTPExpirationTime < new Date()) {
         return res.status(404).json({ msg: "Invalid OTP code!", success: false });
       }
     } else {
-      if (user.userVerificationCode !== confirmcode) {
+      if (user.userVerificationCode !== confirmcode || user.userVFCodeExpirationTime < new Date()) {
         return res.status(404).json({ msg: "Invalid verification code!", success: false });
       }
     }
