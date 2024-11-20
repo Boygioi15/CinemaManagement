@@ -42,8 +42,8 @@ const AuthForm = ({
   };
 
   return (
-    <div className="flex items-center pl-[10%]">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded-lg  max-w-[1000px] shadow-lg">
+    <div className="flex items-center">
+      <div className="bg-white bg-opacity-90 text-black p-5 rounded-b-lg  max-w-[1000px] shadow-lg">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
@@ -67,9 +67,9 @@ const AuthForm = ({
                 required={field.required || false}
                 className="w-full p-2 border border-gray-300 rounded-md min-w-[350px]"
               />
-              <p className="text-sm text-red-500">
+              {/* <p className="text-sm text-red-500">
                 Giá trị đang render: {formValues[field.for]}
-              </p>
+              </p> */}
             </div>
           ))}
         </div>

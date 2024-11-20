@@ -81,7 +81,7 @@ function LoginForm() {
     },
   ];
   return (
-    <div className="">
+    <div className="loginForm">
       <AuthForm
         fields={fields}
         isTickRequired={true}
@@ -149,11 +149,17 @@ function SignUpForm() {
     },
   ];
   return (
-    <div className="">
+    <div className="signUpForm">
       <AuthForm
+        title="Đăng ký"
         fields={fields}
         layout=""
-        links={[{ text: "Bạn đã có tài khoản?", path: "/auth" }]}
+        isTickRequired={true}
+        tickLabel="Chính sách bảo mật"
+        links={[
+          { text: "Bạn đã có tài khoản?", path: "/auth" },
+          { text: "Quên mật khẩu?", path: "/auth/forgot-password" },
+        ]}
         buttontitle="Đăng ký"
         onSubmit={handleRegister}
       />
@@ -163,17 +169,12 @@ function SignUpForm() {
 export default function LoginPage() {
   return (
     <div
-      className="min-h-screen m-0 overflow-y-auto font-sans text-white  bg-gradient-to-b flex-col bg-contain"
-      style={{
-        backgroundImage: "url('/Images/image 1.svg')",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        backgroundColor: "#14102c",
-      }}
+      className="min-h-screen m-0 overflow-y-auto font-sans text-white bg-gradient-to-b from-[#0b0d1c] to-[#1a1a2e]bg-contain"
+      style={{ backgroundImage: "url('/Images/Cover.png')" }}
     >
-      <div className="">
-        <div className="h-full   min-h-screen ">
-          <div className="w-fit flex items-center ml-40 mt-20 mb-20">
+      <div className="relative z-10">
+        <div className="flex h-full  bg-black min-h-screen bg-opacity-50">
+          <div className="w-1/2 flex items-center pl-20">
             <ParentForm />
           </div>
         </div>
