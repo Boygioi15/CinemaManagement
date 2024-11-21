@@ -3,7 +3,7 @@ import { ROUTES } from "./utils/RouteEnum";
 const renderUserRouter = () => {
   const userRouters = [
     {
-      path: ROUTERS.USER.HOME,
+      path: ROUTES.USER.HOME,
       component: <HomePage />,
     },
   ];
