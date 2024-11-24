@@ -6,11 +6,14 @@ import { useAuth } from "../../Context/AuthContext";
 
 function ParentForm() {
   const [display, setDisplay] = useState(true);
+  const switchToLogin = () => {
+    setDisplay(true); // Chuyển sang form Đăng nhập
+  };
   let displayContent;
   if (display) {
     displayContent = <LoginForm />;
   } else {
-    displayContent = <SignUpForm />;
+    displayContent = <SignUpForm switchToLogin={switchToLogin} />;
   }
   return (
     <div className="authForm">
@@ -93,7 +96,8 @@ function LoginForm() {
     </div>
   );
 }
-function SignUpForm() {
+function SignUpForm({ switchToLogin }) {
+  console.log("switchToLogin:", switchToLogin);
   const handleRegister = (formValues, isChecked) => {
     console.log("Đăng nhập với username:");
   };
@@ -153,9 +157,14 @@ function SignUpForm() {
       <AuthForm
         fields={fields}
         layout=""
-        links={[{ text: "Bạn đã có tài khoản?", path: "/auth" }]}
         buttontitle="Đăng ký"
         onSubmit={handleRegister}
+        bottomLink={{
+          text: "Bạn đã có tài khoản?",
+          linkText: "Đăng nhập",
+          path: "#",
+          onClick: { switchToLogin },
+        }}
       />
     </div>
   );

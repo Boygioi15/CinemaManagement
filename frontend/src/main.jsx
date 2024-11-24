@@ -4,7 +4,6 @@ import { AuthProvider } from "./Context/AuthContext";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
-import RegisterPage from "./pages/LoginPage/RegisterPage";
 import ForgotPasswordPage from "./pages/LoginPage/ForgotPassPage";
 import VerifyCodePage from "./pages/LoginPage/VerifyCodePage";
 import ResetPassPage from "./pages/LoginPage/ResetPassPage";
@@ -19,10 +18,6 @@ const router = createBrowserRouter([
       {
         path: "auth",
         element: <LoginPage />,
-      },
-      {
-        path: "auth/register",
-        element: <RegisterPage />,
       },
       {
         path: "auth/forgot-password",

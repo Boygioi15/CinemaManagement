@@ -22,17 +22,21 @@ function ForgotPasswordPage() {
       className="min-h-screen m-0 overflow-y-auto font-sans text-white bg-gradient-to-b from-[#0b0d1c] to-[#1a1a2e]bg-contain"
       style={{ backgroundImage: "url('/Images/Cover.png')" }}
     >
-      <div className="relative z-10">
-        <div className="flex h-full  bg-black min-h-screen bg-opacity-50">
-          <div className="w-1/2 flex items-center pl-20">
-            <AuthForm
-              title="Quên mật khẩu"
-              fields={fields}
-              isTickRequired={false}
-              buttontitle="Gửi mã xác minh"
-              onSubmit={handleClick}
-            />
-          </div>
+      <div className="bg-indigo-900 min-h-screen flex items-center justify-center">
+        <div className="bg-indigo-800 text-white rounded-lg shadow-lg p-6 w-96">
+          <h2 className="text-2xl font-bold mb-4 text-center">Quên mật khẩu</h2>
+          <p className="text-center text-sm mb-6">
+            Hãy nhập tài khoản của mình và chúng tôi sẽ giúp bạn tạo mật khẩu
+            mới
+          </p>
+          <input
+            type="text"
+            placeholder="Nhập tài khoản"
+            className="w-full p-3 text-black rounded-lg mb-4 outline-none border border-gray-300 focus:ring-2 focus:ring-indigo-400"
+          />
+          <button className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-medium py-2 rounded-lg transition duration-200">
+            Gửi mã xác minh
+          </button>
         </div>
       </div>
     </div>

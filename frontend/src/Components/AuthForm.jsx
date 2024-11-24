@@ -11,6 +11,7 @@ const AuthForm = ({
   links = [],
   buttontitle,
   onSubmit,
+  bottomLink,
 }) => {
   const [formValues, setFormValues] = useState({});
   useEffect(() => {
@@ -76,7 +77,7 @@ const AuthForm = ({
 
         {/* Optional "Tick" checkbox */}
         {isTickRequired && (
-          <div className="flex items-center mb-2">
+          <div className="flex items-center mb-5 mt-3">
             <input
               id="remember"
               type="checkbox"
@@ -90,14 +91,18 @@ const AuthForm = ({
 
         {/* Links like forgot password, register */}
         {links.length > 0 && (
-          <div className="flex justify-between items-center mb-5">
+          <div className="text-right items-center">
             {links.map((link, index) => (
               <Link
                 key={index}
                 to={link.path} // Dùng `to` thay vì `onClick`
-                className="text-black no-underline hover:underline cursor-pointer"
+                className="text-black underline hover:underline cursor-pointer"
                 onMouseOver={(e) => (e.currentTarget.style.color = "purple")}
                 onMouseOut={(e) => (e.currentTarget.style.color = "black")}
+                onMouseEnter={(e) => {
+                  e.preventDefault();
+                  if (link.onClick) link.onClick(); // Gọi callback khi có
+                }}
               >
                 {link.text}
               </Link>
@@ -112,6 +117,23 @@ const AuthForm = ({
         >
           {buttontitle}
         </button>
+
+        {/* bottom link */}
+        {bottomLink && (
+          <div className="mt-4 text-center">
+            <span className="text-base text-gray-700">
+              {bottomLink.text}{" "}
+              <span
+                onClick={bottomLink.onClick}
+                className="text-black underline hover:underline cursor-pointer"
+                onMouseOver={(e) => (e.currentTarget.style.color = "purple")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "black")}
+              >
+                {bottomLink.linkText}
+              </span>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
