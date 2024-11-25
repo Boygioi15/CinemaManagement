@@ -1,33 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthForm from "../../Components/AuthForm";
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
-  const fields = [
-    {
-      for: "user",
-      text: "Nhập email hoặc SĐT *",
-      type: "text",
-      placeholder: "irsus123",
-      required: true,
-    },
-  ];
-
   const handleClick = async (e) => {};
 
   return (
     <div
       className="min-h-screen m-0 overflow-y-auto font-sans text-white bg-gradient-to-b from-[#0b0d1c] to-[#1a1a2e]bg-contain"
-      style={{ backgroundImage: "url('/Images/Cover.png')" }}
+      style={{
+        backgroundColor: "#14102c",
+      }}
     >
-      <div className="bg-indigo-900 min-h-screen flex items-center justify-center">
-        <div className="bg-indigo-800 text-white rounded-lg shadow-lg p-6 w-96">
-          <h2 className="text-2xl font-bold mb-4 text-center">Quên mật khẩu</h2>
+      <div className=" min-h-screen flex items-center justify-center">
+        <div className=" text-white rounded-lg shadow-lg p-6 w-96">
+          <h2 className="text-3xl font-bold mb-4 text-center">Quên mật khẩu</h2>
           <p className="text-center text-sm mb-6">
-            Hãy nhập tài khoản của mình và chúng tôi sẽ giúp bạn tạo mật khẩu
-            mới
+            Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn hướng dẫn để
+            tạo mật khẩu mới
           </p>
           <input
             type="text"

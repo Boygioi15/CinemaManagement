@@ -5,10 +5,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import ForgotPasswordPage from "./pages/LoginPage/ForgotPassPage";
-import VerifyCodePage from "./pages/LoginPage/VerifyCodePage";
-import ResetPassPage from "./pages/LoginPage/ResetPassPage";
-import UserInfoPage from "./layouts/UserSpaceLayout";
+import SuccessPage from "./pages/LoginPage/SuccessPage";
+import UserInfoLayout from "./layouts/UserSpaceLayout";
+import UserInfoPage from "./pages/UserPage/UserInfor";
+import UserChangePass from "./pages/UserPage/UserChangePass";
+import UserTransHistory from "./pages/UserPage/UserTransHistory";
 import "./index.css";
+import "./App.css";
 //specified element here
 const router = createBrowserRouter([
   {
@@ -24,16 +27,24 @@ const router = createBrowserRouter([
         element: <ForgotPasswordPage />,
       },
       {
-        path: "auth/verify",
-        element: <VerifyCodePage />,
+        path: "auth/success",
+        element: <SuccessPage />,
       },
       {
-        path: "auth/reset-password",
-        element: <ResetPassPage />,
+        path: "/user/user-space",
+        element: <UserInfoLayout />,
       },
       {
-        path: "/profile",
+        path: "/user/user-space/infor",
         element: <UserInfoPage />,
+      },
+      {
+        path: "/user/user-space/change-pass",
+        element: <UserChangePass />,
+      },
+      {
+        path: "/user/user-space/trans-history",
+        element: <UserTransHistory />,
       },
     ],
   },

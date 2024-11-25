@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthForm from "../../Components/AuthForm";
+import LoginComponent from "../../Components/LoginComponent";
+import SignUpComponent from "../../Components/SignUpComponent";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -85,7 +86,7 @@ function LoginForm() {
   ];
   return (
     <div className="">
-      <AuthForm
+      <LoginComponent
         fields={fields}
         isTickRequired={true}
         tickLabel="Lưu mật khẩu đăng nhập"
@@ -154,7 +155,7 @@ function SignUpForm({ switchToLogin }) {
   ];
   return (
     <div className="">
-      <AuthForm
+      <SignUpComponent
         fields={fields}
         layout=""
         buttontitle="Đăng ký"

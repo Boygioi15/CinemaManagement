@@ -2,16 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-const AuthForm = ({
+const LoginComponent = ({
   title,
   fields,
-  layout = "column",
   isTickRequired = false,
   tickLabel = "Lưu mật khẩu đăng nhập",
   links = [],
   buttontitle,
   onSubmit,
-  bottomLink,
 }) => {
   const [formValues, setFormValues] = useState({});
   useEffect(() => {
@@ -48,15 +46,12 @@ const AuthForm = ({
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
-        <div
-          className={`grid gap-4 ${
-            layout === "row" ? "grid-cols-2" : "grid-cols-1"
-          }`}
-        >
+        <div className={`grid gap-4  "grid-cols-1"`}>
           {fields.map((field, index) => (
             <div key={index} className="flex flex-col">
               <label htmlFor={field.for} className="block mb-1 font-bold">
                 {field.text}
+                {field.required && <span className="text-red-500"> *</span>}
               </label>
               <input
                 id={field.for}
@@ -117,26 +112,9 @@ const AuthForm = ({
         >
           {buttontitle}
         </button>
-
-        {/* bottom link */}
-        {bottomLink && (
-          <div className="mt-4 text-center">
-            <span className="text-base text-gray-700">
-              {bottomLink.text}{" "}
-              <span
-                onClick={bottomLink.onClick}
-                className="text-black underline hover:underline cursor-pointer"
-                onMouseOver={(e) => (e.currentTarget.style.color = "purple")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "black")}
-              >
-                {bottomLink.linkText}
-              </span>
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default AuthForm;
+export default LoginComponent;
