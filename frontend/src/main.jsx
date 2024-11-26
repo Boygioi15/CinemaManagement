@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import GeneralFilmCard from './components/GeneralFilmCard';
+import "./index.css";
+import FilmCard from './components/filmCard';
 
 // Dữ liệu giả lập
 const filmData = [
@@ -12,7 +13,7 @@ const filmData = [
     country: "Mỹ",
     type: "Hoạt hình",
     duration: "95 phút",
-    ageLimit: "P",
+    ageLimit: "13",
   },
   {
     id: 2,
@@ -22,7 +23,7 @@ const filmData = [
     country: "Anh",
     type: "Phiêu lưu",
     duration: "100 phút",
-    ageLimit: "PG",
+    ageLimit: "16",
   },
   {
     id: 3,
@@ -32,7 +33,7 @@ const filmData = [
     country: "Mỹ",
     type: "Hành động",
     duration: "120 phút",
-    ageLimit: "PG-13",
+    ageLimit: "18",
   },
   {
     id: 4,
@@ -42,24 +43,16 @@ const filmData = [
     country: "Canada",
     type: "Khoa học viễn tưởng",
     duration: "110 phút",
-    ageLimit: "PG-13",
+    ageLimit: "13",
   },
 ];
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "20px",
-        overflowX: "auto",
-      }}
-    >
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-4 bg-slate-700">
       {/* Hiển thị các thẻ phim */}
       {filmData.map((film) => (
-        <GeneralFilmCard
+        <FilmCard
           key={film.id}
           imageUrl={film.imageUrl}
           name={film.name}
