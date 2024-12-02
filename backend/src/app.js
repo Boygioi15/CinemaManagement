@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import mainRouter from "./route.js";
+import cookieParser from 'cookie-parser'
 import databaseInstance from "./database/database.init.js";
 //enviroment variables section
 dotenv.config();
@@ -14,6 +15,7 @@ console.log(process.env.PORT);
 //middleware
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(cookieParser())
 app.use(
   express.urlencoded({
     extended: true,
@@ -32,8 +34,12 @@ app.use(mainRouter);
 
 //special function to catch unhandled error.
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Internal server error");
+  console.log("🚀 ~ app.use ~ err:", err)
+  res.status(err.status || 500).json({
+    msg: err.message || 'Internal Server Error',
+    success: false,
+
+  });
 });
 app.listen(PORT, () => {
   console.log(

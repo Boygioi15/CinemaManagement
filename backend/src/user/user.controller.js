@@ -1,4 +1,6 @@
-import { UserService } from "./user.service.js";
+import {
+  UserService
+} from "./user.service.js";
 import expressAsyncHandler from "express-async-handler";
 
 class UserController {
@@ -18,7 +20,9 @@ class UserController {
   });
 
   updateUser = expressAsyncHandler(async (req, res, next) => {
-    const { userId } = req.params;
+    const {
+      userId
+    } = req.params;
     const updatedUser = await UserService.updateUserById(userId, req.body);
     if (updatedUser?.error) {
       return res.status(400).json({
@@ -40,7 +44,9 @@ class UserController {
   });
 
   deleteUser = expressAsyncHandler(async (req, res, next) => {
-    const { userId } = req.params;
+    const {
+      userId
+    } = req.params;
     const deletedUser = await UserService.deleteUserById(userId);
     if (!deletedUser) {
       return res.status(404).json({
@@ -63,27 +69,16 @@ class UserController {
     });
   });
 
-  loginUser = expressAsyncHandler(async (req, res, next) => {
-    const { identifier, userPass } = req.body;
-    const user = await UserService.checkExitAndActiveUser(identifier);
-    if (!user) {
-      return res.status(404).json({ msg: user, success: false });
-    }
-
-    if (userPass) {
-      const isMatch = await user.comparePassword(userPass);
-      if (!isMatch) {
-        return res.status(404).json({ msg: "Incorrect password!", success: false });
-      }
-      return res.status(200).json({ msg: "Login successful!", success: true, user });
-    }
-  });
-
   sendConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const { userEmail } = req.body;
+    const {
+      userEmail
+    } = req.body;
     const user = (await UserService.findUserByEmail(userEmail));
     if (!user) {
-      return res.status(404).json({ msg: "User not found", success: false });
+      return res.status(404).json({
+        msg: "User not found",
+        success: false
+      });
     }
 
     const randomVerificationCode = () => {
@@ -95,45 +90,71 @@ class UserController {
       }
       return code;
     };
+
     const verificationCode = randomVerificationCode();
     await UserService.sendEmail(identifier, "Verification Code", `Your verification code is: ${verificationCode}`);
     await UserService.storeConfirmCode(identifier, verificationCode);
-    return res.status(200).json({ msg: "Verification code sent successfully!", success: true });
+    return res.status(200).json({
+      msg: "Verification code sent successfully!",
+      success: true
+    });
   });
 
   checkConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const { userEmail, userVerificationCode } = req.body;
+    const {
+      userEmail,
+      userVerificationCode
+    } = req.body;
 
     const user = (await UserService.findUserByEmail(userEmail));
     if (!user) {
-      return res.status(404).json({ msg: "User not found!", success: false });
+      return res.status(404).json({
+        msg: "User not found!",
+        success: false
+      });
     }
 
     if (user.userVerificationCode !== userVerificationCode || user.userVFCodeExpirationTime < new Date()) {
-      return res.status(404).json({ msg: "Invalid verification code!", success: false });
+      return res.status(404).json({
+        msg: "Invalid verification code!",
+        success: false
+      });
     }
 
     user.userIsConfirmed = true;
     await user.save();
 
-    return res.status(200).json({ msg: "Confirmed successfully!", success: true });
+    return res.status(200).json({
+      msg: "Confirmed successfully!",
+      success: true
+    });
   });
 
   resetPassword = expressAsyncHandler(async (req, res, next) => {
-    const { userEmail, newPassword } = req.body;
+    const {
+      userEmail,
+      newPassword
+    } = req.body;
 
     const user = (await UserService.findUserByEmail(userEmail));
     if (!user) {
-      return res.status(404).json({ msg: "User not found!", success: false });
+      return res.status(404).json({
+        msg: "User not found!",
+        success: false
+      });
     }
 
     user.userPass = newPassword;
     user.userIsConfirmed = false;
     user.userVerificationCode = undefined;
     user.userVFCodeExpirationTime = new Date(0);
+
     await user.save();
 
-    return res.status(200).json({ msg: "Password reset successfully!", success: true });
+    return res.status(200).json({
+      msg: "Password reset successfully!",
+      success: true
+    });
   });
 }
 
