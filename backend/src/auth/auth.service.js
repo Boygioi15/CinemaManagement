@@ -58,7 +58,6 @@ export class AuthService {
     };
     static processNewToken = async (refreshToken) => {
         const decoded = JwtService.verifyRTToken(refreshToken);
-        console.log("🚀 ~ AuthService ~ processNewToken= ~ decoded:", decoded)
 
         if (!decoded) {
             throw customError("Invalid or expired refresh token", 403);
