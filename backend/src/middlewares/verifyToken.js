@@ -1,17 +1,21 @@
-import jwt from "jsonwebtoken";
-import Users from "../user/user.schema.js";
 import expressAsyncHandler from "express-async-handler";
+import {
+  JwtService
+} from "../auth/jwt/jwt.service.js";
+import userModel from "../user/user.schema.js";
+import {
+  customError
+} from "./errorHandlers.js";
 const validateToken = expressAsyncHandler(async function (req, res, next) {
   let authHeader = req?.headers?.authorization;
   if (!authHeader) {
-    throw new Error("There is no token inside request!");
+    throw customError("There is no token inside request!", 401);
   }
   if (authHeader.startsWith("Bearer")) {
     const token = authHeader.split(" ")[1];
-    //console.log(token)
     try {
-      const decoded = jwt.verify(token, process.env.JWT_KEY);
-      const user = await Users.findById(decoded?.id);
+      const decoded = JwtService.verifyATToken(token)
+      const user = await userModel.findById(decoded?.id);
       req.user = user;
       next();
     } catch (error) {
@@ -29,4 +33,7 @@ const checkIsAdmin = expressAsyncHandler(async function (req, res, next) {
     throw new Error("You are not permitted!");
   }
 });
-export { validateToken, checkIsAdmin };
+export {
+  validateToken,
+  checkIsAdmin
+};
