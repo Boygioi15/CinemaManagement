@@ -1,0 +1,49 @@
+.custom-button {
+    position: relative;
+    inset: 0;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 7px; /* Đảm bảo tất cả phần tử đều có border-radius 7px */
+    overflow: hidden;
+    transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+      background-color 0.2s ease-in-out;
+    cursor: pointer;
+    text-decoration: none; /* Xóa gạch chân mặc định của thẻ a */
+    display: inline-block; /* Đảm bảo thẻ a có dạng như một nút */
+    z-index: 2; /* Đảm bảo text nằm trên nền */
+    background: none; /* Không có nền trực tiếp, để dùng nền từ các div con */
+    text-align: center;
+
+  }
+  
+  /* Khi hover, thay đổi màu chữ sử dụng biến CSS */
+  .custom-button:hover {
+    color: var(--hover-text-color);
+  }
+  
+  /* Div đầu tiên là nền mặc định */
+  .button-background-default {
+    position: absolute;
+    inset: 0; /* Đảm bảo nền bao phủ hoàn toàn */
+    z-index: 1; /* Nằm dưới button */
+  }
+  
+  /* Div thứ hai để tạo hiệu ứng chuyển động khi hover */
+  .button-background-hover {
+    position: absolute;
+    inset: 0; /* Đảm bảo nền hover bao phủ hoàn toàn */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1; /* Nằm dưới button text */
+  }
+  
+  .custom-button:hover .button-background-hover {
+    transform: translateX(0);
+  }
+  
+  /* Văn bản "Đặt vé" */
+  .button-text {
+    position: relative;
+    z-index: 2;
+  }
+  
