@@ -2,24 +2,29 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
-  userName: String,
-  userBirth: Date,
-  userEmail: {
+  name: String,
+  birth: Date,
+  email: {
     type: String,
     unique: true
   },
-  userPhone: {
+  phone: {
     type: String,
     unique: true
   },
-  userPass: String,
-  userActive: {
+  account: String,
+  password: String,
+  blocked: {
     type: Boolean,
-    default: true
+    default: false
   },
-  userVerificationCode: String,
-  userVFCodeExpirationTime: Date,
-  userIsConfirmed: {
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  verificationCode: String,
+  vFCodeExpirationTime: Date,
+  isConfirmed: {
     type: Boolean,
     default: false
   },
@@ -28,14 +33,14 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("userPass")) return next();
+  if (!this.isModified("password")) return next();
   const saltRounds = 10;
-  this.userPass = await bcrypt.hash(this.userPass, saltRounds);
+  this.password = await bcrypt.hash(this.password, saltRounds);
   next();
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.userPass);
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const userModel = mongoose.model("users", userSchema);

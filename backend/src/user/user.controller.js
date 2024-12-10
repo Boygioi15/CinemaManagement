@@ -21,9 +21,9 @@ class UserController {
 
   updateUser = expressAsyncHandler(async (req, res, next) => {
     const {
-      userId
+      _id
     } = req.params;
-    const updatedUser = await UserService.updateUserById(userId, req.body);
+    const updatedUser = await UserService.updateUserById(_id, req.body);
     if (updatedUser?.error) {
       return res.status(400).json({
         msg: updatedUser.error,
@@ -45,9 +45,9 @@ class UserController {
 
   deleteUser = expressAsyncHandler(async (req, res, next) => {
     const {
-      userId
+      _id
     } = req.params;
-    const deletedUser = await UserService.deleteUserById(userId);
+    const deletedUser = await UserService.deleteUserById(_id);
     if (!deletedUser) {
       return res.status(404).json({
         msg: "User not found!",
@@ -71,9 +71,9 @@ class UserController {
 
   sendConfirmCode = expressAsyncHandler(async (req, res, next) => {
     const {
-      userEmail
+      email
     } = req.body;
-    const user = (await UserService.findUserByEmail(userEmail));
+    const user = (await UserService.findUserByEmail(email));
     if (!user) {
       return res.status(404).json({
         msg: "User not found",
@@ -102,11 +102,11 @@ class UserController {
 
   checkConfirmCode = expressAsyncHandler(async (req, res, next) => {
     const {
-      userEmail,
+      email,
       userVerificationCode
     } = req.body;
 
-    const user = (await UserService.findUserByEmail(userEmail));
+    const user = (await UserService.findUserByEmail(email));
     if (!user) {
       return res.status(404).json({
         msg: "User not found!",
@@ -121,7 +121,7 @@ class UserController {
       });
     }
 
-    user.userIsConfirmed = true;
+    user.isConfirmed = true;
     await user.save();
 
     return res.status(200).json({
@@ -132,11 +132,11 @@ class UserController {
 
   resetPassword = expressAsyncHandler(async (req, res, next) => {
     const {
-      userEmail,
+      email,
       newPassword
     } = req.body;
 
-    const user = (await UserService.findUserByEmail(userEmail));
+    const user = (await UserService.findUserByEmail(email));
     if (!user) {
       return res.status(404).json({
         msg: "User not found!",
@@ -144,10 +144,10 @@ class UserController {
       });
     }
 
-    user.userPass = newPassword;
-    user.userIsConfirmed = false;
-    user.userVerificationCode = undefined;
-    user.userVFCodeExpirationTime = new Date(0);
+    user.password = newPassword;
+    user.isConfirmed = false;
+    user.verificationCode = undefined;
+    user.vFCodeExpirationTime = new Date(0);
 
     await user.save();
 
