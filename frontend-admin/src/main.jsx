@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import RootLayout from "./layouts/RootLayout";
+import RootLayout from "./layouts/RootLayout/RootLayout";
 import AdminFilm from "./pages/FilmManagement/FilmList";
 import OnlineTickets from "./pages/TicketManagement/OnlineTicket";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";

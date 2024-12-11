@@ -1,5 +1,5 @@
 import React from "react";
-import RootLayout from "../../layouts/RootLayout";
+import RootLayout from "../../layouts/RootLayout/RootLayout";
 
 const tabs = [
   {
