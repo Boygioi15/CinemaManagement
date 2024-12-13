@@ -1,10 +1,13 @@
-import logoTag from "../../assets/bookmark--bookmarks-tags-favorite.png";
-import logoTime from "../../assets/fastforward-clock--time-clock-reset-stopwatch-circle-measure-loading.png";
-import logoEarth from "../../assets/earth-1--planet-earth-globe-world.png";
-import logoCaption from "../../assets/chat-bubble-text-square--messages-message-bubble-text-square-chat.png";
-import logoTrailer from "../../assets/live-video.png";
+import {
+  FaTag,
+  FaRegClock,
+  FaGlobeAmericas,
+  FaCommentDots,
+} from "react-icons/fa";
+import { PiPlayCircleFill } from "react-icons/pi";
 import "./style.css";
 import CustomButton from "../button";
+
 
 const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
   return (
@@ -22,26 +25,28 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
 
           {/* Góc trên bên trái - Nhãn định dạng */}
           <div className="absolute top-0 left-0 flex items-center transition-transform duration-300 ease-in-out transform sm:group-hover:-translate-y-full">
-            {/* Nhãn 2D */}
-            <div className="flex bg-[#FF9933] w-[39px] h-[45px] px-2 py-1 justify-center items-center shadow-md">
-              <span className="border-2 border-black p-0.5 text-xs rounded-md font-thin text-black">
-                2D
-              </span>
-            </div>
-            {/* Nhãn T13 TEEN hoặc ADULT */}
-            <div className="flex flex-col items-center justify-center w-[39px] h-[45px] bg-[#FF0033] shadow-md">
-              <span className="text-white font-thin overflow-hidden text-sm">
-                T{ageLimit}
-              </span>
-              {ageLimit < 18 ? (
-                <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
-                  TEEN
+            <div className="flex items-center transition-transform duration-300 ease-in-out transform">
+              {/* Nhãn 2D */}
+              <div className="flex bg-[#FF9933]  w-[39px] h-[45px] justify-center items-center shadow-md">
+                <span className="border-2 border-black p-0.5 text-xs rounded-md font-thin text-black">
+                  2D
                 </span>
-              ) : (
-                <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
-                  ADULT
+              </div>
+              {/* Nhãn T13 TEEN hoặc ADULT */}
+              <div className="flex flex-col w-[39px] h-[45px] items-center justify-center bg-[#FF0033] shadow-md">
+                <span className="text-white font-thin overflow-hidden text-sm">
+                  T{ageLimit}
                 </span>
-              )}
+                {ageLimit < 18 ? (
+                  <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
+                    TEEN
+                  </span>
+                ) : (
+                  <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
+                    ADULT
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -52,35 +57,19 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
                 {name}: NHIỆM VỤ GIẢI CỨU HOÀNG GIA (P) {ageLimit}
               </h3>
               <p className="flex items-center mt-2">
-                <img
-                  src={logoTag}
-                  alt="Tag Icon"
-                  className="w-5 h-5 mr-2 align-middle"
-                />
+                <FaTag className="w-5 h-5 mr-2 align-middle" />
                 Thể loại: {type}
               </p>
               <p className="flex items-center mt-2">
-                <img
-                  src={logoTime}
-                  alt="Time Icon"
-                  className="w-5 h-5 mr-2 align-middle"
-                />
+                <FaRegClock className="w-5 h-5 mr-2 align-middle" />
                 {duration} phút
               </p>
               <p className="flex items-center mt-2">
-                <img
-                  src={logoEarth}
-                  alt="Country Icon"
-                  className="w-5 h-5 mr-2 align-middle"
-                />
+                <FaGlobeAmericas className="w-5 h-5 mr-2 align-middle" />
                 Quốc gia: {country}
               </p>
               <p className="flex items-center mt-2">
-                <img
-                  src={logoCaption}
-                  alt="Caption Icon"
-                  className="w-5 h-5 mr-2 align-middle"
-                />
+                <FaCommentDots className="w-5 h-5 mr-2 align-middle" />
                 Phụ đề: {country}
               </p>
             </div>
@@ -96,11 +85,7 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
           <div className="flex justify-between mt-3 pt-4 button-font">
             {/* Nút trailer chỉ hiển thị trên thiết bị lớn hơn sm */}
             <button className="hidden sm:flex items-center">
-              <img
-                src={logoTrailer}
-                alt="Caption Icon"
-                className="w-[31px] h-[31px] mr-2 align-middle"
-              />
+              <PiPlayCircleFill className="w-[31px] h-[31px] mr-2 align-middle" />
               <span className="mr-2 text-white border-b-2">Xem trailer</span>
             </button>
 
