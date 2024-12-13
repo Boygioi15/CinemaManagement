@@ -1,5 +1,5 @@
 // pages/FilmDetailPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaTag,
   FaRegClock,
@@ -11,11 +11,30 @@ import { FaRegCirclePlay } from "react-icons/fa6";
 import "./filmPage.css";
 import FilmInfoSection from "../../Components/FilmInfoSection";
 import TrailerModal from "../../Components/TrailerModal";
-
-const FilmDetailPage = () => {
+import axios from "axios"
+const FilmDetailPage = ({filmID = "674eb734338a95c043b02c5a"}) => {
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
 
+  const [filmDetail, setFilmDetail] = useState();
+  useEffect( ()=>{
+    const fetchFilmDetail = async() => {
+      try{
+        const response = await axios.get(`http://localhost:8000/api/films/${filmID}/getFilmDetail`);
+        if(response && response.data){
+          setFilmDetail(response.data.data)
+        }
+        console.log(response.data.data)
+      }
+      catch{
+        throw new Error("There is an error while getting film detail")
+      }
+    }
+    fetchFilmDetail();
+  },[])
+  if(!filmDetail){
+    return;
+  }
   return (
     <div className="p-6">
       <div className="grid items-start grid-cols-5 gap-12 rounded-lg">
@@ -23,7 +42,7 @@ const FilmDetailPage = () => {
           <div className="relative border border-gray-300 rounded-lg ">
             {/* Hình ảnh phim */}
             <img
-              src="https://cinestar.com.vn/_next/image/?url=https%3A%2F%2Fapi-website.cinestar.com.vn%2Fmedia%2Fwysiwyg%2FPosters%2F12-2024%2Fchi-dau.png&w=3840&q=75"
+              src="https://res.cloudinary.com/ddrfocetn/image/upload/v1732590791/rkq5zo350eovgemvkjyb.jpg"
               alt="Phim"
               className="w-full h-full object-cover rounded-lg "
             />
@@ -60,25 +79,25 @@ const FilmDetailPage = () => {
 
         <div className="col-span-3 pt-6 space-y-10">
           <h1 className="rounded-full w-full h-6 flex items-center justify-start">
-            CHỊ DÂU (T16)
+            {filmDetail.name}
           </h1>
 
           <div className="flex flex-col items-start justify-start space-y-4 text-left w-full mt-4 film-info">
             <p className="flex items-center mt-2 ">
               <FaTag className="icon-style" />
-              Thể loại:
+              Thể loại: {}
             </p>
             <p className="flex items-center mt-2">
               <FaRegClock className="icon-style" />
-              phút
+              {`${filmDetail.filmDuration} phút`} 
             </p>
             <p className="flex items-center mt-2">
               <FaGlobeAmericas className="icon-style" />
-              Quốc gia:
+              Quốc gia: {filmDetail.originatedCountry}
             </p>
             <p className="flex items-center mt-2">
               <FaCommentDots className="icon-style" />
-              Phụ đề:
+              Phụ đề: {filmDetail.voice}
             </p>
             <p className="flex items-center mt-2">
               <LuUserRoundCheck className="icon-style" />{" "}
@@ -107,7 +126,7 @@ const FilmDetailPage = () => {
       <TrailerModal
         videoOpen={videoOpen}
         setVideoOpen={setVideoOpen}
-        videoUrl="https://www.youtube-nocookie.com/embed/WHmHpntEMbk?controls=1&enablejsapi=1&rel=0&fs=1"
+        videoUrl="https://www.youtube.com/embed/zqH4AA-KEgQ?si=G3rf7WBzteyUb6AE"
       />
     </div>
   );
