@@ -24,6 +24,10 @@ const filmShowSchema = new mongoose.Schema({
     locketSeatIds: {
         type: [mongoose.Schema.Types.ObjectId],
         default: []
+    },
+    filmType: {
+        type: String,
+        enum: ["2D", "3D", "4D"]
     }
 }, {
     timestamps: true,

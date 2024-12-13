@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {
     FilmService
 } from "../film/film.service.js";
@@ -50,21 +51,34 @@ export class FilmShowService {
 
     static getShowtimesByDate = async (filmId, date) => {
         const selectedDate = new Date(date);
-        const startOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0));
-        const endOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59, 999));
 
-
-        const showtimes = await filmShowModel.find({
-                film: filmId,
-                showDate: {
-                    $gte: startOfDay,
-                    $lt: endOfDay,
+        const res = await filmShowModel.aggregate([{
+                $match: {
+                    film: new mongoose.Types.ObjectId(filmId),
+                    showDate: date
                 }
-            })
-            .select('showTime _id')
-            .lean();
+            },
+            {
+                $group: {
+                    _id: "$filmType",
+                    showTimes: {
+                        $push: {
+                            _id: "$_id",
+                            showTime: "$showTime"
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    showType: "$_id",
+                    _id: 0,
+                    showTimes: 1
+                }
+            }
+        ]);
 
-        return showtimes;
+        return res;
     }
 
     static getAllFilmShowByFilmId = async (filmId) => {
@@ -76,15 +90,16 @@ export class FilmShowService {
         }).select('showDate').lean();
 
         const arrayShowDates = filmShows.map(item => item.showDate);
+        const uniqueShowDates = [...new Set(arrayShowDates.map(date => date.toISOString()))].map(dateStr => new Date(dateStr));
 
-        const res = Promise.all(arrayShowDates.map(async (date) => {
+        const res = await Promise.all(uniqueShowDates.map(async (date) => {
             const showtimes = await this.getShowtimesByDate(filmId, date);
             if (showtimes.length === 0) {
                 return null
             }
             return {
                 date,
-                showtimes
+                show: showtimes
             };
         }))
         return (await res).filter(item => item !== null);
