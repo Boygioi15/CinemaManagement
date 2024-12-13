@@ -44,25 +44,8 @@ export class FilmShowService {
         return await FilmService.getUpComingFilm()
     };
 
-    static getFilmShowDates = async (filmId) => {
-        const filmShows = await filmShowModel.find({
-            film: filmId,
-            showDate: {
-                $gte: new Date()
-            },
-        }).select('showDate').lean();
-
-        const arrayShowDates = filmShows.map(item => item.showDate);
-        return arrayShowDates;
-    }
-
-    static getShowtimesByFilmIdAndDate = async (filmId, showdate) => {
-        const selectedDate = new Date(showdate);
-        if (isNaN(selectedDate.getTime())) {
-            throw new Error("Invalid date format");
-        }
-
-        // Tạo khoảng thời gian UTC bắt đầu và kết thúc ngày
+    static getShowtimesByDate = async (filmId, date) => {
+        const selectedDate = new Date(date);
         const startOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0));
         const endOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59, 999));
 
@@ -74,10 +57,30 @@ export class FilmShowService {
                     $lt: endOfDay,
                 }
             })
-            .select('showTime')
+            .select('showTime _id')
             .lean();
 
-        const arrayShowTimes = showtimes.map(item => item.showTime);
-        return arrayShowTimes;
+        return showtimes;
+    }
+
+
+    static getAllFilmShowByFilmId = async (filmId) => {
+        const filmShows = await filmShowModel.find({
+            film: filmId,
+            showDate: {
+                $gte: new Date()
+            },
+        }).select('showDate').lean();
+
+        const arrayShowDates = filmShows.map(item => item.showDate);
+
+        const res = Promise.all(arrayShowDates.map(async (date) => {
+            const showtimes = await this.getShowtimesByDate(filmId, date);
+            return {
+                date,
+                showtimes
+            };
+        }))
+        return res;
     }
 }

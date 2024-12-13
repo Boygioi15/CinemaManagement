@@ -7,8 +7,7 @@ const router = express.Router();
 router.post("", filmShowController.createFilmShow);
 router.get("/showing", filmShowController.showingFilm);
 router.get("/upcoming", filmShowController.showingFilm);
-router.get('/:filmId/show-date', filmShowController.getFilmShowDates);
-router.get('/:filmId/show-time', filmShowController.getFilmShowTimes);
+router.get('/getByDate', filmShowController.getAllFilmShow);
 
 
 export default router;

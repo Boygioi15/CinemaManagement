@@ -31,27 +31,12 @@ class FilmShowController {
         });
     });
 
-    getFilmShowDates = expressAsyncHandler(async (req, res, next) => {
-        const response = await FilmShowService.getFilmShowDates(req.params.filmId)
-        return res.status(200).json({
-            msg: "Get showdate successfully!",
-            success: true,
-            data: response
-        });
-    });
 
-    getFilmShowTimes = expressAsyncHandler(async (req, res, next) => {
+    getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
         const {
             filmId
-        } = req.params;
-        const {
-            date // yyyy-mm-dd (2024-12-15) 
         } = req.query;
-
-        const response = await FilmShowService.getShowtimesByFilmIdAndDate(
-            filmId,
-            date
-        )
+        const response = await FilmShowService.getAllFilmShowByFilmId(filmId)
         return res.status(200).json({
             msg: "Get showdate successfully!",
             success: true,

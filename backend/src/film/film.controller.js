@@ -16,6 +16,19 @@ class FilmController {
         });
     });
 
+
+    getFilmDetail = expressAsyncHandler(async (req, res, next) => {
+        const {
+            id
+        } = req.params;
+        const response = await FilmService.getFilmDetail(id);
+        return res.status(200).json({
+            msg: "Get film successfully!",
+            success: true,
+            data: response
+        });
+    });
+
 }
 
 export default new FilmController()
