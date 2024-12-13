@@ -7,9 +7,12 @@ import {
 import { PiPlayCircleFill } from "react-icons/pi";
 import "./style.css";
 import CustomButton from "../button";
-
+import TrailerModal from "../TrailerModal";
+import { useState } from "react";
+import { FaRegCirclePlay } from "react-icons/fa6";
 
 const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
+  const [videoOpen, setVideoOpen] = useState(false);
   return (
     <div className="flex flex-wrap justify-center gap-5 p-2">
       {/* Sử dụng flexbox để căn chỉnh chiều rộng tự động */}
@@ -84,10 +87,20 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
           </a>
           <div className="flex justify-between mt-3 pt-4 button-font">
             {/* Nút trailer chỉ hiển thị trên thiết bị lớn hơn sm */}
-            <button className="hidden sm:flex items-center">
-              <PiPlayCircleFill className="w-[31px] h-[31px] mr-2 align-middle" />
-              <span className="mr-2 text-white border-b-2">Xem trailer</span>
+            <button
+              className="hidden sm:flex items-center"
+              onClick={() => setVideoOpen(true)}
+            >
+              <div className="flex items-center justify-center mr-2">
+                <FaRegCirclePlay className="w-[31px] h-[31px] text-[#fe1e3e] bg-[#d9d9d9] rounded-full" />
+              </div>
+              <span className="text-white border-b-2">Xem trailer</span>
             </button>
+            <TrailerModal
+              videoOpen={videoOpen}
+              setVideoOpen={setVideoOpen}
+              videoUrl="https://www.youtube-nocookie.com/embed/WHmHpntEMbk?controls=1&enablejsapi=1&rel=0&fs=1"
+            />
 
             <CustomButton
               defaultColor="#F3EA28" /* Màu nền mặc định */

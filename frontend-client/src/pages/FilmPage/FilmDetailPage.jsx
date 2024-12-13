@@ -11,14 +11,26 @@ import { FaRegCirclePlay } from "react-icons/fa6";
 import "./filmPage.css";
 import FilmInfoSection from "../../Components/FilmInfoSection";
 import TrailerModal from "../../Components/TrailerModal";
+import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
+import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
+import FoodCard from "../../Components/FoodCard";
 
 const FilmDetailPage = () => {
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
+  const [selectedSchedule, setSSelectedSchedule] = useState("19/12");
+  const [selectedShowtime, setSelectedShowtime] = useState("19/12");
+
+  const handleDateClick = (date) => {
+    setSSelectedSchedule(date);
+  };
+  const handleTimeClick = (time) => {
+    setSelectedShowtime(time);
+  };
 
   return (
-    <div className="p-6">
-      <div className="grid items-start grid-cols-5 gap-12 rounded-lg">
+    <div className="p-6 space-y-12 md:space-y-40">
+      <div className="grid items-start grid-cols-5 gap-6 md:gap-12 rounded-lg">
         <div className="col-span-2 w-full h-full top-0 text-center relative ">
           <div className="relative border border-gray-300 rounded-lg ">
             {/* Hình ảnh phim */}
@@ -100,15 +112,92 @@ const FilmDetailPage = () => {
             <span className="text-white border-b-2">Xem trailer</span>
           </button>
         </div>
+        {/* Sử dụng TrailerModal */}
+        <TrailerModal
+          videoOpen={videoOpen}
+          setVideoOpen={setVideoOpen}
+          videoUrl="https://www.youtube-nocookie.com/embed/WHmHpntEMbk?controls=1&enablejsapi=1&rel=0&fs=1"
+        />
       </div>
       <FilmInfoSection className="block md:hidden mt-6" />
+      <div>
+        <div className="flex flex-col justify-center items-center space-y-12">
+          <h1>LỊCH CHIẾU</h1>
+          <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
+            <ScheduleChooseBox
+              date="19/12"
+              isSelected={selectedSchedule === "19/12"}
+              onClick={() => handleDateClick("19/12")}
+            />
+            <ScheduleChooseBox
+              date="20/12"
+              isSelected={selectedSchedule === "20/12"}
+              onClick={() => handleDateClick("20/12")}
+            />
+            <ScheduleChooseBox
+              date="21/12"
+              isSelected={selectedSchedule === "21/12"}
+              onClick={() => handleDateClick("21/12")}
+            />
+          </div>
+          <div className="flex flex-col justify-center items-center space-y-2">
+            <h1>SUẤT CHIẾU</h1>
+            <h2>2D</h2>
+            <hr className="text-white w-full p-1"></hr>
+            <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
+              <ShowtimeChooseBox
+                time="19/12"
+                isSelected={selectedShowtime === "19/12"}
+                onClick={() => handleTimeClick("19/12")}
+              />
+              <ShowtimeChooseBox
+                time="20/12"
+                isSelected={selectedShowtime === "20/12"}
+                onClick={() => handleTimeClick("20/12")}
+              />
+              <ShowtimeChooseBox
+                time="21/12"
+                isSelected={selectedShowtime === "21/12"}
+                onClick={() => handleTimeClick("21/12")}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-center space-y-2">
+            <h2>3D</h2>
+            <hr className="text-white w-full p-1"></hr>
+            <div className="flex flex-wrap justify-center items-center mt-4 gap-4">
+              <ShowtimeChooseBox
+                time="19/12"
+                isSelected={selectedShowtime === "19/12"}
+                onClick={() => handleTimeClick("19/12")}
+              />
+              <ShowtimeChooseBox
+                time="20/12"
+                isSelected={selectedShowtime === "20/12"}
+                onClick={() => handleTimeClick("20/12")}
+              />
+              <ShowtimeChooseBox
+                time="21/12"
+                isSelected={selectedShowtime === "21/12"}
+                onClick={() => handleTimeClick("21/12")}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col justify-center items-center space-y-12">
+        <h1>CHỌN BẮP NƯỚC</h1>
+        <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
+          <FoodCard />
+          <FoodCard />
+          <FoodCard />
+          <FoodCard />
+          <FoodCard />
+          <FoodCard />
+          <FoodCard />
 
-      {/* Sử dụng TrailerModal */}
-      <TrailerModal
-        videoOpen={videoOpen}
-        setVideoOpen={setVideoOpen}
-        videoUrl="https://www.youtube-nocookie.com/embed/WHmHpntEMbk?controls=1&enablejsapi=1&rel=0&fs=1"
-      />
+        </div>
+      </div>
     </div>
   );
 };
