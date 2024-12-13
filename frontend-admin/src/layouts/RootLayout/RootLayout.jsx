@@ -13,7 +13,6 @@ const RootLayout = ({ tabs }) => {
     */
    setRoles(["ticket_offline","bapNuoc"]);
   })
-  let tabs;
   if(roles.find("ticket")){
     tabs.add(<Ticket />)
   }
