@@ -1,0 +1,80 @@
+body {
+    color: white;
+  }
+  
+  h1 {
+    font-size: 2rem; /* Kích thước mặc định cho màn hình lớn */
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* Kích thước mặc định cho màn hình lớn */
+  }
+  
+  .icon-style {
+    font-size: 1rem;
+    color: #F3EA28;
+    width: 1.5rem;  
+    height: 1.5rem;  
+    margin-right: 1rem; 
+  }
+  
+  .film-info {
+    font-size: 1.2rem; /* Kích thước mặc định cho màn hình lớn */
+    font-weight: 100;
+  }
+  
+  .film-description {
+    font-size: 1rem; /* Kích thước mặc định cho màn hình lớn */
+    font-weight: 100;
+  }
+  
+  /* Media queries cho màn hình nhỏ hơn */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.5rem; /* Kích thước chữ nhỏ hơn cho màn hình tablet */
+    }
+  
+    h2 {
+      font-size: 1.25rem; /* Kích thước chữ nhỏ hơn cho màn hình tablet */
+    }
+  
+    .film-info {
+      font-size: 1rem; /* Kích thước chữ nhỏ hơn cho màn hình tablet */
+    }
+  
+    .film-description {
+      font-size: 0.9rem; /* Kích thước chữ nhỏ hơn cho màn hình tablet */
+    }
+  
+    .icon-style {
+      font-size: 0.9rem; /* Kích thước icon nhỏ hơn cho màn hình tablet */
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.25rem; /* Kích thước chữ nhỏ hơn cho màn hình điện thoại */
+    }
+  
+    h2 {
+      font-size: 1rem; /* Kích thước chữ nhỏ hơn cho màn hình điện thoại */
+    }
+  
+    .film-info {
+      font-size: 0.9rem; /* Kích thước chữ nhỏ hơn cho màn hình điện thoại */
+    }
+  
+    .film-description {
+      font-size: 0.8rem; /* Kích thước chữ nhỏ hơn cho màn hình điện thoại */
+    }
+  
+    .icon-style {
+      font-size: 0.8rem; /* Kích thước icon nhỏ hơn cho màn hình điện thoại */
+      width: 1rem;
+      height: 1rem;
+      margin-right: 0.5rem;
+    }
+  }

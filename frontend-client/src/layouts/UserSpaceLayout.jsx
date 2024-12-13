@@ -24,7 +24,7 @@ const UserInfoLayout = ({ children }) => {
   ];
 
   return (
-    <div className="h-screen bg-gradient-to-br from-[#0f0e2e] to-[#2a2476]  ">
+    <div className="h-screen">
       <div className="flex items-start justify-center ml-40 pt-28">
         {/* Sidebar */}
         <div className="flex">
