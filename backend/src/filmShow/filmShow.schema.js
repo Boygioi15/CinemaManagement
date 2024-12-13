@@ -20,8 +20,11 @@ const filmShowSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "films"
+    },
+    locketSeatIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        default: []
     }
-
 }, {
     timestamps: true,
 });

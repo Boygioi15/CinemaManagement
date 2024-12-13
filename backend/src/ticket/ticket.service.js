@@ -1,4 +1,4 @@
-import ticketModel from "./ticket.schema";
+import ticketModel from "./ticket.schema.js";
 
 export class TicketService {
     static createTicket = async (ticketData) => {
@@ -15,8 +15,9 @@ export class TicketService {
         try {
             const updatedTicket = await ticketModel.findBy_idAndUpdate(
                 _id,
-                updateData,
-                { new: true }
+                updateData, {
+                    new: true
+                }
             ).populate("items customer_id");
 
             return updatedTicket || null;
@@ -29,9 +30,11 @@ export class TicketService {
     static deleteTicketBy_id = async (_id) => {
         try {
             const deletedTicket = await ticketModel.findBy_idAndDelete(_id);
-            return deletedTicket
-                ? { message: "Ticket deleted successfully." }
-                : null;
+            return deletedTicket ?
+                {
+                    message: "Ticket deleted successfully."
+                } :
+                null;
         } catch (error) {
             console.error("Error deleting ticket:", error);
             throw new Error("An error occurred while deleting the ticket.");
@@ -60,9 +63,12 @@ export class TicketService {
     static cancelTicket = async (_id, reason) => {
         try {
             const ticket = await ticketModel.findBy_idAndUpdate(
-                _id,
-                { served: false, inval_idReason: reason },
-                { new: true }
+                _id, {
+                    served: false,
+                    inval_idReason: reason
+                }, {
+                    new: true
+                }
             );
 
             return ticket || null;
@@ -78,9 +84,12 @@ export class TicketService {
             if (!ticket) return null;
 
             const updatedItems = ticket.items.map((item) =>
-                approvedItems.some((approved) => approved.name === item.name)
-                    ? { ...item, approved: true }
-                    : item
+                approvedItems.some((approved) => approved.name === item.name) ?
+                {
+                    ...item,
+                    approved: true
+                } :
+                item
             );
 
             ticket.items = updatedItems;

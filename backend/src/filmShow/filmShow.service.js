@@ -1,6 +1,10 @@
 import {
     FilmService
 } from "../film/film.service.js";
+import {
+    customError
+} from "../middlewares/errorHandlers.js";
+import roomModel from "../room/room.schema.js";
 import filmShowModel from "./filmShow.schema.js";
 
 export class FilmShowService {
@@ -63,7 +67,6 @@ export class FilmShowService {
         return showtimes;
     }
 
-
     static getAllFilmShowByFilmId = async (filmId) => {
         const filmShows = await filmShowModel.find({
             film: filmId,
@@ -76,11 +79,34 @@ export class FilmShowService {
 
         const res = Promise.all(arrayShowDates.map(async (date) => {
             const showtimes = await this.getShowtimesByDate(filmId, date);
+            if (showtimes.length === 0) {
+                return null
+            }
             return {
                 date,
                 showtimes
             };
         }))
-        return res;
+        return (await res).filter(item => item !== null);
+    };
+
+    static getHostRoomOfFilmShow = async (filmShowId) => {
+        const filmShow = await filmShowModel.findById(filmShowId);
+        if (!filmShow) throw customError("Film show not found", 400);
+
+        const roomOfFilmShow = await roomModel.findById(filmShow.roomId).populate({
+                path: "seats",
+                select: "seatName seatCol seatRow usable",
+            })
+            .lean(); // Chuyển kết quả về object JS thuần
+
+        roomOfFilmShow.seats = roomOfFilmShow.seats.map(seat => ({
+            ...seat,
+            isLocked: filmShow.locketSeatIds.includes(seat._id),
+        }));
+
+        return roomOfFilmShow
     }
+
+
 }

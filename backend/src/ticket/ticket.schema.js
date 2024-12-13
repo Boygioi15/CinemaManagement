@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const ticketSchema = new mongoose.Schema({
     filmName: {
@@ -29,26 +29,24 @@ const ticketSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    items: [
-        {
-            name: {
-                type: String,
-                required: true
-            },
-            quantity: {
-                type: String,
-                required: true
-            },
-            unitPrice: {
-                type: String,
-                required: true
-            },
-            approved: {
-                type: Boolean,
-                default: false
-            }
+    items: [{
+        name: {
+            type: String,
+            required: true
+        },
+        quantity: {
+            type: String,
+            required: true
+        },
+        unitPrice: {
+            type: String,
+            required: true
+        },
+        approved: {
+            type: Boolean,
+            default: false
         }
-    ],
+    }],
     customerID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users"
@@ -74,4 +72,4 @@ const ticketSchema = new mongoose.Schema({
 });
 
 const ticketModel = mongoose.model("tickets", ticketSchema);
-module.exports = ticketModel;
+export default ticketModel;

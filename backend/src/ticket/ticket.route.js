@@ -1,5 +1,5 @@
 import express from "express";
-import TicketController from "./ticket.controller";
+import TicketController from "./ticket.controller.js";
 
 const router = express.Router();
 

@@ -17,6 +17,22 @@ const roomSChema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "seats"
     }],
+    centerX2: {
+        type: Number,
+        require: true
+    },
+    centerX1: {
+        type: Number,
+        require: true
+    },
+    centerY1: {
+        type: Number,
+        require: true
+    },
+    centerY2: {
+        type: Number,
+        require: true
+    },
     other: {
         type: String,
     },

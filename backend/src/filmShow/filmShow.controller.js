@@ -43,6 +43,18 @@ class FilmShowController {
             data: response
         });
     });
+
+    getHostRoom = expressAsyncHandler(async (req, res, next) => {
+        const {
+            id
+        } = req.params;
+        const response = await FilmShowService.getHostRoomOfFilmShow(id)
+        return res.status(200).json({
+            msg: "Get showdate successfully!",
+            success: true,
+            data: response
+        });
+    });
 }
 
 export default new FilmShowController()
