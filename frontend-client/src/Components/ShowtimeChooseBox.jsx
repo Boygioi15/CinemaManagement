@@ -13,7 +13,7 @@ const ShowtimeChooseBox = ({ time, isSelected, onClick }) => {
       `}
       onClick={onClick}
     >
-      <div className="text-base">{time}</div>
+      <div className="text-base font-semibold">{time}</div>
     </div>
   );
 };

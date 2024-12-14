@@ -12,10 +12,12 @@ import UserChangePass from "./pages/UserPage/UserChangePass";
 import UserTransHistory from "./pages/UserPage/UserTransHistory";
 import "./index.css";
 import "./App.css";
-import FilmDetailPage from "./pages/FilmPage/FilmDetailPage";
+import FilmDetailPage from "./pages/FilmDetailPage/FilmDetailPage";
+import FoodPage from "./pages/FoodPage/FootPage";
+import FilmShowingPage from "./pages/FilmShowingPage/FilmShowingPage";
+import FilmUpComing from "./pages/FIlmUpComing/FilmUpComing";
 //specified element here
-const router = createBrowserRouter(
-  [
+const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
@@ -52,15 +54,25 @@ const router = createBrowserRouter(
         path: "/movie/detail",
         element: <FilmDetailPage />,
       },
+      {
+        path: "/movie/showing",
+        element: <FilmShowingPage />,
+      },
+      {
+        path: "/movie/upcoming",
+        element: <FilmUpComing/>
+      },
+      {
+        path: "/food",
+        element: <FoodPage />,
+      },
     ],
   },
-]
-)
+]);
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
     </AuthProvider>
   </React.StrictMode>
-)
-
+);

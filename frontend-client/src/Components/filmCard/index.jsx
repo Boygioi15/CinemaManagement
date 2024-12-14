@@ -11,33 +11,28 @@ import TrailerModal from "../TrailerModal";
 import { useState } from "react";
 import { FaRegCirclePlay } from "react-icons/fa6";
 
-const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
+const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing }) => {
   const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <div className="flex flex-wrap justify-center gap-5 p-2">
-      {/* Sử dụng flexbox để căn chỉnh chiều rộng tự động */}
+      {/* FilmCard with flexbox */}
       <div className="flex flex-col items-start gap-2 w-full max-w-xs group">
-        {/* FilmCard với class group */}
+        {/* FilmCard with hover effects */}
         <div className="relative border cursor-pointer border-gray-300 rounded-lg overflow-hidden shadow-md transition-transform duration-300 sm:hover:shadow-lg aspect-[2/3] w-full">
-          {/* Hình ảnh phim */}
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
+          {/* Film image */}
+          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
 
-          {/* Góc trên bên trái - Nhãn định dạng */}
+          {/* Labels for 2D and Age Limit */}
           <div className="absolute top-0 left-0 flex items-center transition-transform duration-300 ease-in-out transform sm:group-hover:-translate-y-full">
             <div className="flex items-center transition-transform duration-300 ease-in-out transform">
-              {/* Nhãn 2D */}
               <div className="flex bg-[#FF9933]  w-[39px] h-[45px] justify-center items-center shadow-md">
-                <span className="border-2 border-black p-0.5 text-xs rounded-md font-thin text-black">
+                <span className="border-2 border-black p-0.5 text-xs rounded-md font-interBold text-black">
                   2D
                 </span>
               </div>
-              {/* Nhãn T13 TEEN hoặc ADULT */}
               <div className="flex flex-col w-[39px] h-[45px] items-center justify-center bg-[#FF0033] shadow-md">
-                <span className="text-white font-thin overflow-hidden text-sm">
+                <span className="text-white font-interBold overflow-hidden text-sm">
                   T{ageLimit}
                 </span>
                 {ageLimit < 18 ? (
@@ -53,7 +48,7 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
             </div>
           </div>
 
-          {/* Overlay */}
+          {/* Overlay text */}
           <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 transition-opacity duration-300 hidden sm:flex justify-center items-center text-center sm:group-hover:opacity-100">
             <div className="flex flex-col items-start justify-start px-[38px] space-y-4 text-left w-full">
               <h3 className="mb-3 text-lg">
@@ -81,12 +76,11 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
 
         {/* Info Section */}
         <div className="w-full">
-          {/* Đặt chiều cao cố định cho tiêu đề để tránh thay đổi chiều cao */}
           <a className="font-bold text-lg mt-3 h-[48px] overflow-hidden line-clamp-2 text-white text-center group-hover:text-[#F3EA28] cursor-pointer">
             {name}: NHIỆM VỤ GIẢI CỨU HOÀNG GIA (P) {ageLimit}
           </a>
           <div className="flex justify-between mt-3 pt-4 button-font">
-            {/* Nút trailer chỉ hiển thị trên thiết bị lớn hơn sm */}
+            {/* Trailer button for larger screens */}
             <button
               className="hidden sm:flex items-center"
               onClick={() => setVideoOpen(true)}
@@ -102,15 +96,16 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit }) => {
               videoUrl="https://www.youtube-nocookie.com/embed/WHmHpntEMbk?controls=1&enablejsapi=1&rel=0&fs=1"
             />
 
+            {/* Custom button */}
             <CustomButton
-              defaultColor="#F3EA28" /* Màu nền mặc định */
-              gradientFrom="#663399" /* Màu bắt đầu của gradient */
-              gradientTo="#3366CC" /* Màu kết thúc của gradient */
-              textColor="#000000" /* Màu chữ mặc định */
-              hoverTextColor="#FFFFFF" /* Màu chữ khi hover */
-              borderColor="#3366CC"
-              href="https://example.com" /* Đường dẫn của liên kết */
+              defaultColor="#F3EA28" /* Default background color */
+              gradientFrom="#663399" /* Gradient start color */
+              gradientTo="#3366CC" /* Gradient end color */
+              textColor="#000000" /* Text color */
+              hoverTextColor="#FFFFFF" /* Text color on hover */
+              href="https://example.com" /* Link */
               className="w-full h-[40px] sm:w-[119px]"
+              text={isShowing ? "Đặt vé" : "Tìm hiểu thêm"} /* Conditional text */
             />
           </div>
         </div>

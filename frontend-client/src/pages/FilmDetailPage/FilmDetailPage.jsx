@@ -11,12 +11,13 @@ import { FaRegCirclePlay } from "react-icons/fa6";
 import "./filmPage.css";
 import FilmInfoSection from "../../Components/FilmInfoSection";
 import TrailerModal from "../../Components/TrailerModal";
-import axios from "axios"
+import axios from "axios";
 import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
 import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import FoodCard from "../../Components/FoodCard";
+import TicketType from "../../Components/TicketType";
 
-const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
+const FilmDetailPage = ({ filmID = "675c2aeb09b5ff5eb1b0e08d" }) => {
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedSchedule, setSSelectedSchedule] = useState("19/12");
@@ -30,22 +31,23 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
   };
 
   const [filmDetail, setFilmDetail] = useState();
-  useEffect( ()=>{
-    const fetchFilmDetail = async() => {
-      try{
-        const response = await axios.get(`http://localhost:8000/api/films/${filmID}/getFilmDetail`);
-        if(response && response.data){
-          setFilmDetail(response.data.data)
+  useEffect(() => {
+    const fetchFilmDetail = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/films/${filmID}/getFilmDetail`
+        );
+        if (response && response.data) {
+          setFilmDetail(response.data.data);
         }
-        console.log(response.data.data)
+        console.log(response.data.data);
+      } catch {
+        throw new Error("There is an error while getting film detail");
       }
-      catch{
-        throw new Error("There is an error while getting film detail")
-      }
-    }
+    };
     fetchFilmDetail();
-  },[])
-  if(!filmDetail){
+  }, []);
+  if (!filmDetail) {
     return;
   }
   return (
@@ -65,21 +67,21 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
                 <div className="flex items-center">
                   {/* Nhãn 2D */}
                   <div className="flex bg-[#FF9933] w-[33px] h-[35px] lg:w-[71px] lg:h-[78px] justify-center items-center rounded-tl-md">
-                    <span className="border-2 border-black p-0.5 text-xs rounded-md font-thin text-black">
+                    <span className="border-2 border-black p-0.5 text-xs rounded-md font-interBold text-black">
                       2D
                     </span>
                   </div>
                   {/* Nhãn T13 TEEN hoặc ADULT */}
                   <div className="flex flex-col w-[33px] h-[35px] lg:w-[71px] lg:h-[78px] items-center justify-center bg-[#FF0033] shadow-md">
-                    <span className="text-white font-thin overflow-hidden text-sm">
+                    <span className="text-white font-interBold overflow-hidden text-sm">
                       T{ageLimit}
                     </span>
                     {ageLimit < 18 ? (
-                      <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
+                      <span className="px-0.5 bg-black text-white font-interBold text-[0.5rem] tracking-widest">
                         TEEN
                       </span>
                     ) : (
-                      <span className="px-0.5 bg-black text-white text-[0.5rem] tracking-widest">
+                      <span className="px-0.5 bg-black text-white font-interBold text-[0.5rem] tracking-widest">
                         ADULT
                       </span>
                     )}
@@ -91,7 +93,7 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
         </div>
 
         <div className="col-span-3 pt-6 space-y-10">
-          <h1 className="rounded-full w-full h-6 flex items-center justify-start">
+          <h1 className="rounded-full w-full h-6 flex items-center justify-start font-interExtraBold">
             {filmDetail.name}
           </h1>
 
@@ -102,7 +104,7 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
             </p>
             <p className="flex items-center mt-2">
               <FaRegClock className="icon-style" />
-              {`${filmDetail.filmDuration} phút`} 
+              {`${filmDetail.filmDuration} phút`}
             </p>
             <p className="flex items-center mt-2">
               <FaGlobeAmericas className="icon-style" />
@@ -142,7 +144,7 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
       <FilmInfoSection className="block md:hidden mt-6" />
       <div>
         <div className="flex flex-col justify-center items-center space-y-12">
-          <h1>LỊCH CHIẾU</h1>
+          <h1 className="font-interExtraBold">LỊCH CHIẾU</h1>
           <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
             <ScheduleChooseBox
               date="19/12"
@@ -161,8 +163,8 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
             />
           </div>
           <div className="flex flex-col justify-center items-center space-y-2">
-            <h1>SUẤT CHIẾU</h1>
-            <h2>2D</h2>
+            <h1 className="font-interExtraBold">SUẤT CHIẾU</h1>
+            <h2 className="font-interBold">2D</h2>
             <hr className="text-white w-full p-1"></hr>
             <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
               <ShowtimeChooseBox
@@ -183,7 +185,7 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
             </div>
           </div>
           <div className="flex flex-col justify-center items-center space-y-2">
-            <h2>3D</h2>
+            <h2 className="font-interBold">3D</h2>
             <hr className="text-white w-full p-1"></hr>
             <div className="flex flex-wrap justify-center items-center mt-4 gap-4">
               <ShowtimeChooseBox
@@ -206,7 +208,15 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
         </div>
       </div>
       <div className="flex flex-col justify-center items-center space-y-12">
-        <h1>CHỌN BẮP NƯỚC</h1>
+        <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
+        <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
+          <TicketType />
+          <TicketType />
+          <TicketType />
+        </div>
+      </div>
+      <div className="flex flex-col justify-center items-center space-y-12">
+        <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
         <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
           <FoodCard />
           <FoodCard />
@@ -215,13 +225,6 @@ const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
           <FoodCard />
           <FoodCard />
           <FoodCard />
-
-      {/* Sử dụng TrailerModal */}
-      <TrailerModal
-        videoOpen={videoOpen}
-        setVideoOpen={setVideoOpen}
-        videoUrl="https://www.youtube.com/embed/zqH4AA-KEgQ?si=G3rf7WBzteyUb6AE"
-      />
         </div>
       </div>
     </div>

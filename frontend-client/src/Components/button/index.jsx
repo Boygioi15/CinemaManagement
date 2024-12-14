@@ -9,39 +9,39 @@ const CustomButton = ({
   hoverTextColor, // Màu chữ khi hover là trắng
   borderColor, // Viền mặc định là không có
   href, // Liên kết mặc định, có thể truyền vào
-className,
+  className,
+  text,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-      <a
-        href={href}
-        className={`custom-button hover:text-[${hoverTextColor}]} ${className}`}
+    <a
+      href={href}
+      className={`custom-button hover:text-[${hoverTextColor}]} ${className}`}
+      style={{
+        color: isHovered ? hoverTextColor : textColor,
+        border: borderColor ? `2px solid ${borderColor}` : "none",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Div đầu tiên là nền mặc định */}
+      <div
+        className="button-background-default"
+        style={{ backgroundColor: defaultColor }}
+      ></div>
+
+      {/* Div thứ hai để tạo hiệu ứng chuyển động khi hover */}
+      <div
+        className="button-background-hover"
         style={{
-          color: isHovered ? hoverTextColor : textColor,
-          border: borderColor ? `2px solid ${borderColor}` : "none",
+          background: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})`,
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Div đầu tiên là nền mặc định */}
-        <div
-          className="button-background-default"
-          style={{ backgroundColor: defaultColor }}
-        ></div>
+      ></div>
 
-        {/* Div thứ hai để tạo hiệu ứng chuyển động khi hover */}
-        <div
-          className="button-background-hover"
-          style={{
-            background: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})`,
-          }}
-        ></div>
-
-        {/* Văn bản "Đặt vé" */}
-        <span className="button-text">Đặt vé</span>
-      </a>
-
+      {/* Văn bản "Đặt vé" */}
+      <span className="button-text">{text}</span>
+    </a>
   );
 };
 

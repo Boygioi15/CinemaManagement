@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 import { GrFormSubtract } from "react-icons/gr";
 
-const QuantitySelector = ({ initialQuantity = 1, onChange }) => {
+const QuantitySelector = ({ initialQuantity = 0, onChange }) => {
   const [quantity, setQuantity] = useState(initialQuantity);
 
   const handleDecrement = () => {
@@ -24,7 +24,7 @@ const QuantitySelector = ({ initialQuantity = 1, onChange }) => {
     }
   };
   return (
-    <div className="flex text-2xl text-black items-center justify-between rounded-md w-[full] h-[40px] bg-[#94a4b8] hover:bg-[#f2ea28] ">
+    <div className="flex text-2xl text-black items-center justify-between rounded-md w-[200px] h-[40px] bg-[#94a4b8] hover:bg-[#f2ea28] ">
       <button
         type="button"
         className=" h-6 w-6 ml-2 rounded-full hover:bg-[#663399] hover:text-[#f2ea28]"

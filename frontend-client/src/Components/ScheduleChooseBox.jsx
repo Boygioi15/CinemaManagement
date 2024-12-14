@@ -9,7 +9,7 @@ const ScheduleChooseBox = ({ date, isSelected, onClick }) => {
       `}
       onClick={onClick}
     >
-      <div className="text-lg font-medium">{date}</div>
+      <div className="text-lg font-interBold">{date}</div>
       <div>Thứ Năm</div>
     </div>
   );
