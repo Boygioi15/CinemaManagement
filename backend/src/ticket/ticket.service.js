@@ -11,30 +11,27 @@ export class TicketService {
         }
     };
 
-    static updateTicketBy_id = async (_id, updateData) => {
+    static updateTicketById = async (id, updateData) => {
         try {
-            const updatedTicket = await ticketModel.findBy_idAndUpdate(
-                _id,
-                updateData, {
-                    new: true
-                }
+            const updatedTicket = await ticketModel.findByIdAndUpdate(
+                id,
+                updateData,
+                { new: true } // Return the updated document
             ).populate("items customer_id");
 
-            return updatedTicket || null;
+            return updatedTicket || { error: "Ticket not found." };
         } catch (error) {
             console.error("Error updating ticket:", error);
             throw new Error("An error occurred while updating the ticket.");
         }
     };
 
-    static deleteTicketBy_id = async (_id) => {
+    static deleteTicketById = async (id) => {
         try {
-            const deletedTicket = await ticketModel.findBy_idAndDelete(_id);
-            return deletedTicket ?
-                {
-                    message: "Ticket deleted successfully."
-                } :
-                null;
+            const deletedTicket = await ticketModel.findByIdAndDelete(id);
+            return deletedTicket
+                ? { message: "Ticket deleted successfully." }
+                : { error: "Ticket not found." };
         } catch (error) {
             console.error("Error deleting ticket:", error);
             throw new Error("An error occurred while deleting the ticket.");
@@ -50,49 +47,43 @@ export class TicketService {
         }
     };
 
-    static getTicketBy_id = async (_id) => {
+    static getTicketById = async (id) => {
         try {
-            const ticket = await ticketModel.findBy_id(_id).populate("items customer_id");
-            return ticket || null;
+            const ticket = await ticketModel.findById(id).populate("items customer_id");
+            return ticket || { error: "Ticket not found." };
         } catch (error) {
-            console.error("Error fetching ticket by _id:", error);
+            console.error("Error fetching ticket by ID:", error);
             throw new Error("An error occurred while fetching the ticket.");
         }
     };
 
-    static cancelTicket = async (_id, reason) => {
+    static cancelTicket = async (id, reason) => {
         try {
-            const ticket = await ticketModel.findBy_idAndUpdate(
-                _id, {
-                    served: false,
-                    inval_idReason: reason
-                }, {
-                    new: true
-                }
+            const ticket = await ticketModel.findByIdAndUpdate(
+                id,
+                { served: false, invalidReason: reason },
+                { new: true } // Return the updated document
             );
 
-            return ticket || null;
+            return ticket || { error: "Ticket not found." };
         } catch (error) {
             console.error("Error canceling ticket:", error);
             throw new Error("An error occurred while canceling the ticket.");
         }
     };
 
-    static approveSnacks = async (_id, approvedItems) => {
+    static approveSnacks = async (id, approvedItems) => {
         try {
-            const ticket = await ticketModel.findBy_id(_id);
-            if (!ticket) return null;
+            const ticket = await ticketModel.findById(id);
+            if (!ticket) return { error: "Ticket not found." };
 
-            const updatedItems = ticket.items.map((item) =>
-                approvedItems.some((approved) => approved.name === item.name) ?
-                {
-                    ...item,
-                    approved: true
-                } :
-                item
+            // Update approved items
+            ticket.items = ticket.items.map((item) =>
+                approvedItems.some((approved) => approved.name === item.name)
+                    ? { ...item, approved: true }
+                    : item
             );
 
-            ticket.items = updatedItems;
             ticket.served = true;
             await ticket.save();
 

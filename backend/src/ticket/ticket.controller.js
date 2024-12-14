@@ -28,11 +28,9 @@ class TicketController {
     });
 
     getTicketById = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
+        const { id } = req.params;
         try {
-            const ticket = await TicketService.getTicketBy_id(_id);
+            const ticket = await TicketService.getTicketById(id);
             if (!ticket) {
                 return res.status(404).json({
                     error: "Ticket not found!"
@@ -47,12 +45,10 @@ class TicketController {
     });
 
     updateTicketById = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
+        const { id } = req.params;
         const updateData = req.body;
         try {
-            const updatedTicket = await TicketService.updateTicketBy_id(_id, updateData);
+            const updatedTicket = await TicketService.updateTicketById(id, updateData);
             if (!updatedTicket) {
                 return res.status(404).json({
                     error: "Ticket not found!"
@@ -67,11 +63,9 @@ class TicketController {
     });
 
     deleteTicketById = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
+        const { id } = req.params;
         try {
-            const result = await TicketService.deleteTicketBy_id(_id);
+            const result = await TicketService.deleteTicketById(id);
             if (!result) {
                 return res.status(404).json({
                     error: "Ticket not found!"
@@ -86,12 +80,8 @@ class TicketController {
     });
 
     cancelTicket = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
-        const {
-            reason
-        } = req.body;
+        const { id } = req.params;
+        const { reason } = req.body;
 
         if (!reason) {
             return res.status(400).json({
@@ -100,7 +90,7 @@ class TicketController {
         }
 
         try {
-            const ticket = await TicketService.cancelTicket(_id, reason);
+            const ticket = await TicketService.cancelTicket(id, reason);
             if (!ticket) {
                 return res.status(404).json({
                     error: "Ticket not found!"
@@ -115,12 +105,10 @@ class TicketController {
     });
 
     approveTicket = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
+        const { id } = req.params;
 
         try {
-            const ticket = await TicketService.approveTicket(_id);
+            const ticket = await TicketService.approveTicket(id);
             if (!ticket) {
                 return res.status(404).json({
                     error: "Ticket not found!"
@@ -135,12 +123,8 @@ class TicketController {
     });
 
     approveSnacks = expressAsyncHandler(async (req, res) => {
-        const {
-            _id
-        } = req.params;
-        const {
-            items
-        } = req.body;
+        const { id } = req.params;
+        const { items } = req.body;
 
         if (!items || !Array.isArray(items)) {
             return res.status(400).json({
@@ -149,7 +133,7 @@ class TicketController {
         }
 
         try {
-            const ticket = await TicketService.approveSnacks(_id, items);
+            const ticket = await TicketService.approveSnacks(id, items);
             if (!ticket) {
                 return res.status(404).json({
                     error: "Ticket not found!"

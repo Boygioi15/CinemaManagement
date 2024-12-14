@@ -11,6 +11,26 @@ class FilmController {
     });
   });
 
+  updateFilm = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const response = await FilmService.updateFilmById(id, req.body);
+    return res.status(200).json({
+      msg: "Update film successfully!",
+      success: true,
+      data: response,
+    });
+  });
+
+  deleteFilm = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const response = await FilmService.deleteFilmById(id);
+    return res.status(200).json({
+      msg: "Delete film successfully!",
+      success: true,
+      data: response,
+    });
+  });
+
   getAllFilms = expressAsyncHandler(async (req, res, next) => {
     const response = await FilmService.getAllFilm();
     return res.status(200).json({
@@ -19,6 +39,7 @@ class FilmController {
       data: response,
     });
   });
+
   getFilmDetail = expressAsyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const response = await FilmService.getFilmDetail(id);

@@ -6,11 +6,11 @@ const router = express.Router();
 // Routes cho ticket
 router.post("/", TicketController.createTicket);
 router.get("/", TicketController.getAllTickets);
-router.get("/:_id", TicketController.getTicketById);
-router.put("/:_id", TicketController.updateTicketById);
-router.delete("/:_id", TicketController.deleteTicketById);
-router.put("/:_id/cancel", TicketController.cancelTicket);
-router.put("/:_id/approve", TicketController.approveTicket);
-router.put("/:_id/approve-snacks", TicketController.approveSnacks);
+router.get("/:id", TicketController.getTicketById);
+router.put("/:id", TicketController.updateTicketById);
+router.delete("/:id", TicketController.deleteTicketById);
+router.put("/:id/cancel", TicketController.cancelTicket);
+router.put("/:id/approve", TicketController.approveTicket);
+router.put("/:id/approve-snacks", TicketController.approveSnacks);
 
 export default router;

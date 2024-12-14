@@ -58,7 +58,28 @@ export class FilmService {
     if (!filmFound) throw customError("Film not found", 400);
     return filmFound;
   };
+
   static getAllFilm = async () => {
     return await filmModel.find();
+  };
+
+  // Xóa một bộ phim
+  static deleteFilmById = async (filmId) => {
+    return await filmModel.findByIdAndUpdate(
+      filmId,
+      { deleted: true },
+      { new: true }
+    );
+  };
+
+  // Cập nhật thông tin của bộ phim
+  static updateFilmById = async (filmId, updateData) => {
+    const updatedFilm = await filmModel.findByIdAndUpdate(
+      filmId,
+      updateData,
+      { new: true, runValidators: true } // Trả về document sau khi cập nhật và kiểm tra validation
+    );
+    if (!updatedFilm) throw customError("Film not found", 400);
+    return updatedFilm;
   };
 }
