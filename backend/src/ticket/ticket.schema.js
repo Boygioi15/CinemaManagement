@@ -21,10 +21,9 @@ const ticketSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    seatName: {
-        type: String,
-        required: false
-    },
+    seatname: [{
+        type: String
+    }],
     totalMoney: {
         type: Number,
         required: true
@@ -50,6 +49,20 @@ const ticketSchema = new mongoose.Schema({
     customerID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users"
+    },
+    customerInfo: {
+        name: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            required: true
+        }
     },
     online: {
         type: Boolean,

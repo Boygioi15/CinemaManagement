@@ -1,5 +1,11 @@
+import {
+    TicketTypeModel
+} from "../param/param.schema.js";
 import ticketModel from "./ticket.schema.js";
-
+import {
+    customError
+} from "../middlewares/errorHandlers.js";
+import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 export class TicketService {
     static createTicket = async (ticketData) => {
         try {
@@ -30,8 +36,7 @@ export class TicketService {
     static deleteTicketBy_id = async (_id) => {
         try {
             const deletedTicket = await ticketModel.findBy_idAndDelete(_id);
-            return deletedTicket ?
-                {
+            return deletedTicket ? {
                     message: "Ticket deleted successfully."
                 } :
                 null;
@@ -84,8 +89,7 @@ export class TicketService {
             if (!ticket) return null;
 
             const updatedItems = ticket.items.map((item) =>
-                approvedItems.some((approved) => approved.name === item.name) ?
-                {
+                approvedItems.some((approved) => approved.name === item.name) ? {
                     ...item,
                     approved: true
                 } :
@@ -102,4 +106,35 @@ export class TicketService {
             throw new Error("An error occurred while approving the snacks.");
         }
     };
+
+
+
+    // TicketInfo: {
+    //     FilmName
+    //     ShowDate
+    //     ShowTime
+    //     RoomName
+    //     Seats: [{
+    //         SeatID
+    //     }]
+    //     Tickets: [{
+    //         id   // id of ticketType
+    //         Quantity
+    //     }]
+    // }
+    // AdditionalItems:[ {
+    //     ref(id)
+    //     Quantity
+    // }]
+
+    static createTicketOrder = async ({
+        customerInfo,
+        ticketInfo,
+        additionalItems
+    }) => {
+        console.log("Create order success")
+    }
+
+
+
 }
