@@ -16,7 +16,7 @@ import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
 import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import FoodCard from "../../Components/FoodCard";
 
-const FilmDetailPage = ({filmID = "674eb734338a95c043b02c5a"}) => {
+const FilmDetailPage = ({filmID = "675c2aeb09b5ff5eb1b0e08d"}) => {
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedSchedule, setSSelectedSchedule] = useState("19/12");

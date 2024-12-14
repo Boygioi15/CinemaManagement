@@ -1,7 +1,5 @@
 import filmModel from "./film.schema.js";
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
+import { customError } from "../middlewares/errorHandlers.js";
 export class FilmService {
   // Lấy danh sách các bộ phim đang chiếu
 
@@ -57,7 +55,10 @@ export class FilmService {
       .findById(filmId)
       .populate("tagsRef", "name -_id")
       .select("-createdAt -updatedAt -deleted -__v");
-    if (!filmFound) throw new customError("Film not found", 400);
+    if (!filmFound) throw customError("Film not found", 400);
     return filmFound;
+  };
+  static getAllFilm = async () => {
+    return await filmModel.find();
   };
 }
