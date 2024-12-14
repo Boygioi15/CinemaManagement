@@ -1,16 +1,21 @@
 import express from "express";
-import TicketController from "./ticket.controller.js";
+import ParamController from "./param.controller.js";
 
 const router = express.Router();
 
-// Routes cho ticket
-router.post("/", TicketController.createTicket);
-router.get("/", TicketController.getAllTickets);
-router.get("/:_id", TicketController.getTicketById);
-router.put("/:_id", TicketController.updateTicketById);
-router.delete("/:_id", TicketController.deleteTicketById);
-router.put("/:_id/cancel", TicketController.cancelTicket);
-router.put("/:_id/approve", TicketController.approveTicket);
-router.put("/:_id/approve-snacks", TicketController.approveSnacks);
+// Routes cho age restriction
+router.post("/age-restriction", ParamController.CreateAgeRestriction);
 
+//router.get("/age-restriction");
+router.get("/age-restriction/:id", ParamController.GetAgeRestriction);
+
+router.patch("/age-restriction", ParamController.UpdateAgeRestriction);
+router.delete("/age-restriction", ParamController.DeleteAgeRestriction);
+
+router.post("/ticket-type", ParamController.CreateTicketType);
+
+router.get("/ticket-type", ParamController.GetAllTicketTypes);
+
+router.patch("/ticket-type/:id", ParamController.UpdateTicketType);
+router.delete("/ticket-type", ParamController.DeleteTicketType);
 export default router;
