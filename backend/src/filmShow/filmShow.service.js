@@ -1,6 +1,11 @@
+import mongoose from "mongoose";
 import {
     FilmService
 } from "../film/film.service.js";
+import {
+    customError
+} from "../middlewares/errorHandlers.js";
+import roomModel from "../room/room.schema.js";
 import filmShowModel from "./filmShow.schema.js";
 
 export class FilmShowService {
@@ -44,7 +49,39 @@ export class FilmShowService {
         return await FilmService.getUpComingFilm()
     };
 
-    static getFilmShowDates = async (filmId) => {
+    static getShowtimesByDate = async (filmId, date) => {
+        const selectedDate = new Date(date);
+
+        const res = await filmShowModel.aggregate([{
+                $match: {
+                    film: new mongoose.Types.ObjectId(filmId),
+                    showDate: date
+                }
+            },
+            {
+                $group: {
+                    _id: "$filmType",
+                    showTimes: {
+                        $push: {
+                            _id: "$_id",
+                            showTime: "$showTime"
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    showType: "$_id",
+                    _id: 0,
+                    showTimes: 1
+                }
+            }
+        ]);
+
+        return res;
+    }
+
+    static getAllFilmShowByFilmId = async (filmId) => {
         const filmShows = await filmShowModel.find({
             film: filmId,
             showDate: {
@@ -53,31 +90,38 @@ export class FilmShowService {
         }).select('showDate').lean();
 
         const arrayShowDates = filmShows.map(item => item.showDate);
-        return arrayShowDates;
-    }
+        const uniqueShowDates = [...new Set(arrayShowDates.map(date => date.toISOString()))].map(dateStr => new Date(dateStr));
 
-    static getShowtimesByFilmIdAndDate = async (filmId, showdate) => {
-        const selectedDate = new Date(showdate);
-        if (isNaN(selectedDate.getTime())) {
-            throw new Error("Invalid date format");
-        }
+        const res = await Promise.all(uniqueShowDates.map(async (date) => {
+            const showtimes = await this.getShowtimesByDate(filmId, date);
+            if (showtimes.length === 0) {
+                return null
+            }
+            return {
+                date,
+                show: showtimes
+            };
+        }))
+        return (await res).filter(item => item !== null);
+    };
 
-        // Tạo khoảng thời gian UTC bắt đầu và kết thúc ngày
-        const startOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0));
-        const endOfDay = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59, 999));
+    static getHostRoomOfFilmShow = async (filmShowId) => {
+        const filmShow = await filmShowModel.findById(filmShowId);
+        if (!filmShow) throw customError("Film show not found", 400);
 
-
-        const showtimes = await filmShowModel.find({
-                film: filmId,
-                showDate: {
-                    $gte: startOfDay,
-                    $lt: endOfDay,
-                }
+        const roomOfFilmShow = await roomModel.findById(filmShow.roomId).populate({
+                path: "seats",
+                select: "seatName seatCol seatRow usable",
             })
-            .select('showTime')
-            .lean();
+            .lean(); // Chuyển kết quả về object JS thuần
 
-        const arrayShowTimes = showtimes.map(item => item.showTime);
-        return arrayShowTimes;
+        roomOfFilmShow.seats = roomOfFilmShow.seats.map(seat => ({
+            ...seat,
+            isLocked: filmShow.locketSeatIds.includes(seat._id),
+        }));
+
+        return roomOfFilmShow
     }
+
+
 }

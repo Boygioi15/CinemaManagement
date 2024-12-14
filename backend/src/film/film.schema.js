@@ -20,10 +20,6 @@ const filmSchema = new mongoose.Schema({
         type: Number,
         required: true
     }, // Đơn vị: phút
-    ageRestrictionRef: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
     voice: {
         type: String,
         required: true
@@ -46,6 +42,14 @@ const filmSchema = new mongoose.Schema({
     beginDate: {
         type: Date,
         required: true
+    },
+    ageValue: {
+        type: String,
+        require: true
+    },
+    ageSymbol: {
+        type: String,
+        require: true
     },
     deleted: {
         type: Boolean,

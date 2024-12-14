@@ -1,85 +1,102 @@
 import userModel from "./user.schema.js";
 
 export class UserService {
-  static findUserByEmail = async (userEmail) => {
-    return await userModel.findOne({
-      userEmail,
-      userActive: true
-    });
+  static findUserByEmail = async (email) => {
+    return await userModel.findOne({ email, blocked: false });
   };
 
-  static findUserByPhone = async (userPhone) => {
-    return await userModel.findOne({
-      userPhone,
-      userActive: true
-    });
+  static findUserByPhone = async (phone) => {
+    return await userModel.findOne({ phone, blocked: false });
   };
 
-  static checkExitAndActiveUser = async (identifier) => {
-    const user = (await UserService.findUserByEmail(identifier)) || (await UserService.findUserByPhone(identifier));
-    return user
+  static checkExitAndBlockedUser = async (identifier) => {
+    const user =
+      (await UserService.findUserByEmail(identifier)) ||
+      (await UserService.findUserByPhone(identifier));
+
+    if (!user) {
+      return { error: "User not found!" };
+    }
+
+    if (user.blocked) {
+      return { error: "User is blocked!" };
+    }
+
+    return user;
   };
 
   static createUser = async (userdata) => {
-    const {
-      userEmail,
-      userPhone
-    } = userdata;
-    const existingUserPhone = await this.findUserByPhone(userPhone);
+    const { email, phone } = userdata;
+
+    if (!email || !phone) {
+      return { error: "Email and phone are required!" };
+    }
+
+    const existingUserPhone = await this.findUserByPhone(phone);
     if (existingUserPhone) {
-      return {
-        error: "Phone number already registered!"
-      };
+      return { error: "Phone number already registered!" };
     }
-    const existingUserEmail = await this.findUserByEmail(userEmail);
+
+    const existingUserEmail = await this.findUserByEmail(email);
     if (existingUserEmail) {
-      return {
-        error: "Email already registered!"
-      };
+      return { error: "Email already registered!" };
     }
+
     return await userModel.create(userdata);
   };
 
-  static updateUserById = async (userid, updatedata) => {
+  static updateUserById = async (_id, updatedata) => {
     try {
-      const {
-        userEmail,
-        userPhone
-      } = updatedata;
+      const { email, phone } = updatedata;
+
       const conflicts = await userModel.findOne({
-        $or: [{
-          userPhone
-        }, {
-          userEmail
-        }],
-        userId: {
-          $ne: userid
-        },
+        $or: [{ phone: phone }, { email: email }],
+        _id: { $ne: _id },
       });
+
       if (conflicts) {
-        return {
-          error: "Phone number or email already registered!"
-        };
+        return { error: "Phone number or email already registered!" };
       }
-      return await userModel.findOneAndUpdate(userid, updatedata, {
-        new: true,
-      });
+
+      const updatedUser = await userModel.findOneAndUpdate(
+        { _id },
+        updatedata,
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return { error: "User not found!" };
+      }
+
+      return updatedUser;
     } catch (error) {
       console.error("Error updating user:", error);
-      throw error;
+      throw new Error("An error occurred while updating user.");
     }
   };
 
-  static deleteUserById = async (userid) => {
-    return await userModel.findOneAndDelete({
-      userid
-    });
+  static deleteUserById = async (_id) => {
+    return await userModel.findOneAndUpdate(
+      { _id },
+      { deleted: true },
+      { new: true }
+    );
   };
 
   static getAllUsers = async () => {
-    return await userModel.find({});
+    return await userModel.find({ deleted: false });
   };
 
-
-
+  static getUserById = async (_id) => {
+    try {
+      const user = await userModel.findOne({ _id, deleted: false });
+      if (!user) {
+        return { error: "User not found or has been deleted!" };
+      }
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      throw new Error("An error occurred while fetching the user.");
+    }
+  };
 }
