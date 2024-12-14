@@ -27,6 +27,13 @@ class ParamController {
       data: response,
     });
   });
+  GetAllAgeRestriction = expressAsyncHandler(async (req, res, next) => {
+    const response = await ParamService.getAllAgeRestriction();
+    return res.status(200).json({
+      success: true,
+      data: response,
+    });
+  });
   DeleteAgeRestriction = expressAsyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const response = await ParamService.deleteAgeRestriction(id);
