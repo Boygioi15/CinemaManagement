@@ -3,7 +3,10 @@ import * as ReactDOM from "react-dom/client";
 import RootLayout from "./layouts/RootLayout/RootLayout";
 import AdminFilm from "./pages/FilmManagement/FilmList";
 import OnlineTickets from "./pages/TicketManagement/OnlineTicket";
+import BapNuoc from "./pages/TicketManagement/BapNuoc";
+import OfflineTicket from "./pages/TicketManagement/OfflineTicket";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import "./index.css";
 
 const router = createBrowserRouter([
   {
@@ -11,8 +14,16 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/admin/ticket",
+        path: "/admin/tab/onlineticket",
         element: <OnlineTickets />,
+      },
+      {
+        path: "/admin/tab/bapnuoc",
+        element: <BapNuoc />,
+      },
+      {
+        path: "/admin/tab/offlineticket",
+        element: <OfflineTicket />,
       },
       {
         path: "/admin/film",
