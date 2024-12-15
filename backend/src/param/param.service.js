@@ -1,4 +1,7 @@
-import { AgeRestrictionModel, TicketTypeModel } from "./param.schema.js";
+import {
+  AgeRestrictionModel,
+  TicketTypeModel
+} from "./param.schema.js";
 
 export class ParamService {
   static createAgeRestriction = async (ageResData) => {

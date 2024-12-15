@@ -60,4 +60,26 @@ export class AdditionalItemService {
     }
     return updatedItem;
   };
+
+
+  static getAdditionalItemsInfo = async (items) => {
+    try {
+      const itemDetails = await Promise.all(items.map(async (item) => {
+        const additionalItem = await additionalItemModel.findById(item.id);
+        if (!additionalItem) {
+          throw new Error(`Item with id ${item.id} not found`);
+        }
+
+        return {
+          name: additionalItem.name,
+          quantity: item.quantity,
+          unitPrice: additionalItem.price.toString()
+        };
+      }));
+
+      return itemDetails;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
 }

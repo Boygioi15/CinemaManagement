@@ -1,5 +1,18 @@
+import {
+    TicketTypeModel
+} from "../param/param.schema.js";
 import ticketModel from "./ticket.schema.js";
-
+import {
+    customError
+} from "../middlewares/errorHandlers.js";
+import additionalItemModel from "../additionalItem/additionalItem.schema.js";
+import {
+    RoomService
+} from "../room/room.service.js";
+import filmShowModel from "../filmShow/filmShow.schema.js";
+import {
+    AdditionalItemService
+} from "../additionalItem/additionalItem.service.js";
 export class TicketService {
     static createTicket = async (ticketData) => {
         try {
@@ -30,8 +43,7 @@ export class TicketService {
     static deleteTicketBy_id = async (_id) => {
         try {
             const deletedTicket = await ticketModel.findBy_idAndDelete(_id);
-            return deletedTicket ?
-                {
+            return deletedTicket ? {
                     message: "Ticket deleted successfully."
                 } :
                 null;
@@ -84,8 +96,7 @@ export class TicketService {
             if (!ticket) return null;
 
             const updatedItems = ticket.items.map((item) =>
-                approvedItems.some((approved) => approved.name === item.name) ?
-                {
+                approvedItems.some((approved) => approved.name === item.name) ? {
                     ...item,
                     approved: true
                 } :
@@ -102,4 +113,77 @@ export class TicketService {
             throw new Error("An error occurred while approving the snacks.");
         }
     };
+
+
+
+    // TicketInfo: {
+    //     FilmName
+    //     ShowDate
+    //     ShowTime
+    //     RoomName
+    //     Seats: [{
+    //         SeatID
+    //     }]
+    //     Tickets: [{
+    //         id   // id of ticketType
+    //         Quantity
+    //     }]
+    // }
+    // AdditionalItems:[ {
+    //     ref(id)
+    //     Quantity
+    // }]
+
+    // Định nghĩa hàm tĩnh để lấy 7 số cuối từ ObjectId
+    static getLast7DigitsOfTicketId = (ticketId) => {
+        return ticketId.toString().slice(-7); // Lấy 7 số cuối
+    }
+
+    static createTicketOrder = async ({
+        customerId,
+        customerInfo,
+        tickets,
+        additionalItems,
+        filmShowId,
+        totalPrice,
+        seats
+    }) => {
+        const filmShow = await filmShowModel.findById(filmShowId).populate("film");
+
+        if (!filmShow) throw new Error("Film Show not found");
+
+        const {
+            roomName,
+            seatNames
+        } = await RoomService.getSeatName(filmShow.roomId, seats);
+
+        const dataFilmShow = {
+            filmName: filmShow.film.name,
+            date: filmShow.showDate,
+            time: filmShow.showTime,
+        };
+
+        const items = await AdditionalItemService.getAdditionalItemsInfo(additionalItems);
+
+        const newTicket = await ticketModel.create({
+            roomName,
+            seatNames,
+            ...dataFilmShow,
+            totalMoney: totalPrice,
+            items,
+            customerID: customerId,
+            customerInfo
+        });
+
+        const last7Digits = this.getLast7DigitsOfTicketId(newTicket._id);
+
+        newTicket.verifyCode = last7Digits;
+
+        await newTicket.save();
+
+        return newTicket;
+    };
+
+
+
 }
