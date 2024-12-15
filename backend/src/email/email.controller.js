@@ -70,6 +70,35 @@ class EmailController {
         });
     });
 
+    testSendMailWithTemplate = expressAsyncHandler(async (req, res, next) => {
+
+        const ticket = {
+            verifyCode: "145910772",
+            filmName: "BONG DUNG TRUNG SO C13",
+            time: "10:10",
+            date: "06-10-2022",
+            roomName: "SỐ 01",
+            seatNames: ["A1", "A2", "A3"],
+            items: [{
+                    name: "Popcorn",
+                    quantity: 2,
+                    price: 50000
+                },
+                {
+                    name: "Coke",
+                    quantity: 1,
+                    price: 30000
+                },
+            ],
+            totalMoney: 130000,
+        };
+
+        await EmailService.sendEmailWithHTMLTemplate("hoangphonghp04@gmail.com", "Vé phim", ticket)
+        return res.status(200).json({
+            msg: "Confirmed successfully!",
+            success: true
+        });
+    });
 }
 
 export default new EmailController();
