@@ -1,15 +1,12 @@
 import React from "react";
 import { FiX } from "react-icons/fi";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxButton,
-  ComboboxOptions,
-  ComboboxOption,
-} from "@headlessui/react";
+import { debounce } from "lodash";
+import { Combobox } from "@headlessui/react";
 import { FiSearch } from "react-icons/fi";
+import Dialog from "./ConfirmDialog";
+import SuccessDialog from "./SuccessDialog";
 
 const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   if (!isOpen) return null;
@@ -20,29 +17,34 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   const [query, setQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [filmTypes, setFilmTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [ageSymbol, setAgeSymbol] = useState([]);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [data, setData] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // const filmTypes = [
-  //   { id: 1, name: "Action" },
-  //   { id: 2, name: "Comedy" },
-  //   { id: 3, name: "Drama" },
-  //   { id: 4, name: "Horror" },
-  //   { id: 5, name: "Romance" },
-  //   { id: 6, name: "Sci-Fi" },
-  // ];
+  const fetchAgeSymbol = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/param");
+      setAgeSymbol(response.data.data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const fetchFilmTypes = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/tags");
       setFilmTypes(response.data.data);
-      setLoading(false);
     } catch (err) {
       setError(err.message);
-      setLoading(false);
     }
   };
-  console.log(filmTypes);
+
   useEffect(() => {
     fetchFilmTypes();
+    fetchAgeSymbol();
   }, []);
 
   const filteredTypes =
@@ -57,6 +59,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       setSelectedTypes([...selectedTypes, typeName]);
     }
   };
+  console.log(`Input Changed: Name=${selectedTypes}`);
 
   const removeType = (typeToRemove) => {
     setSelectedTypes(selectedTypes.filter((type) => type !== typeToRemove));
@@ -64,39 +67,112 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
 
   // Initialize state with existing film data or empty values
   const [formData, setFormData] = useState({
+    _id: film?._id || "",
     name: film?.name || "",
-    type: film?.otherDescription
+    otherDescription: film?.otherDescription
       ? film.otherDescription.split(",").map((t) => t.trim()) // Chuyển chuỗi thành mảng
       : [],
-    country: film?.originatedCountry || "",
-    age: film?.ageSymbol || "",
+    originatedCountry: film?.originatedCountry || "",
+    ageSymbol: film?.ageSymbol || "",
     twoDthreeD: film?.twoDthreeD || "",
-    duration: film?.filmDuration || "",
+    filmDuration: film?.filmDuration || "",
     voice: film?.voice || "",
-    trailerLink: film?.trailerURL || "",
-    description: film?.filmDescription || "",
-    image: film?.thumbnailURL || "",
+    trailerURL: film?.trailerURL || "",
+    filmDescription: film?.filmDescription || "",
+    thumbnailURL: film?.thumbnailURL || "",
   });
+
   useEffect(() => {
     if (film?.otherDescription) {
       setFormData((prev) => ({
         ...prev,
-        type: film.otherDescription.split(", ").map((type) => type.trim()), // Chuyển chuỗi thành mảng
+        otherDescription: film.otherDescription
+          .split(", ")
+          .map((type) => type.trim()), // Chuyển chuỗi thành mảng
       }));
     }
   }, [film]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      otherDescription: selectedTypes, // Cập nhật type từ selectedTypes
     }));
-  };
+  }, [selectedTypes]);
+
+  const isFormValid = useMemo(() => {
+    const requiredFields = [
+      "name",
+      "otherDescription",
+      "ageSymbol",
+      "originatedCountry",
+      "filmDuration",
+      "voice",
+      "thumbnailURL",
+      "trailerURL",
+      "filmDescription",
+      "twoDthreeD",
+    ];
+    console.log(formData);
+
+    return requiredFields.every((field) => !!formData[field]); // Chuyển đổi giá trị thành Boolean
+  }, [formData]);
 
   const handleSubmit = () => {
-    onSave(formData);
-    onClose();
+    const formattedData = {
+      ...formData,
+      otherDescription:
+        formData.otherDescription.length > 0
+          ? formData.otherDescription.join(", ")
+          : null,
+    };
+    setIsConfirmDialogOpen(true);
+    if (mode === "edit") {
+      setDialogData({
+        title: "Confirm update",
+        message: "Bạn có chắc chắn là cập nhật phim này không ?",
+      });
+    } else {
+      setDialogData({
+        title: "Confirm add",
+        message: "Bạn có chắc chắn là thêm phim này không ?",
+      });
+    }
+
+    setData(formattedData);
+  };
+
+  const handleFilm = async () => {
+    setIsLoading(true);
+    try {
+      console.log(`data nè heheh:${data.otherDescription} `);
+
+      // Gọi API tùy thuộc vào mode
+      if (mode === "edit") {
+        await axios.put(`http://localhost:8000/api/films/${data.id}`, data);
+        setDialogData({
+          title: "Successs",
+          message: "Cập nhật phim thành công",
+        });
+      } else {
+        await axios.post("http://localhost:8000/api/films", data);
+        setDialogData({
+          title: "Successs",
+          message: "Thêm phim thành công",
+        });
+      }
+      if (response.status === 200 || response.status === 201) {
+        // Cập nhật state và hiển thị success dialog
+        // Sau khi thành công, hiển thị dialog success
+        setIsLoading(false); // Tắt trạng thái loading
+        setIsConfirmDialogOpen(false); // Đóng dialog xác nhận
+        setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
+      }
+    } catch (error) {
+      console.error("Error updating/adding film:", error);
+      alert("An error occurred while updating the film. Please try again.");
+      setIsLoading(false); // Tắt trạng thái loading
+    }
   };
 
   return (
@@ -123,7 +199,9 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   type="text"
                   name="name"
                   value={formData.name}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -138,7 +216,10 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 /> */}
-                <Combobox value={formData.type} onChange={handleTypeSelection}>
+                <Combobox
+                  value={formData.otherDescription}
+                  onChange={handleTypeSelection}
+                >
                   <div className="relative">
                     <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left border focus-within:ring-2 focus-within:ring-blue-500">
                       <Combobox.Input
@@ -214,8 +295,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 <input
                   type="text"
                   name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
+                  value={formData.originatedCountry}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      originatedCountry: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -225,16 +311,23 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </label>
                 <select
                   name="age"
-                  value={formData.age || ""}
-                  onChange={handleInputChange}
+                  value={formData.ageSymbol || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      ageSymbol: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="P">P</option>
-                  <option value="K">K</option>
-                  <option value="T13">T13</option>
-                  <option value="T16">T16</option>
-                  <option value="T18">T18</option>
-                  <option value="C">C</option>
+                  <option value="" disabled>
+                    Vui lòng chọn độ tuổi
+                  </option>
+                  {ageSymbol.map((age) => (
+                    <option key={age.id} value={age.symbol}>
+                      {age.symbol}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -244,8 +337,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 <input
                   type="text"
                   name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
+                  value={formData.filmDuration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      filmDuration: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -257,7 +355,9 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   type="text"
                   name="voice"
                   value={formData.voice}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, voice: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -267,10 +367,18 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </label>
                 <select
                   name="twoDthreeD"
-                  value={formData.twoDthreeD}
-                  onChange={handleInputChange}
+                  value={formData.twoDthreeD || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      twoDthreeD: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
+                  <option value="" disabled>
+                    vui lòng chọn dạng
+                  </option>
                   <option value="2D">2D</option>
                   <option value="3D">3D</option>
                   <option value="2D,3D">2D, 3D</option>
@@ -281,9 +389,9 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Film Image
               </label>
-              {formData.image && (
+              {formData.thumbnailURL && (
                 <img
-                  src={formData.image}
+                  src={formData.thumbnailURL}
                   alt="Film"
                   className="w-full h-4/5 object-cover rounded-lg mb-2"
                 />
@@ -299,7 +407,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                     const imageUrl = URL.createObjectURL(file);
                     setFormData((prev) => ({
                       ...prev,
-                      image: imageUrl,
+                      thumbnailURL: imageUrl,
                     }));
                   }
                   console.log("File selected:", e.target.files[0]);
@@ -314,8 +422,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
             <input
               type="text"
               name="trailerLink"
-              value={formData.trailerLink}
-              onChange={handleInputChange}
+              value={formData.trailerURL}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  trailerURL: e.target.value,
+                }))
+              }
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -326,8 +439,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
             </label>
             <textarea
               name="description"
-              value={formData.description}
-              onChange={handleInputChange}
+              value={formData.filmDescription}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  filmDescription: e.target.value,
+                }))
+              }
               rows="4"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             ></textarea>
@@ -341,13 +459,34 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
             </button>
             <button
               onClick={handleSubmit}
-              className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              disabled={!isFormValid}
+              className={`px-4 py-2 rounded-lg  ${
+                isFormValid
+                  ? "bg-blue-500 hover:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              } text-white`}
             >
               {isEditMode ? "Save Changes" : "Add Film"}
             </button>
           </div>
         </div>
       </div>
+
+      <Dialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={handleFilm}
+        title={dialogData.title}
+        message={dialogData.message}
+        data={data}
+        mode={mode}
+      />
+      <SuccessDialog
+        isOpen={isSuccessDialogOpen}
+        onClose={() => setIsSuccessDialogOpen(false)}
+        title={dialogData.title}
+        message={dialogData.message}
+      />
     </div>
   );
 };

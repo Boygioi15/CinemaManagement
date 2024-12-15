@@ -6,6 +6,13 @@ import Sidebar from "../../components/Sidebar";
 import { Outlet } from "react-router";
 import axios from "axios";
 
+// const newTabs = [
+//   {
+//     name: "Danh sách phòng",
+//     path: "/admin/infras",
+//     icon: <RxDashboard className="w-6 h-6" />,
+//   },
+// ];
 const newTabs = [
   {
     name: "Danh sách phim",
