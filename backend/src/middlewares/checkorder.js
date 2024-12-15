@@ -1,67 +1,82 @@
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
+import filmShowModel from "../filmShow/filmShow.schema.js";
 import {
     TicketTypeModel
 } from "../param/param.schema.js";
+import {
+    customError
+} from "./errorHandlers.js";
 
 export const checkOutTicket = async (
     req, res, next
 ) => {
+    /*
+        customerId,
+        customerInfo:{ name, phone ,enmail},
+        tickets: [{id,quantity}],
+        seats:[seatId],
+        filmShowId,
+        additonalItems: [{id,quantity}],
+        totalPrice
+     */
     try {
-        console.log("Middleware")
-        req.checkoutData = {
-            totalPrice: 500000
-        }
+        const {
+            customerId,
+            customerInfo,
+            tickets,
+            additionalItems,
+            filmShowId,
+            totalPrice,
+            seats
+        } = req.body;
+        console.log("🚀 ~ additionalItems:", additionalItems)
+
+
+
+        let totalPriceByServer = 0;
+
+        await Promise.all(tickets.map(async (ticket) => {
+            const {
+                id,
+                quantity
+            } = ticket
+
+            const ticketTypeFound = await TicketTypeModel.findById(id).lean();
+            if (!ticketTypeFound) throw customError("Ticket type not found")
+
+            totalPriceByServer += ticketTypeFound.price * quantity;
+        }))
+
+
+        await Promise.all(additionalItems.map(async (additionalItem) => {
+            const {
+                id,
+                quantity
+            } = additionalItem
+
+            const additionalItemFound = await additionalItemModel.findById(id).lean();
+            if (!additionalItemFound) throw customError("Additionalitem not found")
+
+            totalPriceByServer += additionalItemFound.price * quantity;
+        }))
+
+        console.log("🚀 ~ totalPriceByServer:", totalPriceByServer)
+        if (totalPrice !== totalPriceByServer) throw customError("The total value is not accurate");
+
+        // lock seat
+        const fimlShow = await filmShowModel.findById(filmShowId);
+        if (!fimlShow) throw customError("Filmshow not found ", 400)
+
+        fimlShow.locketSeatIds.push(...seats);
+
+        await fimlShow.save();
+
+        // pass
         next();
 
-        // const {
-        //     customerInfo,
-        //     ticketInfo,
-        //     additionalItems
-        // } = req.body;
-
-        // const tickets = ticketInfo.tickets;
-
-        // let totalPrice = 0;
-
-        // Promise.all(tickets.map(async (ticket) => {
-        //     const {
-        //         id,
-        //         quantity
-        //     } = ticket
-
-        //     const ticketTypeFound = await TicketTypeModel.findById(id).lean();
-        //     if (!ticketTypeFound) throw customError("Ticket type not found")
-
-        //     totalPrice += ticketTypeFound.price * quantity;
-        // }))
-
-
-        // Promise.all(additionalItems.map(async (additionalItem) => {
-        //     const {
-        //         id,
-        //         quantity
-        //     } = additionalItem
-
-        //     const additionalItemFound = await additionalItemModel.findById(id).lean();
-        //     if (!additionalItemFound) throw customError("Additionalitem not found")
-
-        //     totalPrice += additionalItemFound.price * quantity;
-        // }))
-
-        // req.checkoutData = {
-        //     totalPrice,
-        //     customerInfo,
-        //     ticketInfo,
-        //     additionalItems
-        // };
-        // next();
     } catch (error) {
         console.log("🚀 ~ error:", error)
         next(error)
     }
 
 }
-
-
-
-// //---------------------------

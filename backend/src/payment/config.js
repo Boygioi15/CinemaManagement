@@ -4,7 +4,7 @@ export default {
     orderInfo: 'pay with MoMo',
     partnerCode: 'MOMO',
     redirectUrl: 'http://localhost:5000/views/home.html', // link frontend 
-    ipnUrl: 'https://cdd3-183-81-8-72.ngrok-free.app/callback', //chú ý: cần dùng ngrok thì momo mới post đến url này được
+    ipnUrl: 'https://047d-183-81-8-72.ngrok-free.app/api/payment/callback', //chú ý: cần dùng ngrok thì momo mới post đến url này được
     requestType: 'payWithMethod',
     extraData: '',
     orderGroupId: '',

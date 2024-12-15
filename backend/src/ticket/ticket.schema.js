@@ -15,13 +15,12 @@ const ticketSchema = new mongoose.Schema({
     },
     verifyCode: {
         type: String,
-        required: true
     },
     roomName: {
         type: String,
         required: false
     },
-    seatname: [{
+    seatNames: [{
         type: String
     }],
     totalMoney: {
@@ -53,20 +52,20 @@ const ticketSchema = new mongoose.Schema({
     customerInfo: {
         name: {
             type: String,
-            required: true
+
         },
         email: {
             type: String,
-            required: true
+
         },
         phone: {
             type: String,
-            required: true
+
         }
     },
     online: {
         type: Boolean,
-        required: true
+        default: true
     },
     printed: {
         type: Boolean,

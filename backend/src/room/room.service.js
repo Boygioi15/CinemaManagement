@@ -58,4 +58,30 @@ export class RoomService {
     // Save the room document to the database
     return await newRoom.save();
   };
+
+  static getSeatName = async (roomId, seatIds) => {
+    try {
+      // Tìm phòng theo roomId
+      const room = await roomModel.findById(roomId);
+      if (!room) {
+        throw new Error('Room not found');
+      }
+
+      const seatNames = room.seats
+        .filter(seat => seatIds.includes(seat._id.toString()))
+        .map(seat => seat.seatName);
+
+      if (seatNames.length === 0) {
+        throw new Error('No seats found');
+      }
+
+      // Trả về mảng seatName
+      return {
+        seatNames,
+        roomName: room.roomName
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
