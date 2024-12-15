@@ -49,7 +49,7 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing
           </div>
 
           {/* Overlay text */}
-          <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 transition-opacity duration-300 hidden sm:flex justify-center items-center text-center sm:group-hover:opacity-100">
+          <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 transition-opacity duration-300 hidden sm:flex justify-center items-center text-center sm:group-hover:opacity-100 content-text">
             <div className="flex flex-col items-start justify-start px-[38px] space-y-4 text-left w-full">
               <h3 className="mb-3 text-lg">
                 {name}: NHIỆM VỤ GIẢI CỨU HOÀNG GIA (P) {ageLimit}
@@ -76,7 +76,7 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing
 
         {/* Info Section */}
         <div className="w-full">
-          <a className="font-bold text-lg mt-3 h-[48px] overflow-hidden line-clamp-2 text-white text-center group-hover:text-[#F3EA28] cursor-pointer">
+          <a className="font-bold text-lg mt-3 h-[48px] overflow-hidden line-clamp-2 text-white text-center group-hover:text-mainColor cursor-pointer">
             {name}: NHIỆM VỤ GIẢI CỨU HOÀNG GIA (P) {ageLimit}
           </a>
           <div className="flex justify-between mt-3 pt-4 button-font">

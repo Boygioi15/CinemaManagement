@@ -8,6 +8,9 @@ export default {
         interBold: ["Inter-bold", "sans-serif"],
         interExtraBold: ["Inter-extrabold", "sans-serif"],
       },
+      colors: {
+        mainColor: "#F3EA28", // Sửa cú pháp
+      },
     },
   },
   plugins: [],

@@ -116,7 +116,7 @@ const FilmDetailPage = ({ filmID = "675c2aeb09b5ff5eb1b0e08d" }) => {
             </p>
             <p className="flex items-center mt-2">
               <LuUserRoundCheck className="icon-style" />{" "}
-              <span className="bg-[#F3EA28] text-black">
+              <span className="bg-mainColor text-black">
                 T16: Phim dành cho khán giả từ đủ 16 tuổi trở lên (16+)
               </span>
             </p>

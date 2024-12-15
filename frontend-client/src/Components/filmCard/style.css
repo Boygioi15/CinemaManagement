@@ -1,9 +1,12 @@
 body {
-    font-size: 0.7rem; 
+  font-size: 0.7rem;
 }
-h3{
-    font-size: 0.75rem;
+h3 {
+  font-size: 0.75rem;
 }
-.button-font{
-    font-size: 1rem;
+.button-font {
+  font-size: 1rem;
+}
+.content-text {
+    color: #F3EA28;
 }
