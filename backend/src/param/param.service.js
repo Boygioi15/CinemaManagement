@@ -12,6 +12,9 @@ export class ParamService {
   static getAgeRestrictionID = async (id) => {
     return await AgeRestrictionModel.findById(id);
   };
+  static getAllAgeRestriction = async() =>{
+    return await AgeRestrictionModel.find();
+  }
   static deleteAgeRestriction = async (id) => {
     return await AgeRestrictionModel.findByIdAndDelete(id);
   };

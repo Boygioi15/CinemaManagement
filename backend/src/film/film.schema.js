@@ -28,9 +28,11 @@ const filmSchema = new mongoose.Schema({
         type: String,
         required: true
     }, // Ví dụ: VN, Hàn Quốc
-    twoDthreeD: [{
-        type: String
-    }], // Ví dụ: 2D, 3D
+    twoDthreeD: {
+        type: [String],
+        enum: ["2D", "3D"],
+        required: true
+    }, // Ví dụ: 2D, 3D
     otherDescription: {
         type: String,
         required: true
