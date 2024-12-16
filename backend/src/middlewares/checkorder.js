@@ -1,3 +1,4 @@
+import expressAsyncHandler from "express-async-handler";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import filmShowModel from "../filmShow/filmShow.schema.js";
 import {
@@ -7,7 +8,7 @@ import {
     customError
 } from "./errorHandlers.js";
 
-export const checkOutTicket = async (
+export const checkOutTicket = expressAsyncHandler(async (
     req, res, next
 ) => {
     /*
@@ -29,7 +30,6 @@ export const checkOutTicket = async (
             totalPrice,
             seats
         } = req.body;
-        console.log("🚀 ~ additionalItems:", additionalItems)
 
 
 
@@ -77,6 +77,6 @@ export const checkOutTicket = async (
     } catch (error) {
         console.log("🚀 ~ error:", error)
         next(error)
-    }
 
-}
+    }
+});
