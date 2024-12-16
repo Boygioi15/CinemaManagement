@@ -4,14 +4,22 @@ import {
   FaGlobeAmericas,
   FaCommentDots,
 } from "react-icons/fa";
-import { PiPlayCircleFill } from "react-icons/pi";
 import "./style.css";
 import CustomButton from "../button";
 import TrailerModal from "../TrailerModal";
 import { useState } from "react";
 import { FaRegCirclePlay } from "react-icons/fa6";
 
-const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing }) => {
+const FilmCard = ({
+  imageUrl,
+  name,
+  country,
+  type,
+  duration,
+  ageLimit,
+  isShowing,
+  is3D, // Thêm props kiểm tra phim 3D
+}) => {
   const [videoOpen, setVideoOpen] = useState(false);
 
   return (
@@ -21,14 +29,28 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing
         {/* FilmCard with hover effects */}
         <div className="relative border cursor-pointer border-gray-300 rounded-lg overflow-hidden shadow-md transition-transform duration-300 sm:hover:shadow-lg aspect-[2/3] w-full">
           {/* Film image */}
-          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover"
+          />
 
-          {/* Labels for 2D and Age Limit */}
+          {/* Labels for 2D/3D and Age Limit */}
           <div className="absolute top-0 left-0 flex items-center transition-transform duration-300 ease-in-out transform sm:group-hover:-translate-y-full">
             <div className="flex items-center transition-transform duration-300 ease-in-out transform">
-              <div className="flex bg-[#FF9933]  w-[39px] h-[45px] justify-center items-center shadow-md">
-                <span className="border-2 border-black p-0.5 text-xs rounded-md font-interBold text-black">
-                  2D
+              <div
+                className={`flex w-[39px] h-[45px] justify-center items-center shadow-md ${
+                  is3D ? "bg-[#663399]" : "bg-[#FF9933]"
+                }`}
+              >
+                <span
+                  className={`p-0.5 text-xs border-2 rounded-md font-interBold ${
+                    is3D
+                      ? "text-white  border-white"
+                      : "text-black  border-black"
+                  }`}
+                >
+                  {is3D ? "3D" : "2D"}
                 </span>
               </div>
               <div className="flex flex-col w-[39px] h-[45px] items-center justify-center bg-[#FF0033] shadow-md">
@@ -105,7 +127,9 @@ const FilmCard = ({ imageUrl, name, country, type, duration, ageLimit, isShowing
               hoverTextColor="#FFFFFF" /* Text color on hover */
               href="https://example.com" /* Link */
               className="w-full h-[40px] sm:w-[119px]"
-              text={isShowing ? "Đặt vé" : "Tìm hiểu thêm"} /* Conditional text */
+              text={
+                isShowing ? "Đặt vé" : "Tìm hiểu thêm"
+              } /* Conditional text */
             />
           </div>
         </div>

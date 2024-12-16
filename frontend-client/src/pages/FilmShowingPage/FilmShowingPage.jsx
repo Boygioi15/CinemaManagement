@@ -15,6 +15,7 @@ const FilmShowingPage = () => {
           duration={120}
           ageLimit={13}
           isShowing={true}
+          is3D={true}
         />
          <FilmCard
           imageUrl={

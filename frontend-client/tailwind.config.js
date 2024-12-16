@@ -10,6 +10,7 @@ export default {
       },
       colors: {
         mainColor: "#F3EA28", // Sửa cú pháp
+        secondColor: "#663399"
       },
     },
   },
