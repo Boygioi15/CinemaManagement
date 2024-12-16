@@ -1,57 +1,106 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema(
+  {
+    verifyCode: {
+      type: String,
+    },
     filmName: {
-        type: String
+      type: String,
+      required: false,
     },
     date: {
-        type: Date,
-        required: true
+      type: String,
+      required: true,
     },
     time: {
-        type: String,
-        required: true
-    },
-    verifyCode: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     roomName: {
-        type: String
+      type: String,
+      required: false,
     },
-    seatName: {
-        type: String
-    },
+    seatNames: [
+      {
+        type: String,
+      },
+    ],
     totalMoney: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
     },
-    items: [{
-        type: mongoose.Schema.Types.Mixed
-    }],
+    tickets: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: String,
+          required: true,
+        },
+        unitPrice: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    items: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: String,
+          required: true,
+        },
+        unitPrice: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     customerID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
+    customerInfo: {
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
     },
     online: {
-        type: Boolean,
-        required: true
+      type: Boolean,
+      default: true,
     },
     printed: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     served: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     invalidReason: {
-        type: String,
-        default: ""
+      type: String,
+      default: "",
     },
-}, {
+  },
+  {
     timestamps: true,
-});
+  }
+);
 
 const orderModel = mongoose.model("orders", orderSchema);
 export default orderModel;

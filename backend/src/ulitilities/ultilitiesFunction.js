@@ -9,7 +9,7 @@ export function validatePhone(phone) {
   // Check if the phone is a string of numbers with exactly 10 digits
   return validator.isNumeric(phone) && phone.length === 10;
 }
-function generateRandomVerifyCode(length = 8) {
+export function generateRandomVerifyCode(length = 8) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {

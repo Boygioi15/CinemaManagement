@@ -36,8 +36,8 @@ class ParamController {
     });
   });
 
-  CreateTicketType = expressAsyncHandler(async (req, res, next) => {
-    const response = await ParamService.createTicketType(req.body);
+  createOrderType = expressAsyncHandler(async (req, res, next) => {
+    const response = await ParamService.createOrderType(req.body);
     return res.status(200).json({
       msg: "Create age restriction successfully!",
       success: true,

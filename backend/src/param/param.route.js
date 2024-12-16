@@ -12,7 +12,7 @@ router.get("/age-restriction/:id", ParamController.GetAgeRestriction);
 router.patch("/age-restriction", ParamController.UpdateAgeRestriction);
 router.delete("/age-restriction", ParamController.DeleteAgeRestriction);
 
-router.post("/ticket-type", ParamController.CreateTicketType);
+router.post("/ticket-type", ParamController.createOrderType);
 
 router.get("/ticket-type", ParamController.GetAllTicketTypes);
 

@@ -183,7 +183,7 @@ export class FilmShowService {
       if (!filmShow) throw customError("Filmshow not found ", 400);
 
       filmShow.lockedSeatIds = filmShow.lockedSeatIds.filter(
-        (seatId) => !seats.includes(seatIDs)
+        (seatId) => !filmShow.lockedSeatIds.includes(seatId)
       );
       await filmShow.save();
     }

@@ -14,7 +14,7 @@ router.post(
 router.post(
   "/callback",
   checkPaymentResultFromMomo,
-  paymentController.callback
+  paymentController.momoCallBack
 );
-
+router.get("/transaction-status/:id", paymentController.getTransactionStatus);
 export default router;

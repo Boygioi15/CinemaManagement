@@ -1,7 +1,4 @@
-import {
-  AgeRestrictionModel,
-  TicketTypeModel
-} from "./param.schema.js";
+import { AgeRestrictionModel, TicketTypeModel } from "./param.schema.js";
 
 export class ParamService {
   static createAgeRestriction = async (ageResData) => {
@@ -19,7 +16,7 @@ export class ParamService {
     return await AgeRestrictionModel.findByIdAndDelete(id);
   };
 
-  static createTicketType = async (ticketTypeData) => {
+  static createOrderType = async (ticketTypeData) => {
     return await TicketTypeModel.create(ticketTypeData);
   };
   static updateTicketType = async (id, ticketTypeData) => {
@@ -32,5 +29,28 @@ export class ParamService {
   };
   static deleteTicketType = async (id) => {
     return await TicketTypeModel.findByIdAndDelete(id);
+  };
+
+  static getTicketsInfo = async (tickets) => {
+    try {
+      const ticketDetails = await Promise.all(
+        tickets.map(async (ticket) => {
+          const ticketDetail = await TicketTypeModel.findById(ticket.id);
+          if (!ticketDetail) {
+            throw new Error(`Item with id ${ticket.id} not found`);
+          }
+
+          return {
+            name: ticketDetail.title,
+            quantity: ticket.quantity,
+            unitPrice: ticketDetail.price.toString(),
+          };
+        })
+      );
+
+      return ticketDetails;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   };
 }

@@ -58,7 +58,6 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
 
-    await FilmShowService.appendLockedSeats(filmShowId, seats);
     next();
   }
 );

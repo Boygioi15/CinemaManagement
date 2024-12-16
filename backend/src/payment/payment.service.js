@@ -1,12 +1,13 @@
 import config from "./config.js";
 import crypto from "crypto";
 import axios from "axios";
-import { TicketService } from "../ticket/ticket.service.js";
+import { OrderService } from "../order/order.service.js";
 import mongoose from "mongoose";
 import { Order_1Service } from "./Order_1/Order_1.service.js";
-import { FilmService } from "../film/film.service.js";
 import { FilmShowService } from "../filmShow/filmShow.service.js";
-
+import { EmailService } from "../email/email.service.js";
+import expressAsyncHandler from "express-async-handler";
+import orderModel from "../order/order.schema.js";
 export class PaymentService {
   static createPayment = async (req, res) => {
     try {
@@ -37,7 +38,7 @@ export class PaymentService {
       const requestId = orderId;
 
       // Prepare signature components carefully
-      const rawSignature = [
+      let rawSignature = [
         `accessKey=${accessKey}`,
         `amount=${amount}`,
         `extraData=${JSON.stringify(transactionData)}`,
@@ -84,7 +85,10 @@ export class PaymentService {
         },
         data: requestBody,
       });
-      Order_1Service.createNewEntry(orderId, signature);
+      await Order_1Service.createNewEntry(orderId, signature);
+
+      const { filmShowId, seats } = req.body;
+      await FilmShowService.appendLockedSeats(filmShowId, seats);
       return res.status(200).json(result.data);
     } catch (error) {
       console.error(
@@ -98,33 +102,48 @@ export class PaymentService {
       });
     }
   };
-  static callbackService = async (req, res) => {
+  static momoCallBackService = async (req, res) => {
     const { resultCode, amount, orderId, extraData } = req.body;
-    console.log(req.body);
+
     const extraDataObj = JSON.parse(extraData);
     //success
     if (resultCode === 0) {
+      // create order
       try {
-        const newTicket = await TicketService.createTicketOrder(extraDataObj);
+        const newOrder = await OrderService.createOrder(extraDataObj);
+        if (!newOrder) throw customError("Tạo đơn hàng thất bại");
+        // cuưa dăng nhap ma mua
 
-        return res.status(204).json(newTicket);
+        if (!newOrder.customerID) {
+          await EmailService.sendEmailWithHTMLTemplate(
+            newOrder.customerInfo.email,
+            "Thư xác nhận đơn hàng",
+            newOrder1
+          );
+        } else {
+          // user da dăng nhap
+          const user = await userModel.findById(newOrder.customerID);
+          await EmailService.sendEmailWithHTMLTemplate(
+            user.userEmail,
+            "Thư xác nhận đơn hàng",
+            newOrder1
+          );
+        }
+        return res.status(204).json(newOrder);
       } catch (error) {
         console.log("🚀 ~ PaymentService ~ callbackService= ~ error:", error);
+        const { filmShowId, seats } = extraDataObj;
+        await FilmShowService.releaseLockedSeats(filmShowId, seats);
       }
     } else {
       // fail
-      const {
-        customerInfo,
-        tickets,
-        filmShowId,
-        seats,
-        additionalItems,
-        totalPrice,
-      } = extraDataObj;
-
-      FilmShowService.releaseLockedSeats(filmShowId, seats);
+      const { filmShowId, seats } = extraDataObj;
+      await FilmShowService.releaseLockedSeats(filmShowId, seats);
     }
 
     return res.status(204).json(req.body);
   };
+  static getTransactionStatus = expressAsyncHandler(async (id) => {
+    return await orderModel.findById(id);
+  });
 }
