@@ -1,36 +1,63 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { FiMenu } from "react-icons/fi";
 
-const Sidebar = ({ tabs }) => {
-  const location = useLocation();
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
+  const location = useLocation(); // Lấy đường dẫn hiện tại
+  useEffect(() => {
+    console.log(location.pathname);
+  }, [location.pathname]);
 
   return (
-    <div className="w-64 bg-white shadow-md h-full flex flex-col">
-      <div className="p-4 text-xl font-bold text-blue-500">
-        Admin Panelsdfsdfdsfsdf
+    <div
+      className={`${
+        isSidebarOpen ? "w-64" : "w-20"
+      } bg-white shadow-lg transition-all duration-300 ease-in-out`}
+    >
+      <div className="flex items-center justify-between p-4 border-b">
+        <h1
+          className={`${
+            isSidebarOpen ? "block" : "hidden"
+          } font-bold text-xl text-gray-800`}
+        >
+          Admin Panel
+        </h1>
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-lg hover:bg-gray-100"
+        >
+          <FiMenu className="w-6 h-6 text-gray-600" />
+        </button>
       </div>
-      <nav className="flex flex-col gap-2 p-4">
-        {tabs &&
-          tabs.map((tab) => (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 ${
-                location.pathname === tab.path
-                  ? "bg-blue-100 text-blue-500 font-bold"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              {/* Hiển thị icon tùy theo trạng thái */}
-              <img
-                src={location.pathname === tab.path ? tab.checked : tab.icon}
-                alt={tab.name}
-                className="w-6 h-6 object-contain"
-              />
-              {/* Tên tab */}
-              <span>{tab.name}</span>
-            </NavLink>
-          ))}
+      <nav className="p-4">
+        <ul className="space-y-2">
+          {tabs.map((tab, index) => {
+            const isActive = location.pathname === tab.path; // Kiểm tra tab hiện tại
+            return (
+              <li key={index}>
+                <Link
+                  to={tab.path}
+                  className={`flex items-center p-3 rounded-lg ${
+                    isActive ? "text-blue-500" : "text-gray-700"
+                  } hover:bg-gray-100`}
+                >
+                  <span
+                    className={`${
+                      isActive ? "text-blue-500" : "text-gray-700"
+                    }`}
+                  >
+                    {tab.icon}
+                  </span>
+                  {isSidebarOpen && (
+                    <span className={`ml-3 ${isActive ? "font-bold" : ""}`}>
+                      {tab.name}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </div>
   );

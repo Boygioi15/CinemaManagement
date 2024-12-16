@@ -1,23 +1,30 @@
 import React from "react";
-
+import { useState } from "react";
+import { FiSearch, FiBell, FiUser } from "react-icons/fi";
 const Navbar = () => {
+  const [searchQuery, setSearchQuery] = useState("");
   return (
-    <div className="h-16 bg-white shadow flex items-center justify-between px-6">
-      <input
-        type="text"
-        placeholder="Search"
-        className="border rounded-lg px-4 py-2 w-1/3"
-      />
-      <div className="flex items-center space-x-4">
-        <span className="relative">
-          <span className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0"></span>
-          <span className="text-gray-500">🔔</span>
-        </span>
-        <img
-          src="https://via.placeholder.com/40"
-          alt="User Avatar"
-          className="w-10 h-10 rounded-full border"
+    <div className="flex items-center justify-between mb-6 bg-white rounded-lg shadow-sm p-3">
+      <div className="flex items-center w-1/3">
+        {/* <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 rounded-lg focus:outline-none border"
         />
+        <button className="ml-2 text-gray-600 hover:text-gray-800">
+          <FiSearch className="w-5 h-5" />
+        </button> */}
+      </div>
+      <div className="flex items-center space-x-4">
+        <button className="p-2 text-gray-600 hover:text-gray-800 relative">
+          <FiBell className="w-6 h-6" />
+          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <button className="p-2 text-gray-600 hover:text-gray-800">
+          <FiUser className="w-6 h-6" />
+        </button>
       </div>
     </div>
   );

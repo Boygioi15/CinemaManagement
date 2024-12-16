@@ -1,49 +1,91 @@
-import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import Sidebar from "../../components/Sidebar";
+import React, { useState, useEffect } from "react";
+import { FiColumns, FiLayers } from "react-icons/fi";
 import Navbar from "../../components/Navbar";
-import axios from "axios"
-const RootLayout = ({ tabs }) => {
-  const [roles, setRoles] = useState([]);
-  useEffect(async ()=>{
-    console.log("I'm faking a request to back end")
-    /*
-    const response = await axios.get(`api/admin/roles/${JWT}`);
-    setRoles(response.data)
-    */
-   setRoles(["ticket_offline","bapNuoc"]);
-  })
-  if(roles.find("ticket")){
-    tabs.add(<Ticket />)
-  }
-  if(roles.find("bapNuoc")){
-    tabs.add(<BapNuoc />)
-  }
-  console.log("Tabs:", tabs);
+import { RxDashboard } from "react-icons/rx";
+import Sidebar from "../../components/Sidebar";
+import { Outlet } from "react-router";
+import axios from "axios";
+
+// const newTabs = [
+//   {
+//     name: "Danh sách phòng",
+//     path: "/admin/infras",
+//     icon: <RxDashboard className="w-6 h-6" />,
+//   },
+// ];
+const newTabs = [
+  {
+    name: "Danh sách phim",
+    path: "/admin/film",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+];
+// const newTabs = [
+//   {
+//     name: "Vé Offline",
+//     path: "/admin/tab/offlineticket",
+//     icon: <RxDashboard className="w-6 h-6" />,
+//   },
+//   {
+//     name: "Vé Online",
+//     path: "/admin/tab/onlineticket",
+//     icon: <FiColumns className="w-6 h-6" />,
+//   },
+//   {
+//     name: "Bắp nước",
+//     path: "/admin/tab/bapnuoc",
+//     icon: <FiLayers className="w-6 h-6" />,
+//   },
+// ];
+
+const RootLayout = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [tabs, setTabs] = useState(newTabs);
+  // useEffect(() => {
+  //   const fetchRoles = async () => {
+  //     console.log("I'm faking a request to back end");
+  //     /*
+  //     const response = await axios.get(`api/admin/roles/${JWT}`);
+  //     setRoles(response.data);
+  //     */
+  //     setRoles(["ticket_offline", "bapNuoc"]); // Giá trị giả lập
+  //   };
+
+  //   fetchRoles();
+  // }, []);
+
+  // useEffect(() => {
+  // const newTabs = [
+  //   {
+  //     name: "Vé Offline",
+  //     path: "",
+  //     icon: <RxDashboard className="w-6 h-6" />,
+  //   },
+  //   {
+  //     name: "Vé Online",
+  //     path: "/admin/tab/onlineticket",
+  //     icon: <FiColumns className="w-6 h-6" />,
+  //   },
+  //   {
+  //     name: "Bắp nước",
+  //     path: "admin/tab/bapnuoc",
+  //     icon: <FiLayers className="w-6 h-6" />,
+  //   },
+  // ];
+
+  //   setTabs(newTabs);
+  // }, []);
+  // }, [roles]); // Khi `roles` thay đổi, cập nhật tabs
   return (
-    // <div className="flex h-screen bg-gray-100">
-    //   {/* Sidebar */}
-    //   <Sidebar tabs={tabs} />
-
-    //   {/* Main content */}
-    //   <div className="flex flex-col flex-1">
-    //     {/* Navbar */}
-    //     <Navbar />
-    //     {/* Dynamic content */}
-    //     <div className="p-4 bg-white flex-1 overflow-y-auto">
-    //       <Outlet />
-    //     </div>
-    //   </div>
-    // </div>
-    <div className="flex flex-col h-screen">
-      {/* Navbar */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <Sidebar tabs={tabs} />
-        <Navbar />
-
-        {/* Main Content */}
-        <div className="flex-1 bg-gray-100 p-6 overflow-auto">
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        tabs={tabs}
+      />
+      <div className="flex-1 overflow-hidden">
+        <div className="p-6">
+          <Navbar />
           <Outlet />
         </div>
       </div>

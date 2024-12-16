@@ -1,83 +1,40 @@
 import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import FilmModal from "../../components/FilmModal";
+import SeatModal from "../../components/SeatModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Dialog from "../../components/ConfirmDialog";
-import SuccessDialog from "../../components/SuccessDialog";
 
-const AdminFilm = () => {
+const InfrasManage = () => {
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFilm, setSelectedFilm] = useState(null);
   const [modalMode, setModalMode] = useState("add");
-  const [films, setFilms] = useState([]);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [dialogData, setDialogData] = useState({ title: "", message: "" });
-  const [formData, setFormData] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddRoomModalOpen, setIsAddRoomModalOpen] = useState(false);
+  const [seatStates, setSeatStates] = useState({});
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
-  const fetchFilms = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/api/films");
-      setFilms(response.data.data); // Lưu dữ liệu vào state
-    } catch (error) {
-      console.error("Error fetching films:", error);
-    }
-  };
-
-  // Gọi API khi component được render lần đầu
-  useEffect(() => {
-    fetchFilms();
-  }, []);
-
-  const handleEditClick = (film) => {
-    setSelectedFilm(film);
+  const handleEditClick = () => {
     setModalMode("edit");
     setIsModalOpen(true);
   };
 
-  const handleAddClick = () => {
-    setSelectedFilm(null);
-    setModalMode("add");
-    setIsModalOpen(true);
+  const handleAddRoom = () => {
+    setIsAddRoomModalOpen(true);
   };
 
-  const handleDeleteClick = (item) => {
-    setItemToDelete(item);
-    setIsConfirmDialogOpen(true);
-    setDialogData({
-      title: "Confirm Delete",
-      message:
-        "Are you sure you want to delete this item? This action cannot be undone.",
-    });
-  };
-
-  const handleDeleteConfirm = () => {
-    setIsConfirmDialogOpen(false);
-    setIsSuccessDialogOpen(true);
-    setDialogData({
-      title: "Success",
-      message: "Item deleted successfully",
-    });
+  const handleCloseAddRoomModal = () => {
+    setIsAddRoomModalOpen(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedFilm(null);
   };
 
   const handleSaveChanges = (formData) => {
     if (modalMode === "edit") {
-      setIsConfirmDialogOpen(true);
-      setDialogData({
-        title: "Confirm update",
-        message: "Do you want to update this film ?",
-      });
-      setFormData(formData);
       console.log("Saving changes", formData);
     } else {
       console.log("Adding new film", formData);
@@ -103,10 +60,7 @@ const AdminFilm = () => {
           >
             <FiEdit2 className="w-4 h-4" />
           </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={() => handleDeleteClick(row)}
-          >
+          <button className="text-red-600 hover:text-red-800">
             <FiTrash2 className="w-4 h-4" />
           </button>
         </div>
@@ -116,7 +70,7 @@ const AdminFilm = () => {
 
   const itemsPerPage = 6;
 
-  const filteredData = films.filter((item) =>
+  const filteredData = rooms.filter((item) =>
     item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
   );
 
@@ -132,7 +86,7 @@ const AdminFilm = () => {
       <div className="mb-6 flex justify-between items-center pr-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Film Information
+            Room Information
           </h2>
           <div className="flex items-center w-[300px]">
             <input
@@ -146,9 +100,9 @@ const AdminFilm = () => {
         </div>
         <button
           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          onClick={() => handleAddClick()}
+          onClick={() => handleAddRoom()}
         >
-          Add Film +
+          Add Room +
         </button>
       </div>
 
@@ -176,29 +130,14 @@ const AdminFilm = () => {
         </div>
       </div>
 
-      <FilmModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        film={selectedFilm}
+      <SeatModal
+        isOpen={isAddRoomModalOpen}
+        onClose={handleCloseAddRoomModal}
         onSave={handleSaveChanges}
         mode={modalMode}
-      />
-
-      <Dialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title={dialogData.title}
-        message={dialogData.message}
-      />
-      <SuccessDialog
-        isOpen={isSuccessDialogOpen}
-        onClose={() => setIsSuccessDialogOpen(false)}
-        title={dialogData.title}
-        message={dialogData.message}
       />
     </div>
   );
 };
 
-export default AdminFilm;
+export default InfrasManage;
