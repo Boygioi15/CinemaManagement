@@ -1,13 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
+process.env.PORT || 4000;
 export default {
-    accessKey: 'F8BBA842ECF85',
-    secretKey: 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
-    orderInfo: 'pay with MoMo',
-    partnerCode: 'MOMO',
-    redirectUrl: 'http://localhost:5000/views/home.html', // link frontend 
-    ipnUrl: 'https://047d-183-81-8-72.ngrok-free.app/api/payment/callback', //chú ý: cần dùng ngrok thì momo mới post đến url này được
-    requestType: 'payWithMethod',
-    extraData: '',
-    orderGroupId: '',
-    autoCapture: true,
-    lang: 'vi',
+  accessKey: process.env.MOMO_ACCESS_KEY,
+  secretKey: process.env.MOMO_SECRET_KEY,
+  orderInfo: "pay with MoMo",
+  partnerCode: process.env.MOMO_PARTNER_CODE,
+  redirectUrl: process.env.MOMO_REDIRECT_URL, // link frontend
+  ipnUrl: process.env.MOMO_NOTIFY_URL, //chú ý: cần dùng ngrok thì momo mới post đến url này được
+  requestType: "payWithMethod",
+  extraData: "",
+  orderGroupId: "",
+  autoCapture: true,
+  lang: "vi",
 };
