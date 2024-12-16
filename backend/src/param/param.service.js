@@ -33,4 +33,28 @@ export class ParamService {
   static deleteTicketType = async (id) => {
     return await TicketTypeModel.findByIdAndDelete(id);
   };
+
+
+
+
+  static getTicketsInfo = async (tickets) => {
+    try {
+      const ticketDetails = await Promise.all(tickets.map(async (ticket) => {
+        const ticketDetail = await TicketTypeModel.findById(ticket.id);
+        if (!ticketDetail) {
+          throw new Error(`Item with id ${ticket.id} not found`);
+        }
+
+        return {
+          name: ticketDetail.title,
+          quantity: ticket.quantity,
+          unitPrice: ticketDetail.price.toString()
+        };
+      }));
+
+      return ticketDetails;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
 }

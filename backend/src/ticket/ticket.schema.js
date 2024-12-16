@@ -27,6 +27,20 @@ const ticketSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    tickets: [{
+        name: {
+            type: String,
+            required: true
+        },
+        quantity: {
+            type: String,
+            required: true
+        },
+        unitPrice: {
+            type: String,
+            required: true
+        }
+    }],
     items: [{
         name: {
             type: String,

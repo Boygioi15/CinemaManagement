@@ -79,6 +79,17 @@ class EmailController {
             date: "06-10-2022",
             roomName: "SỐ 01",
             seatNames: ["A1", "A2", "A3"],
+            tickets: [{
+                    name: "ĐƠn",
+                    quantity: 2,
+                    price: 50000
+                },
+                {
+                    name: "Đôi",
+                    quantity: 1,
+                    price: 30000
+                },
+            ],
             items: [{
                     name: "Popcorn",
                     quantity: 2,

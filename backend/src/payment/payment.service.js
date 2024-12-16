@@ -8,6 +8,9 @@ import {
     EmailService
 } from "../email/email.service.js";
 import userModel from "../user/user.schema.js";
+import {
+    customError
+} from "../middlewares/errorHandlers.js";
 
 export class PaymentService {
     static createPayment = async (req, res) => {
@@ -112,15 +115,15 @@ export class PaymentService {
             // create order
             try {
                 const newTicket = await TicketService.createTicketOrder(extraDataObj)
-
+                if (!newTicket) throw customError("tạo đơn hàng thất bại")
                 // cuưa dăng nhap ma mua
-                if (newTicket.customerID === null) {
-                    EmailService.sendEmailWithHTMLTemplate(newTicket.customerInfo.email, "Thư xác nhận đơn hàng", newTicket)
+
+                if (!newTicket.customerID) {
+                    await EmailService.sendEmailWithHTMLTemplate(newTicket.customerInfo.email, "Thư xác nhận đơn hàng", newTicket)
                 } else {
                     // user da dăng nhap
-                    const user = userModel.findById(newTicket.customerID);
-
-                    EmailService.sendEmailWithHTMLTemplate(user.userEmail, "Thư xác nhận đơn hàng", newTicket)
+                    const user = await userModel.findById(newTicket.customerID);
+                    await EmailService.sendEmailWithHTMLTemplate(user.userEmail, "Thư xác nhận đơn hàng", newTicket)
                 }
 
                 return res.status(204).json(newTicket);

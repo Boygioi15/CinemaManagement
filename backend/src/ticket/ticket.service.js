@@ -13,6 +13,9 @@ import filmShowModel from "../filmShow/filmShow.schema.js";
 import {
     AdditionalItemService
 } from "../additionalItem/additionalItem.service.js";
+import {
+    ParamService
+} from "../param/param.service.js";
 export class TicketService {
     static createTicket = async (ticketData) => {
         try {
@@ -165,12 +168,16 @@ export class TicketService {
 
         const items = await AdditionalItemService.getAdditionalItemsInfo(additionalItems);
 
+
+        const ticketDetails = await ParamService.getTicketsInfo(tickets)
+
         const newTicket = await ticketModel.create({
             roomName,
             seatNames,
             ...dataFilmShow,
             totalMoney: totalPrice,
             items,
+            tickets: ticketDetails,
             customerID: customerId,
             customerInfo
         });
