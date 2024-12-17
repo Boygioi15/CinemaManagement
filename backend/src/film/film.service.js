@@ -109,26 +109,18 @@ export class FilmService {
 
   // Tương tự, cập nhật updateFilmById
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageValue, ageSymbol, twoDthreeD, ...rest } = updateData;
-    if (ageValue && ageSymbol) {
-      FilmService.validateAgeRestriction(ageValue, ageSymbol);
-    }
+    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
+    // Kiểm tra tuổi
+    FilmService.validateAgeRestriction(ageRestriction);
+    // Kiểm tra định dạng 2D, 3D
     const formattedTwoDthreeD = FilmService.isValid2D3DArray(twoDthreeD);
-    const validTagIds = tagsRef
-      ? await FilmService.validateTags(tagsRef)
-      : undefined;
-    const updatedFilm = await filmModel.findByIdAndUpdate(
-      filmId,
-      {
-        ...rest,
-        ...(formattedTwoDthreeD && { twoDthreeD: formattedTwoDthreeD }),
-        ...(validTagIds && { tagsRef: validTagIds }),
-        ...(ageValue && { ageValue }),
-        ...(ageSymbol && { ageSymbol }),
-      },
-      { new: true, runValidators: true }
-    );
-    if (!updatedFilm) throw customError("Film not found", 400);
-    return updatedFilm;
+    // Kiểm tra các thể loại phim (tags)
+    const validTagIds = await FilmService.validateTags(tagsRef);
+    return await filmModel.findByIdAndUpdate(filmId, {
+      ...rest,
+      tagsRef: validTagIds,
+      ageRestriction,
+      twoDthreeD: formattedTwoDthreeD,
+    });
   };
 }
