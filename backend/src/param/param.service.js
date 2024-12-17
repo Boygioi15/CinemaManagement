@@ -12,14 +12,14 @@ export class ParamService {
   static getAgeRestrictionID = async (id) => {
     return await AgeRestrictionModel.findById(id);
   };
-  static getAllAgeRestriction = async() =>{
+  static getAllAgeRestriction = async () => {
     return await AgeRestrictionModel.find();
-  }
+  };
   static deleteAgeRestriction = async (id) => {
     return await AgeRestrictionModel.findByIdAndDelete(id);
   };
 
-  static createOrderType = async (ticketTypeData) => {
+  static createTicketType = async (ticketTypeData) => {
     return await TicketTypeModel.create(ticketTypeData);
   };
   static updateTicketType = async (id, ticketTypeData) => {

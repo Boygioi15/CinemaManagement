@@ -10,28 +10,13 @@ class ParamController {
       data: response,
     });
   });
-  UpdateAgeRestriction = expressAsyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const response = await ParamService.updateAgeRestriction(id, req.body);
-    return res.status(200).json({
-      msg: "Update age restriction successfully!",
-      success: true,
-      data: response,
-    });
-  });
-  GetAgeRestriction = expressAsyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const response = await ParamService.getAgeRestrictionID(id);
-    return res.status(200).json({
-      success: true,
-      data: response,
-    });
-  });
-  GetAllAgeRestriction = expressAsyncHandler(async (req, res, next) => {
+  GetAllAgeRestrictionSymbol = expressAsyncHandler(async (req, res, next) => {
     const response = await ParamService.getAllAgeRestriction();
+    const symbols = response.map((item) => item.name);
+
     return res.status(200).json({
       success: true,
-      data: response,
+      data: symbols, // Send only the list of symbols
     });
   });
   DeleteAgeRestriction = expressAsyncHandler(async (req, res, next) => {
@@ -43,8 +28,8 @@ class ParamController {
     });
   });
 
-  createOrderType = expressAsyncHandler(async (req, res, next) => {
-    const response = await ParamService.createOrderType(req.body);
+  createTicketType = expressAsyncHandler(async (req, res, next) => {
+    const response = await ParamService.createTicketType(req.body);
     return res.status(200).json({
       msg: "Create age restriction successfully!",
       success: true,

@@ -6,10 +6,15 @@ import OnlineTickets from "./pages/TicketManagement/OnlineTicket";
 import BapNuoc from "./pages/TicketManagement/BapNuoc";
 import OfflineTicket from "./pages/TicketManagement/OfflineTicket";
 import InfrasManage from "./pages/Infrastructure/InfrasManage";
+import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RedirectToRoot />
+  },
   {
     path: "/admin",
     element: <RootLayout />,

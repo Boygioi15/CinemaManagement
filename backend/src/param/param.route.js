@@ -5,14 +5,13 @@ const router = express.Router();
 
 // Routes cho age restriction
 router.post("/age-restriction", ParamController.CreateAgeRestriction);
-
-//router.get("/age-restriction");
-router.get("/age-restriction/:id", ParamController.GetAgeRestriction);
-
-router.patch("/age-restriction", ParamController.UpdateAgeRestriction);
+router.get(
+  "/age-restriction-symbol",
+  ParamController.GetAllAgeRestrictionSymbol
+);
 router.delete("/age-restriction", ParamController.DeleteAgeRestriction);
 
-router.post("/ticket-type", ParamController.createOrderType);
+router.post("/ticket-type", ParamController.createTicketType);
 
 router.get("/ticket-type", ParamController.GetAllTicketTypes);
 

@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
 
 const AgeRestrictionSchema = new mongoose.Schema({
-  symbol: {
-    type: String,
-    required: true,
-  },
-  value: {
+  name: {
     type: String,
     required: true,
   },

@@ -2,59 +2,56 @@ import filmModel from "./film.schema.js";
 import { AgeRestrictionModel } from "../param/param.schema.js";
 import { customError } from "../middlewares/errorHandlers.js";
 import mongoose from "mongoose";
+import tagModel from "../tag/tag.schema.js";
 
 export class FilmService {
   // Hàm kiểm tra ageValue và ageSymbol
-  static validateAgeRestriction = async (ageValue, ageSymbol) => {
+  static validateAgeRestriction = async (ageName) => {
     const ageRestriction = await AgeRestrictionModel.findOne({
-      value: ageValue,
-      symbol: ageSymbol,
+      name: ageName,
     });
 
     if (!ageRestriction) {
-      throw customError("Invalid ageValue or ageSymbol.", 400);
+      throw customError("Giới hạn tuổi không hợp lệ", 400);
     }
   };
 
   // Hàm kiểm tra mảng twoDthreeD
   static isValid2D3DArray = (array) => {
-    if (!array) { // Kiểm tra nếu array không có giá trị (undefined, null hoặc rỗng)
+    if (!array) {
+      // Kiểm tra nếu array không có giá trị (undefined, null hoặc rỗng)
       throw customError("twoDthreeD is required and cannot be empty.", 400);
     }
-    const values = array.replace(/\s+/g, '').split(','); // Xóa khoảng trắng và tách chuỗi thành mảng
-    const allowedValues = ['2D', '3D']; // Các giá trị hợp lệ
+    const values = array.replace(/\s+/g, "").split(","); // Xóa khoảng trắng và tách chuỗi thành mảng
+    const allowedValues = ["2D", "3D"]; // Các giá trị hợp lệ
     if (
       values.length > 2 ||
       values.some((value) => !allowedValues.includes(value))
     ) {
-      throw customError("twoDthreeD must contain only '2D', '3D' or '2D,3D'.", 400);
+      throw customError(
+        "twoDthreeD must contain only '2D', '3D' or '2D,3D'.",
+        400
+      );
     }
     return values;
   };
 
-  // Hàm kiểm tra danh sách thể loại phim (tagsRef)
-  static validateTags = async (tagsString) => {
-    if (!tagsString) {
+  static validateTags = async (tagIDs) => {
+    if (!tagIDs || !Array.isArray(tagIDs) || tagIDs.length === 0) {
       throw customError("Tags cannot be empty.", 400);
     }
-    // Tách chuỗi các thể loại phim thành mảng
-    const tagsArray = tagsString.replace(/\s+/g, "").split(",");
-    // Lấy danh sách tất cả các tags hợp lệ từ collection tags
-    const existingTags = await TagModel.find({
-      name: { $in: tagsArray }
-    }).select("name -_id");
-    const validTags = existingTags.map(tag => tag.name);
-    // Kiểm tra xem có tag nào không hợp lệ
-    const invalidTags = tagsArray.filter(tag => !validTags.includes(tag));
-    if (invalidTags.length > 0) {
-      throw customError(`Invalid tags: ${invalidTags.join(", ")}`, 400);
-    }
-    // Trả về danh sách các ObjectId tương ứng với các tags hợp lệ
-    const validTagIds = await TagModel.find({
-      name: { $in: tagsArray }
-    }).select("_id");
 
-    return validTagIds.map(tag => tag._id);
+    // Fetch tags from the database that match the tagIDs
+    const tagsInDB = await tagModel
+      .find({ _id: { $in: tagIDs } })
+      .select("_id");
+
+    // Compare the number of matching tags with the input tagIDs
+    if (tagsInDB.length !== tagIDs.length) {
+      throw customError("Some tags are invalid or do not exist.", 404);
+    }
+
+    return true; // All tags are valid
   };
 
   // Lấy danh sách các bộ phim đang chiếu
@@ -72,9 +69,9 @@ export class FilmService {
 
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
-    const { tagsRef, ageValue, ageSymbol, twoDthreeD, ...rest } = filmData;
+    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
     // Kiểm tra tuổi
-    FilmService.validateAgeRestriction(ageValue, ageSymbol);
+    FilmService.validateAgeRestriction(ageRestriction);
     // Kiểm tra định dạng 2D, 3D
     const formattedTwoDthreeD = FilmService.isValid2D3DArray(twoDthreeD);
     // Kiểm tra các thể loại phim (tags)
@@ -82,8 +79,7 @@ export class FilmService {
     return await filmModel.create({
       ...rest,
       tagsRef: validTagIds,
-      ageValue,
-      ageSymbol,
+      ageRestriction,
       twoDthreeD: formattedTwoDthreeD,
     });
   };

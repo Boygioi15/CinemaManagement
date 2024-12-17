@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.post("", upload.single("uploaded_file"), filmController.createFilm);
 router.post("", filmController.createFilm);
-router.put("/:id", filmController.updateFilm);
-router.delete("/:id", filmController.deleteFilm);
+//router.put("/:id", filmController.updateFilm);
+//router.delete("/:id", filmController.deleteFilm);
 router.get("", filmController.getAllFilms);
 router.get("/:id/getFilmDetail", filmController.getFilmDetail);
 

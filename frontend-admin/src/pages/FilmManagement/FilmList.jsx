@@ -8,17 +8,20 @@ import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
 
 const AdminFilm = () => {
+  const [films, setFilms] = useState([]);
+
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState(null);
-  const [modalMode, setModalMode] = useState("add");
-  const [films, setFilms] = useState([]);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add");
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [formData, setFormData] = useState("");
+
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   const fetchFilms = async () => {
     try {
