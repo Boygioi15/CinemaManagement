@@ -3,172 +3,163 @@ import { FiX } from "react-icons/fi";
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { debounce } from "lodash";
-import { Combobox, ComboboxOption } from "@headlessui/react";
+import { Combobox } from "@headlessui/react";
 import { FiSearch } from "react-icons/fi";
 import Dialog from "./ConfirmDialog";
 import SuccessDialog from "./SuccessDialog";
-import slugify from "slugify";
-import slugifyOption from "../ulitilities/slugifyOption";
+
 const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   if (!isOpen) return null;
+
   const isEditMode = mode === "edit";
-  const title = isEditMode ? "Cập nhật nội dung phim" : "Thêm mới phim";
+  const title = isEditMode ? "Edit Film Details" : "Add New Film";
 
-  const [queryTagText, setQueryTagText] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [filmTags, setFilmTags] = useState([]);
-
-  const [ageResData, setAgeResData] = useState([]);
-
-  const [data, setData] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [query, setQuery] = useState("");
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [filmTypes, setFilmTypes] = useState([]);
+  const [ageSymbol, setAgeSymbol] = useState([]);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [data, setData] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  /////////////////////////fetch tags and ageRes///////////////////////////
-  const fetchAgeRes = async () => {
+  const fetchAgeSymbol = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/param/age-restriction-symbol"
-      );
-      setAgeResData(response.data.data);
+      const response = await axios.get("http://localhost:8000/api/param");
+      setAgeSymbol(response.data.data);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const fetchFilmTags = async () => {
+  const fetchFilmTypes = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/tags");
-      setFilmTags(response.data.data);
+      setFilmTypes(response.data.data);
     } catch (err) {
       setError(err.message);
     }
   };
+
   useEffect(() => {
-    fetchFilmTags();
-    fetchAgeRes();
+    fetchFilmTypes();
+    fetchAgeSymbol();
   }, []);
-  /////////////////////////fetch tags and ageRes///////////////////////////
-  const filteredTags =
-    queryTagText === ""
-      ? filmTags
-      : filmTags.filter((tag) =>
-          slugify(tag.name, slugifyOption).includes(
-            slugify(queryTagText),
-            slugifyOption
-          )
+
+  const filteredTypes =
+    query === ""
+      ? filmTypes
+      : filmTypes.filter((type) =>
+          type.name.toLowerCase().includes(query.toLowerCase())
         );
-  const handleTagSelection = (tag) => {
-    if (!selectedTags.some((selectedTag) => selectedTag._id === tag._id)) {
-      setSelectedTags([...selectedTags, tag]);
+
+  const handleTypeSelection = (typeName) => {
+    if (!selectedTypes.includes(typeName)) {
+      setSelectedTypes([...selectedTypes, typeName]);
     }
   };
-  //console.log(`Input Changed: Name=${selectedTags}`);
-  const removeTag = (tagToRemove) => {
-    setSelectedTags(selectedTags.filter((tag) => tag._id !== tagToRemove._id));
-  };
-  useEffect(() => {
-    const tagIds = selectedTags.map((tag) => tag._id);
-    setFormData((prevData) => ({
-      ...prevData,
-      tagsRef: tagIds,
-    }));
-  }, [selectedTags]);
-  const initTagChoices = (tagIDs) => {
-    // For each tagID in tagIDs, check if it exists in filmTags
-    tagIDs.forEach((tagID) => {
-      const tagExists = filmTags.some((filmTag) => filmTag._id === tagID);
-      if (tagExists) {
-        // Perform the action if the tag exists
-        setSelectedTags(...selectedTags, tagExists);
-      }
-    });
-  };
-  const initAgeChoice = (ageSymbol) => {
-    const age = ageResData.find((ageItem) => ageItem === ageSymbol);
-    console.log("HO");
-    return age;
+  console.log(`Input Changed: Name=${selectedTypes}`);
+
+  const removeType = (typeToRemove) => {
+    setSelectedTypes(selectedTypes.filter((type) => type !== typeToRemove));
   };
 
+  // Initialize state with existing film data or empty values
   const [formData, setFormData] = useState({
     _id: film?._id || "",
     name: film?.name || "",
-    trailerURL: film?.trailerURL || "",
-    thumbnailURL: film?.thumbnailURL || "",
-    tagsRef: film?.tagsRef || [],
-    filmDuration: film?.filmDuration || "",
-    ageRestriction: film?.ageRestriction || "",
-    voice: film?.voice || "",
+    otherDescription: film?.otherDescription
+      ? film.otherDescription.split(",").map((t) => t.trim()) // Chuyển chuỗi thành mảng
+      : [],
     originatedCountry: film?.originatedCountry || "",
+    ageSymbol: film?.ageSymbol || "",
     twoDthreeD: film?.twoDthreeD || "",
+    filmDuration: film?.filmDuration || "",
+    voice: film?.voice || "",
+    trailerURL: film?.trailerURL || "",
     filmDescription: film?.filmDescription || "",
-    filmContent: film?.filmContent || "",
+    thumbnailURL: film?.thumbnailURL || "",
     beginDate: film?.beginDate || "",
   });
 
   useEffect(() => {
-    if (!isEditMode) {
-      return;
+    if (film?.otherDescription) {
+      setFormData((prev) => ({
+        ...prev,
+        otherDescription: film.otherDescription
+          .split(", ")
+          .map((type) => type.trim()), // Chuyển chuỗi thành mảng
+      }));
     }
-    console.log("Film value: " + JSON.stringify(film));
-    initAgeChoice(film.ageRestriction);
-    initTagChoices(film.tagsRef);
   }, [film]);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      otherDescription: selectedTypes, // Cập nhật type từ selectedTypes
+    }));
+  }, [selectedTypes]);
+
   const isFormValid = useMemo(() => {
     const requiredFields = [
       "name",
-      "trailerURL",
-      "thumbnailURL",
-      "tagsRef",
-      "filmDuration",
-      "ageRestriction",
-      "voice",
+      "otherDescription",
+      "ageSymbol",
       "originatedCountry",
-      "twoDthreeD",
+      "filmDuration",
+      "voice",
+      "thumbnailURL",
+      "trailerURL",
       "filmDescription",
-      "filmContent",
+      "twoDthreeD",
       "beginDate",
     ];
-    console.log("Form data : " + JSON.stringify(formData));
+    console.log(formData);
 
     return requiredFields.every((field) => !!formData[field]); // Chuyển đổi giá trị thành Boolean
   }, [formData]);
 
   const handleSubmit = () => {
+    const formattedData = {
+      ...formData,
+      otherDescription:
+        formData.otherDescription.length > 0
+          ? formData.otherDescription.join(", ")
+          : null,
+    };
+
+    console.log(formattedData);
     setIsConfirmDialogOpen(true);
     if (mode === "edit") {
       setDialogData({
-        title: "Xác nhận cập nhật thông tin phim",
-        message: "Cập nhật thông tin phim?",
+        title: "Confirm update",
+        message: "Bạn có chắc chắn là cập nhật phim này không ?",
       });
     } else {
       setDialogData({
-        title: "Xác nhận thêm mới phim",
-        message: "Thêm mới phim?",
+        title: "Confirm add",
+        message: "Bạn có chắc chắn là thêm phim này không ?",
       });
     }
+
+    setData(formattedData);
   };
 
   const handleFilm = async () => {
     setIsLoading(true);
     try {
-      //console.log(`data nè heheh:${data.otherDescription} `);
+      console.log(`data nè heheh:${data.otherDescription} `);
 
       // Gọi API tùy thuộc vào mode
       if (mode === "edit") {
-        await axios.put(
-          `http://localhost:8000/api/films/${film._id}`,
-          formData
-        );
+        await axios.put(`http://localhost:8000/api/films/${data.id}`, data);
         setDialogData({
           title: "Successs",
           message: "Cập nhật phim thành công",
         });
       } else {
-        await axios.post("http://localhost:8000/api/films", formData);
+        await axios.post("http://localhost:8000/api/films", data);
         setDialogData({
           title: "Successs",
           message: "Thêm phim thành công",
@@ -230,8 +221,8 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 /> */}
                 <Combobox
-                  value={formData.selectedTags}
-                  onChange={handleTagSelection}
+                  value={formData.otherDescription}
+                  onChange={handleTypeSelection}
                 >
                   <div className="relative">
                     <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left border focus-within:ring-2 focus-within:ring-blue-500">
@@ -239,9 +230,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                         name="type"
                         //value={formData.type.join(", ")}
                         className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:outline-none"
-                        onChange={(event) =>
-                          setQueryTagText(event.target.value)
-                        }
+                        onChange={(event) => setQuery(event.target.value)}
                         displayValue={() => ""}
                         placeholder="Search types..."
                       />
@@ -253,14 +242,14 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                       </Combobox.Button>
                     </div>
                     <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {filteredTags.length === 0 && queryTagText !== "" ? (
+                      {filteredTypes.length === 0 && query !== "" ? (
                         <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                          Không tìm thấy kết quả
+                          Nothing found.
                         </div>
                       ) : (
-                        filteredTags.map((tag) => (
+                        filteredTypes.map((type) => (
                           <Combobox.Option
-                            key={tag._id}
+                            key={type.id}
                             className={({ active }) =>
                               `relative cursor-default select-none py-2 pl-10 pr-4 ${
                                 active
@@ -268,7 +257,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                                   : "text-gray-900"
                               }`
                             }
-                            value={tag}
+                            value={type.name}
                           >
                             {({ selected, active }) => (
                               <span
@@ -276,7 +265,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                                   selected ? "font-medium" : "font-normal"
                                 }`}
                               >
-                                {tag.name}
+                                {type.name}
                               </span>
                             )}
                           </Combobox.Option>
@@ -287,14 +276,14 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </Combobox>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedTags.map((tag) => (
+                  {selectedTypes.map((type) => (
                     <div
-                      key={tag._id}
+                      key={type}
                       className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
                     >
-                      {tag.name}
+                      {type}
                       <button
-                        onClick={() => removeTag(tag)}
+                        onClick={() => removeType(type)}
                         className="ml-2 text-blue-600 hover:text-blue-800"
                       >
                         <FiX className="w-4 h-4" />
@@ -326,11 +315,11 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </label>
                 <select
                   name="age"
-                  value={formData.ageRes || ""}
+                  value={formData.ageSymbol || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      ageRestriction: e.target.value,
+                      ageSymbol: e.target.value,
                     }))
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -338,9 +327,9 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   <option value="" disabled>
                     Vui lòng chọn độ tuổi
                   </option>
-                  {ageResData.map((ageRes, index) => (
-                    <option key={index} value={ageRes}>
-                      {`${ageRes}`}
+                  {ageSymbol.map((age) => (
+                    <option key={age.id} value={age.symbol}>
+                      {age.symbol}
                     </option>
                   ))}
                 </select>
@@ -399,7 +388,6 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   <option value="2D,3D">2D, 3D</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ngày khởi chiếu
@@ -465,32 +453,15 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mt-1 mb-1">
-              Mô tả phim
+              Description
             </label>
             <textarea
-              name="filmDescription"
+              name="description"
               value={formData.filmDescription}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
                   filmDescription: e.target.value,
-                }))
-              }
-              rows="4"
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mt-1 mb-1">
-              Nội dung phim
-            </label>
-            <textarea
-              name="filmContent"
-              value={formData.filmContent}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  filmContent: e.target.value,
                 }))
               }
               rows="4"
