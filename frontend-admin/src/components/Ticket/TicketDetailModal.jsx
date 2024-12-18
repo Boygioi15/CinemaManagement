@@ -1,7 +1,7 @@
 import React from "react";
 import { FiPrinter, FiArrowLeft } from "react-icons/fi";
 
-const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
+const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
   if (!isOpen) return null;
 
   return (
@@ -24,9 +24,27 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               </div>
               <div className="ml-10">
                 <p className="text-sm text-gray-500">Trạng thái</p>
-                <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
-                  Chưa in
-                </span>
+                {order.invalidReason_Printed ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
+                    Từ chối in vé
+                  </span>
+                ) : order.invalidReason_Served ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
+                    Từ chối phục vụ
+                  </span>
+                ) : order.served ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
+                    Đã phục vụ
+                  </span>
+                ) : order.printed ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded">
+                    Đã in
+                  </span>
+                ) : (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-yellow-700 bg-yellow-100 rounded">
+                    Chưa in
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -142,16 +160,18 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               <FiArrowLeft className="mr-2" />
               Trở về
             </button>
-            <button
-              className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                onConfirm(order);
-                //onClose();
-              }}
-            >
-              <FiPrinter className="mr-2" />
-              In vé
-            </button>
+            {view ? (
+              <button
+                className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                onClick={() => {
+                  onConfirm(order);
+                  // onClose();
+                }}
+              >
+                <FiPrinter className="mr-2" />
+                In vé
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

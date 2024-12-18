@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
+import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
 import slugify from "slugify";
 import TicketDetailModal from "../../components/Ticket/TicketDetailModal";
@@ -15,12 +16,14 @@ const InVe = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   const [tableSearchQuery, setTableSearchQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("all");
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [view, setView] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -28,6 +31,13 @@ const InVe = () => {
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
     setIsTicketModalOpen(true);
+    setView(true);
+  };
+
+  const handleViewClick = (order) => {
+    setSelectedOrder(order);
+    setIsTicketModalOpen(true);
+    setView(false);
   };
 
   const handleCancelClick = (order) => {
@@ -88,10 +98,7 @@ const InVe = () => {
     try {
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
-      const filteredOrders = response.data.filter(
-        (order) => order.printed === false
-      );
-      setOrders(filteredOrders);
+      setOrders(response.data);
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -105,16 +112,25 @@ const InVe = () => {
     return;
   }
   const itemsPerPage = 7;
-  const filteredData = orders.filter(
-    (item) =>
-      (item.filmName &&
-        slugify(item.filmName).includes(slugify(tableSearchQuery))) ||
-      (item.verifyCode &&
-        slugify(item.verifyCode).includes(slugify(tableSearchQuery))) ||
-      (item.customerInfo.name &&
-        slugify(item.customerInfo.name).includes(slugify(tableSearchQuery))) ||
-      (item.time && item.time.includes(tableSearchQuery))
-  );
+  const filteredData = orders.filter((order) => {
+    // Lọc theo mã code
+    const matchesCode =
+      !tableSearchQuery ||
+      order.verifyCode?.toLowerCase().includes(tableSearchQuery.toLowerCase());
+
+    // Lọc theo trạng thái
+    const matchesStatus =
+      statusQuery === "all" ||
+      (!order.printed && statusQuery === "Chưa in") ||
+      (order.printed && statusQuery === "Đã in") ||
+      (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
+      (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
+      (!order.served && statusQuery === "Chưa phục vụ") ||
+      (order.served && statusQuery === "Đã phục vụ");
+
+    // Kết hợp cả hai điều kiện
+    return matchesCode && matchesStatus;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -122,6 +138,14 @@ const InVe = () => {
     startIndex,
     startIndex + itemsPerPage
   );
+  const statusOptions = [
+    "Chưa in",
+    "Đã in",
+    "Từ chối in vé",
+    "Từ chối phục vụ",
+    "Chưa phục vụ",
+    "Đã phục vụ",
+  ];
 
   const columns = [
     {
@@ -145,12 +169,21 @@ const InVe = () => {
         let statusText = "";
         let statusClass = "";
 
-        if (row.invalidreason) {
+        if (row.invalidReason_Printed) {
           statusText = "Từ chối in vé";
+          statusClass = "bg-red-100 text-red-800";
+        } else if (row.invalidReason_Served) {
+          statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
         } else if (!row.printed) {
           statusText = "Chưa in";
-          statusClass = "bg-green-100 text-green-700";
+          statusClass = "bg-yellow-100 text-yellow-800";
+        } else if (row.served) {
+          statusText = "Đã phục vụ";
+          statusClass = "bg-green-100 text-green-800";
+        } else if (row.printed) {
+          statusText = "Đã in";
+          statusClass = "bg-blue-100 text-blue-800";
         }
 
         return (
@@ -165,13 +198,35 @@ const InVe = () => {
       key: "actions",
       render: (_, row) => (
         <div className="flex space-x-3">
-          <button className="text-blue-600 hover:text-blue-800">
+          <button className="text-gray-600 hover:text-gray-800">
+            <FiSearch
+              className="w-4 h-4"
+              onClick={() => handleViewClick(row)}
+            />
+          </button>
+          <button
+            className="text-blue-600 hover:text-blue-800"
+            disabled={
+              row.printed ||
+              row.served ||
+              row.invalidReason_Printed ||
+              row.invalidReason_Served
+            }
+          >
             <FaPrint
               className="w-4 h-4"
               onClick={() => handlePrintClick(row)}
             />
           </button>
-          <button className="text-red-600 hover:text-red-800">
+          <button
+            className="text-red-600 hover:text-red-800"
+            disabled={
+              row.printed ||
+              row.served ||
+              row.invalidReason_Printed ||
+              row.invalidReason_Served
+            }
+          >
             <TbCancel
               className="w-5 h-5"
               onClick={() => handleCancelClick(row)}
@@ -186,14 +241,34 @@ const InVe = () => {
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Thông tin vé</h2>
-        <div className="flex items-center w-1/4">
-          <input
-            type="text"
-            placeholder="Enter code here..."
-            value={tableSearchQuery}
-            onChange={(e) => setTableSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg focus:outline-none border"
-          />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center w-1/4">
+            <input
+              type="text"
+              placeholder="Nhập code..."
+              value={tableSearchQuery}
+              onChange={(e) => setTableSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+            />
+          </div>
+          <div className="flex items-center w-[300px]">
+            <select
+              name="status"
+              value={statusQuery}
+              onChange={(e) => setStatusQuery(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                <span className="text-gray-400">Trạng thái</span>
+              </option>
+              <option value="all">Tất cả</option>
+              {statusOptions.map((status, index) => (
+                <option key={index} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -226,6 +301,7 @@ const InVe = () => {
         isOpen={isTicketModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmModal}
+        view={view}
       />
       <TicketCancelModal
         isOpen={isCancelModalOpen}
