@@ -5,9 +5,9 @@ import axios from "axios";
 import { debounce } from "lodash";
 import { Combobox, ComboboxOption } from "@headlessui/react";
 import { FiSearch } from "react-icons/fi";
-import Dialog from "../ConfirmDialog";
-import SuccessDialog from "../SuccessDialog";
-import slugify from "slugify";
+import Dialog from "./ConfirmDialog";
+import SuccessDialog from "./SuccessDialog";
+import slugify from "slugify"
 import slugifyOption from "../../ulitilities/slugifyOption";
 const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   if (!isOpen) return null;
@@ -30,9 +30,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   /////////////////////////fetch tags and ageRes///////////////////////////
   const fetchAgeRes = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/param/age-restriction-symbol"
-      );
+      const response = await axios.get("http://localhost:8000/api/param/age-restriction-symbol");
       setAgeResData(response.data.data);
     } catch (err) {
       setError(err.message);
@@ -51,18 +49,15 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     fetchFilmTags();
     fetchAgeRes();
   }, []);
-  /////////////////////////fetch tags and ageRes///////////////////////////
-  const filteredTags =
+/////////////////////////fetch tags and ageRes///////////////////////////
+const filteredTags =
     queryTagText === ""
       ? filmTags
       : filmTags.filter((tag) =>
-          slugify(tag.name, slugifyOption).includes(
-            slugify(queryTagText),
-            slugifyOption
-          )
+          slugify(tag.name,slugifyOption).includes(slugify(queryTagText),slugifyOption)
         );
   const handleTagSelection = (tag) => {
-    if (!selectedTags.some((selectedTag) => selectedTag._id === tag._id)) {
+    if (!selectedTags.some(selectedTag => selectedTag._id === tag._id)) {
       setSelectedTags([...selectedTags, tag]);
     }
   };
@@ -71,6 +66,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     setSelectedTags(selectedTags.filter((tag) => tag._id !== tagToRemove._id));
   };
   useEffect(() => {
+    //console.log("SelectedTag" + selectedTags);
     const tagIds = selectedTags.map((tag) => tag._id);
     setFormData((prevData) => ({
       ...prevData,
@@ -78,26 +74,47 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     }));
   }, [selectedTags]);
   const initTagChoices = (tagIDs) => {
-    // For each tagID in tagIDs, check if it exists in filmTags
-    tagIDs.forEach((tagID) => {
-      const tagExists = filmTags.some((filmTag) => filmTag._id === tagID);
+    tagIDs.forEach(tagID => {
+      const tagExists = filmTags.find(filmTag => filmTag._id === tagID); // Check if tag exists in filmTags
+  
       if (tagExists) {
-        // Perform the action if the tag exists
-        setSelectedTags(...selectedTags, tagExists);
+        setSelectedTags((prevSelectedTags) => {
+          // Check if the tag already exists in the selectedTags
+          const alreadySelected = prevSelectedTags.some(tag => tag._id === tagExists._id);
+          
+          // Only add the tag if it's not already in the list
+          if (!alreadySelected) {
+            return [...prevSelectedTags, tagExists];
+          }
+          return prevSelectedTags; // If duplicate, return unchanged state
+        });
       }
     });
+  /*
+    console.log("TAGGGG");
+    console.log(tagIDs);
+    console.log(selectedTags);
+    */
   };
   const initAgeChoice = (ageSymbol) => {
-    const age = ageResData.find((ageItem) => ageItem === ageSymbol);
-    console.log("HO");
-    return age;
+    const age = ageResData.find(ageItem => ageItem === ageSymbol);
+    /*
+    console.log("AGEGE")
+    console.log(ageSymbol);
+    */
+    setFormData((prev) => ({
+      ...prev,
+      ageRestriction: age,
+    }))
   };
-
+  
   const [formData, setFormData] = useState({
-    _id: film?._id || "",
     name: film?.name || "",
     trailerURL: film?.trailerURL || "",
-    thumbnailURL: film?.thumbnailURL || "",
+
+    thumbnailURL: film?.thumbnailURL,
+    thumbnailFile: null,
+
     tagsRef: film?.tagsRef || [],
     filmDuration: film?.filmDuration || "",
     ageRestriction: film?.ageRestriction || "",
@@ -105,23 +122,22 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     originatedCountry: film?.originatedCountry || "",
     twoDthreeD: film?.twoDthreeD || "",
     filmDescription: film?.filmDescription || "",
-    filmContent: film?.filmContent || "",
+    filmContent: film?.filmContent|| "",
+
     beginDate: film?.beginDate || "",
   });
-
-  useEffect(() => {
-    if (!isEditMode) {
+  useEffect(()=> {
+    if(!isEditMode){
       return;
     }
-    console.log("Film value: " + JSON.stringify(film));
+    //console.log("Film value: " + JSON.stringify(film));
     initAgeChoice(film.ageRestriction);
     initTagChoices(film.tagsRef);
-  }, [film]);
+  },[film,filmTags,ageResData])
   const isFormValid = useMemo(() => {
     const requiredFields = [
       "name",
       "trailerURL",
-      "thumbnailURL",
       "tagsRef",
       "filmDuration",
       "ageRestriction",
@@ -130,11 +146,11 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       "twoDthreeD",
       "filmDescription",
       "filmContent",
-      "beginDate",
+      "beginDate"
     ];
     console.log("Form data : " + JSON.stringify(formData));
 
-    return requiredFields.every((field) => !!formData[field]); // Chuyển đổi giá trị thành Boolean
+    return requiredFields.every((field) => !!formData[field]) && (formData.thumbnailFile || formData.thumbnailURL); // Chuyển đổi giá trị thành Boolean
   }, [formData]);
 
   const handleSubmit = () => {
@@ -151,32 +167,42 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       });
     }
   };
-
   const handleFilm = async () => {
     setIsLoading(true);
     try {
       //console.log(`data nè heheh:${data.otherDescription} `);
 
-      // Gọi API tùy thuộc vào mode
+      const data = new FormData();
+      data.append("thumbnailFile", formData.thumbnailFile);
+      data.append("tagsRef", JSON.stringify(formData.tagsRef));
+      // Append all other fields individually
+      data.append("name", formData.name);
+      data.append("trailerURL", formData.trailerURL);
+      data.append("thumbnailURL", formData.thumbnailURL || "");
+      data.append("filmDuration", formData.filmDuration);
+      data.append("ageRestriction", formData.ageRestriction);
+      data.append("voice", formData.voice);
+      data.append("originatedCountry", formData.originatedCountry);
+      data.append("twoDthreeD", formData.twoDthreeD);
+      data.append("filmDescription", formData.filmDescription);
+      data.append("filmContent", formData.filmContent);
+      data.append("beginDate", formData.beginDate);
+
       if (mode === "edit") {
-        await axios.put(
-          `http://localhost:8000/api/films/${film._id}`,
-          formData
-        );
+        await axios.put(`http://localhost:8000/api/films/${film._id}`, data);
         setDialogData({
           title: "Successs",
           message: "Cập nhật phim thành công",
         });
-      } else {
-        await axios.post("http://localhost:8000/api/films", formData);
+      } else {  
+        await axios.post("http://localhost:8000/api/films",data);
+        
         setDialogData({
           title: "Successs",
           message: "Thêm phim thành công",
         });
       }
       if (response.status === 200 || response.status === 201) {
-        // Cập nhật state và hiển thị success dialog
-        // Sau khi thành công, hiển thị dialog success
         setIsLoading(false); // Tắt trạng thái loading
         setIsConfirmDialogOpen(false); // Đóng dialog xác nhận
         setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
@@ -230,7 +256,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 /> */}
                 <Combobox
-                  value={formData.selectedTags}
+                  value={selectedTags}
                   onChange={handleTagSelection}
                 >
                   <div className="relative">
@@ -239,9 +265,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                         name="type"
                         //value={formData.type.join(", ")}
                         className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:outline-none"
-                        onChange={(event) =>
-                          setQueryTagText(event.target.value)
-                        }
+                        onChange={(event) => setQueryTagText(event.target.value)}
                         displayValue={() => ""}
                         placeholder="Search types..."
                       />
@@ -287,7 +311,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </Combobox>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedTags.map((tag) => (
+                  {selectedTags && selectedTags.map((tag) => (
                     <div
                       key={tag._id}
                       className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
@@ -326,7 +350,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 </label>
                 <select
                   name="age"
-                  value={formData.ageRes || ""}
+                  value={formData.ageRestriction || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -338,7 +362,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   <option value="" disabled>
                     Vui lòng chọn độ tuổi
                   </option>
-                  {ageResData.map((ageRes, index) => (
+                  {ageResData.map((ageRes,index) => (
                     <option key={index} value={ageRes}>
                       {`${ageRes}`}
                     </option>
@@ -399,7 +423,6 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   <option value="2D,3D">2D, 3D</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ngày khởi chiếu
@@ -409,7 +432,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   name="beginDate"
                   value={formData.beginDate}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, voice: e.target.value }))
+                    setFormData((prev) => ({ ...prev, beginDate: e.target.value }))
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -417,11 +440,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
             </div>
             <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Film Image
+                Hình ảnh phim
               </label>
-              {formData.thumbnailURL && (
+              {(formData.thumbnailFile || formData.thumbnailURL) && (
                 <img
-                  src={formData.thumbnailURL}
+                  src={
+                    formData.thumbnailFile ? URL.createObjectURL(formData.thumbnailFile) : formData.thumbnailURL
+                  }
                   alt="Film"
                   className="w-full h-4/5 object-cover rounded-lg mb-2"
                 />
@@ -430,14 +455,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                 type="file"
                 className="w-full"
                 accept="image/*"
+                multiple={false}
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    // Tạo URL tạm thời từ file và cập nhật formData.image
-                    const imageUrl = URL.createObjectURL(file);
                     setFormData((prev) => ({
                       ...prev,
-                      thumbnailURL: imageUrl,
+                      thumbnailFile: file,
                     }));
                   }
                   console.log("File selected:", e.target.files[0]);
