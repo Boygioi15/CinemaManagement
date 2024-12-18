@@ -13,4 +13,11 @@ export class TagService {
   static async getTagName(tagId) {
     return await tagModel.findById(tagId).name;
   }
+  static deleteTag = async (tagId) => {
+    const deletedTag = await tagModel.findByIdAndDelete(tagId);
+    if (!deletedTag) {
+      throw new Error("Tag not found.");
+    }
+    return deletedTag;
+  };  
 }

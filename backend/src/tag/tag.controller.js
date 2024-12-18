@@ -18,6 +18,15 @@ class TagController {
       data: response,
     });
   });
+  DeleteTag = expressAsyncHandler(async (req, res, next) => {
+    const { tagId } = req.params;
+    const response = await TagService.deleteTag(tagId);
+    return res.status(200).json({
+      msg: "Tag deleted successfully!",
+      success: true,
+      data: response,
+    });
+  });
 }
 
 export default new TagController();

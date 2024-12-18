@@ -1,31 +1,6 @@
 import mongoose from "mongoose";
 
-const seatSchema = new mongoose.Schema({
-  seatName: {
-    type: String,
-    required: true,
-  },
-  isPairSeat: {
-    type: Boolean,
-    default: false,
-  },
-  seatCol: {
-    type: Number,
-    required: true,
-  },
-  seatRow: {
-    type: Number,
-    required: true,
-  },
-  usable: {
-    type: Boolean,
-    default: true,
-  },
-  other: {
-    type: String,
-  },
-});
-const roomSChema = new mongoose.Schema(
+const roomSchema = new mongoose.Schema(
   {
     roomName: {
       type: String,
@@ -39,29 +14,34 @@ const roomSChema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    seats: [seatSchema],
+    seats: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "seats",
+      },
+    ],
     centerX2: {
       type: Number,
-      require: true,
+      required: true,
     },
     centerX1: {
       type: Number,
-      require: true,
+      required: true,
     },
     centerY1: {
       type: Number,
-      require: true,
+      required: true,
     },
     centerY2: {
       type: Number,
-      require: true,
+      required: true,
     },
     other: {
       type: String,
     },
     deleted: {
       type: Boolean,
-      required: false,
+      default: false,
     },
   },
   {
@@ -69,5 +49,5 @@ const roomSChema = new mongoose.Schema(
   }
 );
 
-const roomModel = mongoose.model("rooms", roomSChema);
+const roomModel = mongoose.model("rooms", roomSchema);
 export default roomModel;

@@ -59,7 +59,6 @@ export class FilmShowService {
     });
   };
   
-
   static getListFilmShowing = async () => {
     const filmShows = await filmShowModel
       .find({
