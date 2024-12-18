@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import FilmModal from "../../components/FilmModal";
+import FilmModal from "../../components/Film/FilmModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Dialog from "../../components/ConfirmDialog";
