@@ -10,6 +10,10 @@ const filmSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    public_ID: {
+      type: String,
+      required: true,
+    },
     trailerURL: {
       type: String,
     },
