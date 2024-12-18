@@ -95,7 +95,7 @@ export default function PhucVuVe() {
           statusClass = "bg-green-100 text-green-700";
         } else if (!row.served) {
           statusText = "Chưa phục vụ";
-          statusClass = "bg-green-100 text-green-700";
+          statusClass = "bg-yellow-100 text-yellow-700";
         } else {
           statusText = "Đã hủy";
           statusClass = "bg-red-100 text-red-700";

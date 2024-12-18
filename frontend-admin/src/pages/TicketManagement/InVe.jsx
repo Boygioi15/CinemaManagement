@@ -7,6 +7,8 @@ import slugify from "slugify";
 import TicketDetailModal from "../../components/Ticket/TicketDetailModal";
 import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
 import Dialog from "../../components/ConfirmDialog";
+import SuccessDialog from "../../components/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
 
 const InVe = () => {
   const [orders, setOrders] = useState([]);
@@ -17,9 +19,11 @@ const InVe = () => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
@@ -34,6 +38,8 @@ const InVe = () => {
     setIsTicketModalOpen(false);
     setIsCancelModalOpen(false);
     setIsConfirmModalOpen(false);
+    setIsSuccessModalOpen(false);
+
     setSelectedOrder(null);
   };
 
@@ -44,6 +50,15 @@ const InVe = () => {
       title: "Xác nhận",
       message: "Bạn chắc chắn muốn in vé này ?",
     });
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchOrder();
+    setTimeout(() => {
+      setLoading(false);
+      setIsSuccessModalOpen(true);
+    }, 2000);
   };
 
   const handleConfirmClick = async () => {
@@ -59,6 +74,14 @@ const InVe = () => {
     } catch (error) {
       console.error("Error marking order as printed:", error);
     }
+
+    handleRefresh();
+    setDialogData({
+      title: "Thành công",
+      message: "In vé thành công",
+    });
+    setIsTicketModalOpen(false);
+    setIsConfirmModalOpen(false);
   };
 
   const fetchOrder = async () => {
@@ -123,7 +146,7 @@ const InVe = () => {
         let statusClass = "";
 
         if (row.invalidreason) {
-          statusText = "Đã hủy";
+          statusText = "Từ chối in vé";
           statusClass = "bg-red-100 text-red-800";
         } else if (!row.printed) {
           statusText = "Chưa in";
@@ -216,6 +239,15 @@ const InVe = () => {
         onClose={handleCloseModal}
         onConfirm={handleConfirmClick}
       />
+
+      <SuccessDialog
+        isOpen={isSuccessModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={handleCloseModal}
+      />
+
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };
