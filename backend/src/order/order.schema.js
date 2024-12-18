@@ -9,6 +9,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    ageRestriction: {
+      type: String,
+      required: false,
+    },
     date: {
       type: String,
       required: true,
@@ -83,6 +87,10 @@ const orderSchema = new mongoose.Schema(
     online: {
       type: Boolean,
       default: true,
+    },
+    printed: {
+      type: Boolean,
+      default: false,
     },
     served: {
       type: Boolean,

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 
-const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
+const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
   const [reason, setReason] = useState("");
   if (!isOpen) return null;
 
@@ -12,7 +12,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
           <div className="relative rounded-lg bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-200 p-4">
               <h2 className="text-xl font-bold text-gray-800" id="modal-title">
-                Reason for Cancellation
+                Lý do từ chối vé
               </h2>
               <button
                 onClick={onClose}
@@ -27,7 +27,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
               <textarea
                 className="w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 rows="4"
-                placeholder="Enter your reason here..."
+                placeholder="Nhập lý do..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 aria-label="Cancellation reason"
@@ -40,7 +40,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
                 aria-label="Cancel"
               >
-                Cancel
+                Trở về
               </button>
               <button
                 onClick={() => {
@@ -50,7 +50,7 @@ const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Submit"
               >
-                Submit
+                Xác nhận
               </button>
             </div>
           </div>
@@ -60,4 +60,4 @@ const CancellationModal = ({ isOpen, onClose, onConfirm }) => {
   );
 };
 
-export default CancellationModal;
+export default TicketCancelModal;

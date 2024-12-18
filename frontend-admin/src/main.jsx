@@ -2,8 +2,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import RootLayout from "./layouts/RootLayout/RootLayout";
 import AdminFilm from "./pages/FilmManagement/FilmList";
-import DuyetVe from "./pages/TicketManagement/DuyetVe";
+
+import InVe from "./pages/TicketManagement/InVe";
 import TaoVe from "./pages/TicketManagement/TaoVe";
+import PhucVuVe from "./pages/TicketManagement/PhucVuVe";
+
 import InfrasManage from "./pages/Infrastructure/InfrasManage";
 import FilmShow from "./pages/FilmShow/filmshow";
 
@@ -26,7 +29,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/admin/tab/duyet-ve",
-        element: <DuyetVe />,
+        element: <InVe />,
+      },
+      {
+        path: "/admin/tab/phuc-vu-ve",
+        element: <PhucVuVe />,
       },
       {
         path: "/admin/phim",
