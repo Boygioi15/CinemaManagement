@@ -4,14 +4,11 @@ import filmShowModel from "../filmShow/filmShow.schema.js";
 import { AdditionalItemService } from "../additionalItem/additionalItem.service.js";
 import { ParamService } from "../param/param.service.js";
 import { generateRandomVerifyCode } from "../ulitilities/ultilitiesFunction.js";
+import { customError } from "../middlewares/errorHandlers.js";
+import { FilmService } from "../film/film.service.js";
 export class OrderService {
   static getAllOrders = async () => {
-    try {
-      return await orderModel.find({}).populate("items customer_id");
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      throw new Error("An error occurred while fetching tickets.");
-    }
+    return await orderModel.find();
   };
 
   static getOrderBy_id = async (_id) => {
@@ -45,30 +42,35 @@ export class OrderService {
       throw new Error("An error occurred while canceling the ticket.");
     }
   };
-
-  static markOrderServed = async (_id, approvedItems) => {
-    try {
-      const ticket = await orderModel.findById(_id);
-      if (!ticket) return null;
-
-      const updatedItems = ticket.items.map((item) =>
-        approvedItems.some((approved) => approved.name === item.name)
-          ? {
-              ...item,
-              approved: true,
-            }
-          : item
-      );
-
-      ticket.items = updatedItems;
-      ticket.served = true;
-      await ticket.save();
-
-      return ticket;
-    } catch (error) {
-      console.error("Error approving snacks:", error);
-      throw new Error("An error occurred while approving the snacks.");
+  static markOrderPrinted = async (_id) => {
+    const order = await orderModel.findById(_id);
+    if (!order) return null;
+    if (order.printed) {
+      throw customError("Vé đã được in");
     }
+
+    return await orderModel.findByIdAndUpdate(
+      _id,
+      {
+        printed: true,
+      },
+      { new: true }
+    );
+  };
+  static markOrderServed = async (_id) => {
+    const order = await orderModel.findById(_id);
+    if (!order) return null;
+    if (order.served) {
+      throw customError("Vé đã được phục vụ");
+    }
+
+    return await orderModel.findByIdAndUpdate(
+      _id,
+      {
+        served: true,
+      },
+      { new: true }
+    );
   };
   static createOrder = async ({
     customerId,
@@ -82,7 +84,8 @@ export class OrderService {
     const filmShow = await filmShowModel.findById(filmShowId).populate("film");
 
     if (!filmShow) throw new Error("Film Show not found");
-
+    const film = await FilmService.findById(filmShow.film);
+    const ageRestriction = film.ageRestriction;
     const { roomName, seatNames } = await RoomService.getSeatName(
       filmShow.roomId,
       seats
@@ -103,6 +106,7 @@ export class OrderService {
     const newOrder = await orderModel.create({
       roomName,
       seatNames,
+      ageRestriction,
       ...dataFilmShow,
       totalMoney: totalPrice,
       items,

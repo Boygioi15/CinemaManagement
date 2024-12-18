@@ -1,12 +1,12 @@
 import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import FilmModal from "../../components/FilmModal";
+import FilmModal from "../../components/Film/FilmModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
-
+const itemsPerPage = 20;
 const AdminFilm = () => {
   const [films, setFilms] = useState([]);
 
@@ -117,7 +117,7 @@ const AdminFilm = () => {
     },
   ];
 
-  const itemsPerPage = 6;
+
 
   const filteredData = films.filter((item) =>
     item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())

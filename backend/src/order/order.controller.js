@@ -48,43 +48,28 @@ class OrderController {
 
     if (!reason) {
       return res.status(400).json({
-        error: "Cancellation reason is required!",
+        error: "Phải nêu rõ lý do từ chối phục vụ",
       });
     }
 
-    try {
-      const order = await OrderService.disapproveOrder(_id, reason);
-      if (!order) {
-        return res.status(404).json({
-          error: "Order not found!",
-        });
-      }
-      res.status(200).json(order);
-    } catch (error) {
-      res.status(500).json({
-        error: error.message,
+    const order = await OrderService.disapproveOrder(_id, reason);
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found!",
       });
     }
+    res.status(200).json(order);
   });
-
   markOrderPrinted = expressAsyncHandler(async (req, res) => {
     const { _id } = req.params;
-
-    try {
-      const order = await OrderService.markOrderPrinted(_id);
-      if (!order) {
-        return res.status(404).json({
-          error: "Ticket not found!",
-        });
-      }
-      res.status(200).json(order);
-    } catch (error) {
-      res.status(500).json({
-        error: error.message,
+    const order = await OrderService.markOrderServed(_id);
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found!",
       });
     }
+    res.status(200).json(order);
   });
-
   markOrderServed = expressAsyncHandler(async (req, res) => {
     const { _id } = req.params;
     const order = await OrderService.markOrderServed(_id);

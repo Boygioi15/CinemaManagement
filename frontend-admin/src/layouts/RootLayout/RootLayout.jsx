@@ -7,37 +7,36 @@ import { Outlet } from "react-router";
 import axios from "axios";
 
 // const newTabs = [
-//   {
-//     name: "Danh sách phòng",
-//     path: "/admin/infras",
-//     icon: <RxDashboard className="w-6 h-6" />,
-//   },
+  
 // ];
 const newTabs = [
   {
     name: "Danh sách phim",
-    path: "/admin/film",
+    path: "/admin/phim",
     icon: <RxDashboard className="w-6 h-6" />,
   },
-];
-// const newTabs = [
-//   {
-//     name: "Vé Offline",
-//     path: "/admin/tab/offlineticket",
-//     icon: <RxDashboard className="w-6 h-6" />,
-//   },
-//   {
-//     name: "Vé Online",
-//     path: "/admin/tab/onlineticket",
-//     icon: <FiColumns className="w-6 h-6" />,
-//   },
-//   {
-//     name: "Bắp nước",
-//     path: "/admin/tab/bapnuoc",
-//     icon: <FiLayers className="w-6 h-6" />,
-//   },
-// ];
+  {
+    name: "Suất phim",
+    path: "/admin/suat-phim",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Tạo vé trực tiếp",
+    path: "/admin/tab/tao-ve",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Duyệt vé",
+    path: "/admin/tab/duyet-ve",
+    icon: <FiColumns className="w-6 h-6" />,
+  },
+  {
+    name: "Danh sách phòng",
+    path: "/admin/co-so-vat-chat",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
 
+];
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [tabs, setTabs] = useState(newTabs);

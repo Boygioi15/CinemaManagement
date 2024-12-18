@@ -1,4 +1,4 @@
-const OfflineTicket = () => {
+const TaoVe = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h2 className="text-xl font-bold mb-4">Ticket Information</h2>
@@ -24,4 +24,4 @@ const OfflineTicket = () => {
   );
 };
 
-export default OfflineTicket;
+export default TaoVe;
