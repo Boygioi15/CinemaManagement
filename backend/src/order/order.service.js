@@ -23,20 +23,39 @@ export class OrderService {
     }
   };
 
-  static disapproveOrder = async (_id, reason) => {
+  static disapprovePrinted = async (_id, reason) => {
     try {
       const order = await orderModel.findByIdAndUpdate(
         _id,
         {
           served: false,
-          invalid_Reason: reason,
+          invalidReason_Printed: reason,
         },
         {
           new: true,
         }
       );
 
-      return ticket || null;
+      return order || null;
+    } catch (error) {
+      console.error("Error canceling ticket:", error);
+      throw new Error("An error occurred while canceling the ticket.");
+    }
+  };
+  static disapproveServed = async (_id, reason) => {
+    try {
+      const order = await orderModel.findByIdAndUpdate(
+        _id,
+        {
+          served: false,
+          invalidReason_Served: reason,
+        },
+        {
+          new: true,
+        }
+      );
+
+      return order || null;
     } catch (error) {
       console.error("Error canceling ticket:", error);
       throw new Error("An error occurred while canceling the ticket.");

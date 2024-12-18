@@ -96,7 +96,11 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    invalidReason: {
+    invalidReason_Printed: {
+      type: String,
+      default: "",
+    },
+    invalidReason_Served: {
       type: String,
       default: "",
     },

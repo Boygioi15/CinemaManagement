@@ -42,7 +42,25 @@ class OrderController {
     }
   });
 
-  disapproveOrder = expressAsyncHandler(async (req, res) => {
+  disapprovePrinted = expressAsyncHandler(async (req, res) => {
+    const { _id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({
+        error: "Phải nêu rõ lý do từ chối in vé",
+      });
+    }
+
+    const order = await OrderService.disapprovePrinted(_id, reason);
+    if (!order) {
+      return res.status(404).json({
+        error: "Order not found!",
+      });
+    }
+    res.status(200).json(order);
+  });
+  disapproveServed = expressAsyncHandler(async (req, res) => {
     const { _id } = req.params;
     const { reason } = req.body;
 
@@ -52,7 +70,7 @@ class OrderController {
       });
     }
 
-    const order = await OrderService.disapproveOrder(_id, reason);
+    const order = await OrderService.disapproveServed(_id, reason);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",

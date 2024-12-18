@@ -7,7 +7,9 @@ const router = express.Router();
 router.post("/", OrderController.createOrder);
 router.get("/", OrderController.getAllOrders);
 router.get("/:_id", OrderController.getOrderById);
-router.put("/:_id/cancel", OrderController.disapproveOrder);
+router.put("/:_id/disapprove-print", OrderController.disapprovePrinted);
+router.put("/:_id/disapprove-serve", OrderController.disapproveServed);
+
 router.put("/:_id/print", OrderController.markOrderPrinted);
 router.put("/:_id/serve", OrderController.markOrderServed);
 
