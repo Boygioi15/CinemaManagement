@@ -9,6 +9,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    ageRestriction: {
+      type: String,
+      required: false,
+    },
     date: {
       type: String,
       required: true,

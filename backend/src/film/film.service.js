@@ -3,6 +3,7 @@ import { AgeRestrictionModel } from "../param/param.schema.js";
 import { customError } from "../middlewares/errorHandlers.js";
 import mongoose from "mongoose";
 import tagModel from "../tag/tag.schema.js";
+import { handleDestroyCloudinary } from "../ulitilities/cloudinary.js";
 
 export class FilmService {
   // Hàm kiểm tra ageValue và ageSymbol
@@ -37,20 +38,17 @@ export class FilmService {
   };
 
   static validateTags = async (tagIDs) => {
-    if (!tagIDs || !Array.isArray(tagIDs) || tagIDs.length === 0) {
-      throw customError("Tags cannot be empty.", 400);
+    if (!tagIDs) {
+      throw customError("Không được để trống danh mục phim!", 400);
     }
-
     // Fetch tags from the database that match the tagIDs
     const tagsInDB = await tagModel
       .find({ _id: { $in: tagIDs } })
       .select("_id");
-
     // Compare the number of matching tags with the input tagIDs
     if (tagsInDB.length !== tagIDs.length) {
-      throw customError("Some tags are invalid or do not exist.", 404);
+      throw customError("Các danh mục không hợp lệ!", 404);
     }
-
     return true; // All tags are valid
   };
 
@@ -70,15 +68,17 @@ export class FilmService {
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
     const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
+    const tagsArray = JSON.parse(tagsRef);
+    console.log(filmData);
     // Kiểm tra tuổi
-    FilmService.validateAgeRestriction(ageRestriction);
+    await FilmService.validateAgeRestriction(ageRestriction);
     // Kiểm tra định dạng 2D, 3D
-    const formattedTwoDthreeD = FilmService.isValid2D3DArray(twoDthreeD);
+    const formattedTwoDthreeD = await FilmService.isValid2D3DArray(twoDthreeD);
     // Kiểm tra các thể loại phim (tags)
-    const validTagIds = await FilmService.validateTags(tagsRef);
+    await FilmService.validateTags(tagsArray);
     return await filmModel.create({
       ...rest,
-      tagsRef: validTagIds,
+      tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,
     });
@@ -109,18 +109,19 @@ export class FilmService {
 
   // Tương tự, cập nhật updateFilmById
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
+    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = updateData;
+    const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
-    FilmService.validateAgeRestriction(ageRestriction);
-    // Kiểm tra định dạng 2D, 3D
-    const formattedTwoDthreeD = FilmService.isValid2D3DArray(twoDthreeD);
-    // Kiểm tra các thể loại phim (tags)
-    const validTagIds = await FilmService.validateTags(tagsRef);
-    return await filmModel.findByIdAndUpdate(filmId, {
+    await FilmService.validateAgeRestriction(ageRestriction);
+    const formattedTwoDthreeD = await FilmService.isValid2D3DArray(twoDthreeD);
+    await FilmService.validateTags(tagsArray);
+    const oldFilm = await filmModel.findByIdAndUpdate(filmId, {
       ...rest,
-      tagsRef: validTagIds,
+      tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,
     });
+    //destroy old img
+    handleDestroyCloudinary(oldFilm.public_ID);
   };
 }
