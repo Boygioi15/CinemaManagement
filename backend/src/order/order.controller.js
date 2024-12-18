@@ -62,7 +62,7 @@ class OrderController {
   });
   markOrderPrinted = expressAsyncHandler(async (req, res) => {
     const { _id } = req.params;
-    const order = await OrderService.markOrderServed(_id);
+    const order = await OrderService.markOrderPrinted(_id);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",
