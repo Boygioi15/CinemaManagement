@@ -7,7 +7,7 @@ import { Outlet } from "react-router";
 import axios from "axios";
 
 // const newTabs = [
-  
+
 // ];
 const newTabs = [
   {
@@ -31,11 +31,15 @@ const newTabs = [
     icon: <FiColumns className="w-6 h-6" />,
   },
   {
+    name: "Bắp nước",
+    path: "/admin/tab/phuc-vu-ve",
+    icon: <FiColumns className="w-6 h-6" />,
+  },
+  {
     name: "Danh sách phòng",
     path: "/admin/co-so-vat-chat",
     icon: <RxDashboard className="w-6 h-6" />,
   },
-
 ];
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

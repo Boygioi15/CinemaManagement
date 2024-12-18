@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import Table from "../../components/Table";
-import axios from "axios"
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
 import { TbCancel } from "react-icons/tb";
 import slugify from "slugify";
 import TicketDetailModal from "../../components/Ticket/TicketDetailModal";
 import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
+import Dialog from "../../components/ConfirmDialog";
 
 const InVe = () => {
   const [orders, setOrders] = useState([]);
@@ -16,6 +16,9 @@ const InVe = () => {
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const handlePrintClick = (order) => {
@@ -27,11 +30,45 @@ const InVe = () => {
     setSelectedOrder(order);
     setIsCancelModalOpen(true);
   };
+  const handleCloseModal = () => {
+    setIsTicketModalOpen(false);
+    setIsCancelModalOpen(false);
+    setIsConfirmModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleConfirmModal = (order) => {
+    setIsConfirmModalOpen(true);
+    setSelectedOrder(order);
+    setDialogData({
+      title: "Xác nhận",
+      message: "Bạn chắc chắn muốn in vé này ?",
+    });
+  };
+
+  const handleConfirmClick = async () => {
+    console.log(selectedOrder._id);
+
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/orders/${selectedOrder._id}/print`
+      );
+      if (response.status === 200) {
+        fetchOrder();
+      }
+    } catch (error) {
+      console.error("Error marking order as printed:", error);
+    }
+  };
 
   const fetchOrder = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/orders");
-      setOrders(response.data); // Lưu dữ liệu vào state
+      // Lọc những order có printed === false
+      const filteredOrders = response.data.filter(
+        (order) => order.printed === false
+      );
+      setOrders(filteredOrders);
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -41,16 +78,19 @@ const InVe = () => {
   useEffect(() => {
     fetchOrder();
   }, []);
-  if(!orders){
+  if (!orders) {
     return;
   }
-  const itemsPerPage = 20;
+  const itemsPerPage = 7;
   const filteredData = orders.filter(
     (item) =>
-      item.filmName && slugify(item.filmName).includes(slugify(tableSearchQuery)) ||
-      item.verifyCode && slugify(item.verifyCode).includes(slugify(tableSearchQuery)) ||
-      item.customerInfo.name && slugify(item.customerInfo.name).includes(slugify(tableSearchQuery)) ||
-      item.time && item.time.includes(tableSearchQuery)
+      (item.filmName &&
+        slugify(item.filmName).includes(slugify(tableSearchQuery))) ||
+      (item.verifyCode &&
+        slugify(item.verifyCode).includes(slugify(tableSearchQuery))) ||
+      (item.customerInfo.name &&
+        slugify(item.customerInfo.name).includes(slugify(tableSearchQuery))) ||
+      (item.time && item.time.includes(tableSearchQuery))
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -61,26 +101,41 @@ const InVe = () => {
   );
 
   const columns = [
-    { header: "Tên khách hàng", key: "customer" },
-    { header: "Tên phim", key: "filmname" },
-    { header: "Verify Code", key: "code" },
-    { header: "Ngày chiếu", key: "daterelease" },
-    { header: "Giờ chiếu", key: "hourelease" },
-    { header: "Tổng tiền", key: "total" },
+    {
+      header: "Tên khách hàng",
+      key: "customerName",
+      render: (_, row) => row.customerInfo.name,
+    },
+    { header: "Tên phim", key: "filmName" },
+    { header: "Verify Code", key: "verifyCode" },
+    {
+      header: "Ngày chiếu",
+      key: "date",
+      render: (value) => new Date(value).toLocaleDateString(),
+    },
+    { header: "Giờ chiếu", key: "time" },
+    { header: "Tổng tiền", key: "totalMoney" },
     {
       header: "Trạng thái",
       key: "status",
-      render: (value) => (  
-        <span
-          className={
-            value === "Active"
-              ? "px-2 py-1 rounded-full text-xs bg-green-100 text-green-800"
-              : "px-2 py-1 rounded-full text-xs bg-red-100 text-red-800"
-          }
-        >
-          {value}
-        </span>
-      ),
+      render: (_, row) => {
+        let statusText = "";
+        let statusClass = "";
+
+        if (row.invalidreason) {
+          statusText = "Đã hủy";
+          statusClass = "bg-red-100 text-red-800";
+        } else if (!row.printed) {
+          statusText = "Chưa in";
+          statusClass = "bg-green-100 text-green-700";
+        }
+
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>
+            {statusText}
+          </span>
+        );
+      },
     },
     {
       header: "Hành động",
@@ -88,23 +143,26 @@ const InVe = () => {
       render: (_, row) => (
         <div className="flex space-x-3">
           <button className="text-blue-600 hover:text-blue-800">
-            <FaPrint className="w-4 h-4" onClick={()=>handlePrintClick(row)}/>
+            <FaPrint
+              className="w-4 h-4"
+              onClick={() => handlePrintClick(row)}
+            />
           </button>
           <button className="text-red-600 hover:text-red-800">
-            <TbCancel className="w-5 h-5" onClick={()=>handleCancelClick(row)}/>
+            <TbCancel
+              className="w-5 h-5"
+              onClick={() => handleCancelClick(row)}
+            />
           </button>
         </div>
       ),
     },
   ];
 
-  
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Ticket Information
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Thông tin vé</h2>
         <div className="flex items-center w-1/4">
           <input
             type="text"
@@ -125,17 +183,17 @@ const InVe = () => {
             disabled={currentPage === 1}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Previous
+            Trước
           </button>
           <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+            Trang {currentPage} trên {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Next
+            Tiếp
           </button>
         </div>
       </div>
@@ -143,12 +201,21 @@ const InVe = () => {
       <TicketDetailModal
         order={selectedOrder}
         isOpen={isTicketModalOpen}
-        // onClose={handleCloseModal}
-        // film={selectedFilm}
-        // onSave={handleSaveChanges}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmModal}
       />
-      <TicketCancelModal isOpen={isCancelModalOpen}/>
+      <TicketCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={handleCloseModal}
+      />
 
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmClick}
+      />
     </div>
   );
 };

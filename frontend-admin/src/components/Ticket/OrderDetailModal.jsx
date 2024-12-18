@@ -1,8 +1,8 @@
 import React from "react";
-import { FiPrinter, FiArrowLeft } from "react-icons/fi";
+import { FiX, FiArrowLeft, FiPrinter } from "react-icons/fi";
 
-const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
-  if (!isOpen) return null;
+const OrderDetailModal = ({ isOpen, onClose, order }) => {
+  if (!isOpen || !order) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -30,7 +30,9 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               </div>
             </div>
           </div>
-          <hr className="border-gray-200" />
+
+          <hr className="border-gray-400" />
+
           {/* Customer Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -51,46 +53,9 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               </div>
             </div>
           </div>
-          <hr className="border-gray-200" />
-          {/* Showtime Information */}
-          {order.filmName && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Thông tin suất chiếu
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Tên phim</p>
-                  <p className="font-semibold">{order.filmName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Giới hạn độ tuổi</p>
-                  <p className="font-semibold">{order.ageRestriction}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Ngày chiếu</p>
-                  <p className="font-semibold">
-                    {new Date(order.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Giờ chiếu</p>
-                  <p className="font-semibold">{order.time}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phòng chiếu</p>
-                  <p className="font-semibold">{order.roomName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Danh sách ghế ngồi</p>
-                  <p className="font-semibold">{order.seatNames.join(", ")}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          (order.filmName &&(
-          <hr className="border-gray-200" />
-          ))
+
+          <hr className="border-gray-400" />
+
           {/* Payment Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -125,7 +90,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               ))}
             </div>
 
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-400 my-4" />
 
             {/* Total */}
             <div className="flex justify-between items-center font-bold text-lg text-green-600">
@@ -133,6 +98,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
               <span>{order.totalMoney} VNĐ</span>
             </div>
           </div>
+
           {/* Actions */}
           <div className="flex justify-end space-x-4 mt-6">
             <button
@@ -145,8 +111,8 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
             <button
               className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
               onClick={() => {
-                onConfirm(order);
-                //onClose();
+                //onConfirm(order);
+                onClose();
               }}
             >
               <FiPrinter className="mr-2" />
@@ -159,4 +125,4 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order }) => {
   );
 };
 
-export default TicketModal;
+export default OrderDetailModal;

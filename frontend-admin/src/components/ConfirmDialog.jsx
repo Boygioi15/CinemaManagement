@@ -46,13 +46,13 @@ const Dialog = ({ isOpen, onClose, onConfirm, title, message, data, mode }) => {
             onClick={onClose}
             className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
           >
-            Cancel
+            Trở về
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700"
           >
-            Confirm
+            Xác nhận
           </button>
         </div>
       </div>

@@ -47,7 +47,12 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
                   onConfirm(reason);
                   onClose();
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!reason.trim()}
+                className={`rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 ${
+                  !reason.trim()
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                }`}
                 aria-label="Submit"
               >
                 Xác nhận
