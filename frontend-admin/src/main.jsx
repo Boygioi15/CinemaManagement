@@ -2,10 +2,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import RootLayout from "./layouts/RootLayout/RootLayout";
 import AdminFilm from "./pages/FilmManagement/FilmList";
-import OnlineTickets from "./pages/TicketManagement/OnlineTicket";
-import BapNuoc from "./pages/TicketManagement/BapNuoc";
-import OfflineTicket from "./pages/TicketManagement/OfflineTicket";
+import DuyetVe from "./pages/TicketManagement/DuyetVe";
+import TaoVe from "./pages/TicketManagement/TaoVe";
 import InfrasManage from "./pages/Infrastructure/InfrasManage";
+import FilmShow from "./pages/FilmShow/filmshow";
+
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
@@ -20,45 +21,43 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/admin/tab/onlineticket",
-        element: <OnlineTickets />,
+        path: "/admin/tab/tao-ve",
+        element: <TaoVe />,
       },
       {
-        path: "/admin/tab/bapnuoc",
-        element: <BapNuoc />,
+        path: "/admin/tab/duyet-ve",
+        element: <DuyetVe />,
       },
       {
-        path: "/admin/tab/offlineticket",
-        element: <OfflineTicket />,
-      },
-      {
-        path: "/admin/film",
+        path: "/admin/phim",
         element: <AdminFilm />,
       },
       {
-        path: "/admin/infras",
+        path: "/admin/suat-phim",
+        element: <FilmShow />,
+      },
+      {
+        path: "/admin/co-so-vat-chat",
         element: <InfrasManage />,
       },
+
+
       // {
-      //   path: "/admin/filmshow",
-      //   element: <SuccessPage />,
+      //   path: "/admin/minh-hoa-ca-lam",
+      //   element: <ShiftVisualization />
       // },
       // {
-      //   path: "/admin/infras",
-      //   element: <UserInfoLayout />,
-      // },
-      // {
-      //   path: "/admin/customer",
-      //   element: <UserInfoPage />,
-      // },
-      // {
-      //   path: "/admin/employee",
-      //   element: <UserChangePass />,
+      //   path: "/admin/nhan-vien",
+      //   element: <Employee />
       // },
       // {
       //   path: "/admin/statistic",
-      //   element: <UserTransHistory />,
+      //   element: <Statistic />
       // },
+      // {
+      //   path: "/admin/tai-khoan-nguoi-dung",
+      //   element: <UserAccount />
+      // }
     ],
   },
 ]);

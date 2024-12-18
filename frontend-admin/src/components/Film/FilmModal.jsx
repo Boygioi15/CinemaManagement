@@ -50,13 +50,13 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     fetchAgeRes();
   }, []);
 /////////////////////////fetch tags and ageRes///////////////////////////
-const filteredTags =
-    queryTagText === ""
-      ? filmTags
-      : filmTags.filter((tag) =>
-          slugify(tag.name,slugifyOption).includes(slugify(queryTagText),slugifyOption)
-        );
+const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((tag) =>
+  slugify(tag.name, slugifyOption).includes(slugify(queryTagText), slugifyOption)
+);
   const handleTagSelection = (tag) => {
+    if(!tag){
+      return;
+    }
     if (!selectedTags.some(selectedTag => selectedTag._id === tag._id)) {
       setSelectedTags([...selectedTags, tag]);
     }
@@ -311,7 +311,7 @@ const filteredTags =
                 </Combobox>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedTags && selectedTags.map((tag) => (
+                  {selectedTags && Array.isArray(selectedTags) && selectedTags.map((tag) => (
                     <div
                       key={tag._id}
                       className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"

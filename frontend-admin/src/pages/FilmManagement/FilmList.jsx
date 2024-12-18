@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
-
+const itemsPerPage = 20;
 const AdminFilm = () => {
   const [films, setFilms] = useState([]);
 
@@ -117,7 +117,7 @@ const AdminFilm = () => {
     },
   ];
 
-  const itemsPerPage = 6;
+
 
   const filteredData = films.filter((item) =>
     item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())

@@ -84,10 +84,6 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    printed: {
-      type: Boolean,
-      default: false,
-    },
     served: {
       type: Boolean,
       default: false,

@@ -40,7 +40,7 @@ const columns = [
   },
 ];
 
-const OnlineTickets = () => {
+const DuyetVe = () => {
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -163,4 +163,4 @@ const OnlineTickets = () => {
   );
 };
 
-export default OnlineTickets;
+export default DuyetVe;
