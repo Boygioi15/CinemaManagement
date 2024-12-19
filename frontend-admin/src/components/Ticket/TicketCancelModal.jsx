@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 
 const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
   const [reason, setReason] = useState("");
+  useEffect(() => {
+    if (isOpen) {
+      setReason(""); // Reset reason khi modal được mở
+    }
+  }, [isOpen]);
   if (!isOpen) return null;
 
   return (
@@ -28,7 +33,6 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
                 className="w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 rows="4"
                 placeholder="Nhập lý do..."
-                value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 aria-label="Cancellation reason"
               />

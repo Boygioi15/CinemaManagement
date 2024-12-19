@@ -2,6 +2,7 @@ import { FiAlertCircle } from "react-icons/fi";
 
 const Dialog = ({ isOpen, onClose, onConfirm, title, message, data, mode }) => {
   if (!isOpen) return null;
+  console.log("hahaha");
 
   // const handleSubmit = async () => {
   //   if (mode === "edit") {

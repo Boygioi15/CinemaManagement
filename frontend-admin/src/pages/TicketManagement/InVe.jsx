@@ -14,6 +14,7 @@ import RefreshLoader from "../../components/Loading";
 const InVe = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reason, setReason] = useState("");
 
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("all");
@@ -28,22 +29,41 @@ const InVe = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  //Mở modal chi tiết vé
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
     setIsTicketModalOpen(true);
     setView(true);
   };
 
+  //Mở modal xem thông tin vé ( ko có nút in)
   const handleViewClick = (order) => {
     setSelectedOrder(order);
     setIsTicketModalOpen(true);
     setView(false);
   };
 
+  //Mở modal nhập lý do hủy vé
   const handleCancelClick = (order) => {
     setSelectedOrder(order);
     setIsCancelModalOpen(true);
   };
+
+  //Nhấn nút in vé
+  const handleReason = (reason) => {
+    setReason(reason);
+    console.log(selectedOrder);
+    console.log("a");
+    console.log(reason);
+    setIsConfirmModalOpen(true);
+
+    setDialogData({
+      title: "Xác nhận",
+      message: "Bạn chắc chắn muốn hủy vé này ?",
+    });
+  };
+
+  //Đóng modal
   const handleCloseModal = () => {
     setIsTicketModalOpen(false);
     setIsCancelModalOpen(false);
@@ -53,6 +73,7 @@ const InVe = () => {
     setSelectedOrder(null);
   };
 
+  //Nhấn nút in vé
   const handleConfirmModal = (order) => {
     setIsConfirmModalOpen(true);
     setSelectedOrder(order);
@@ -71,27 +92,57 @@ const InVe = () => {
     }, 2000);
   };
 
-  const handleConfirmClick = async () => {
-    console.log(selectedOrder._id);
-
+  //Xác nhận hủy vé
+  const handleCancelConfirmClick = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/orders/${selectedOrder._id}/print`
+        `http://localhost:8000/api/orders/${selectedOrder._id}/disapprove-print`,
+        { reason }
       );
       if (response.status === 200) {
-        fetchOrder();
+        console.log("thành công");
       }
     } catch (error) {
-      console.error("Error marking order as printed:", error);
+      console.error("Error canceling order:", error);
     }
 
     handleRefresh();
     setDialogData({
       title: "Thành công",
-      message: "In vé thành công",
+      message: "Hủy vé thành công",
     });
-    setIsTicketModalOpen(false);
+    setIsCancelModalOpen(false);
     setIsConfirmModalOpen(false);
+  };
+
+  //Xác nhận in vé
+  const handleConfirmClick = async () => {
+    console.log(selectedOrder._id);
+    if (
+      dialogData.title === "Xác nhận" &&
+      dialogData.message.includes("Bạn chắc chắn muốn hủy vé này ?")
+    ) {
+      await handleCancelConfirmClick();
+    } else {
+      try {
+        const response = await axios.put(
+          `http://localhost:8000/api/orders/${selectedOrder._id}/print`
+        );
+        if (response.status === 200) {
+          console.log("thành công");
+        }
+      } catch (error) {
+        console.error("Error marking order as printed:", error);
+      }
+
+      handleRefresh();
+      setDialogData({
+        title: "Thành công",
+        message: "In vé thành công",
+      });
+      setIsTicketModalOpen(false);
+      setIsConfirmModalOpen(false);
+    }
   };
 
   const fetchOrder = async () => {
@@ -306,6 +357,7 @@ const InVe = () => {
       <TicketCancelModal
         isOpen={isCancelModalOpen}
         onClose={handleCloseModal}
+        onConfirm={handleReason}
       />
 
       <Dialog
