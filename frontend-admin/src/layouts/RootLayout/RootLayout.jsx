@@ -21,6 +21,11 @@ const newTabs = [
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
+    name: "Suất phim",
+    path: "/admin/suat-phim/bieu-do",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
     name: "Tạo vé trực tiếp",
     path: "/admin/tab/tao-ve",
     icon: <RxDashboard className="w-6 h-6" />,
@@ -86,7 +91,7 @@ const RootLayout = () => {
         setIsSidebarOpen={setIsSidebarOpen}
         tabs={tabs}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         <div className="p-6">
           <Navbar />
           <Outlet />

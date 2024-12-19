@@ -1,7 +1,7 @@
 import React from "react";
 import { FiX, FiArrowLeft, FiPrinter } from "react-icons/fi";
 
-const OrderDetailModal = ({ isOpen, onClose, order }) => {
+const OrderDetailModal = ({ isOpen, onClose, order, view, onConfirm }) => {
   if (!isOpen || !order) return null;
 
   return (
@@ -24,9 +24,19 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
               </div>
               <div className="ml-10">
                 <p className="text-sm text-gray-500">Trạng thái</p>
-                <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
-                  Chưa in
-                </span>
+                {order.invalidReason_Served ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
+                    Từ chối phục vụ
+                  </span>
+                ) : order.served ? (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
+                    Đã phục vụ
+                  </span>
+                ) : (
+                  <span className="inline-block px-2 py-1 text-sm font-semibold text-yellow-700 bg-yellow-100 rounded">
+                    Chưa phục vụ
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -108,16 +118,18 @@ const OrderDetailModal = ({ isOpen, onClose, order }) => {
               <FiArrowLeft className="mr-2" />
               Trở về
             </button>
-            <button
-              className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
-              onClick={() => {
-                //onConfirm(order);
-                onClose();
-              }}
-            >
-              <FiPrinter className="mr-2" />
-              In vé
-            </button>
+            {view ? (
+              <button
+                className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                onClick={() => {
+                  onConfirm(order);
+                  //onClose();
+                }}
+              >
+                <FiPrinter className="mr-2" />
+                Phục vụ
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
