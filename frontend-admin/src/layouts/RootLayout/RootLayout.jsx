@@ -7,7 +7,7 @@ import { Outlet } from "react-router";
 import axios from "axios";
 
 // const newTabs = [
-  
+
 // ];
 const newTabs = [
   {
@@ -21,6 +21,11 @@ const newTabs = [
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
+    name: "Suất phim",
+    path: "/admin/suat-phim/bieu-do",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
     name: "Tạo vé trực tiếp",
     path: "/admin/tab/tao-ve",
     icon: <RxDashboard className="w-6 h-6" />,
@@ -31,11 +36,15 @@ const newTabs = [
     icon: <FiColumns className="w-6 h-6" />,
   },
   {
+    name: "Bắp nước",
+    path: "/admin/tab/phuc-vu-ve",
+    icon: <FiColumns className="w-6 h-6" />,
+  },
+  {
     name: "Danh sách phòng",
     path: "/admin/co-so-vat-chat",
     icon: <RxDashboard className="w-6 h-6" />,
   },
-
 ];
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -82,7 +91,7 @@ const RootLayout = () => {
         setIsSidebarOpen={setIsSidebarOpen}
         tabs={tabs}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         <div className="p-6">
           <Navbar />
           <Outlet />

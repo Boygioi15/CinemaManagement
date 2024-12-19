@@ -1,8 +1,8 @@
 import React from "react";
-import { FiPrinter, FiArrowLeft } from "react-icons/fi";
+import { FiX, FiArrowLeft, FiPrinter } from "react-icons/fi";
 
-const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
-  if (!isOpen) return null;
+const OrderDetailModal = ({ isOpen, onClose, order, view, onConfirm }) => {
+  if (!isOpen || !order) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -24,11 +24,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
               </div>
               <div className="ml-10">
                 <p className="text-sm text-gray-500">Trạng thái</p>
-                {order.invalidReason_Printed ? (
-                  <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
-                    Từ chối in vé
-                  </span>
-                ) : order.invalidReason_Served ? (
+                {order.invalidReason_Served ? (
                   <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
                     Từ chối phục vụ
                   </span>
@@ -36,19 +32,17 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
                   <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
                     Đã phục vụ
                   </span>
-                ) : order.printed ? (
-                  <span className="inline-block px-2 py-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded">
-                    Đã in
-                  </span>
                 ) : (
                   <span className="inline-block px-2 py-1 text-sm font-semibold text-yellow-700 bg-yellow-100 rounded">
-                    Chưa in
+                    Chưa phục vụ
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <hr className="border-gray-200" />
+
+          <hr className="border-gray-400" />
+
           {/* Customer Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -69,46 +63,9 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
               </div>
             </div>
           </div>
-          <hr className="border-gray-200" />
-          {/* Showtime Information */}
-          {order.filmName && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Thông tin suất chiếu
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Tên phim</p>
-                  <p className="font-semibold">{order.filmName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Giới hạn độ tuổi</p>
-                  <p className="font-semibold">{order.ageRestriction}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Ngày chiếu</p>
-                  <p className="font-semibold">
-                    {new Date(order.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Giờ chiếu</p>
-                  <p className="font-semibold">{order.time}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Phòng chiếu</p>
-                  <p className="font-semibold">{order.roomName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Danh sách ghế ngồi</p>
-                  <p className="font-semibold">{order.seatNames.join(", ")}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          (order.filmName &&(
-          <hr className="border-gray-200" />
-          ))
+
+          <hr className="border-gray-400" />
+
           {/* Payment Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -143,7 +100,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
               ))}
             </div>
 
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-400 my-4" />
 
             {/* Total */}
             <div className="flex justify-between items-center font-bold text-lg text-green-600">
@@ -151,6 +108,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
               <span>{order.totalMoney} VNĐ</span>
             </div>
           </div>
+
           {/* Actions */}
           <div className="flex justify-end space-x-4 mt-6">
             <button
@@ -165,11 +123,11 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
                 className="flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
                 onClick={() => {
                   onConfirm(order);
-                  // onClose();
+                  //onClose();
                 }}
               >
                 <FiPrinter className="mr-2" />
-                In vé
+                Phục vụ
               </button>
             ) : null}
           </div>
@@ -179,4 +137,4 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
   );
 };
 
-export default TicketModal;
+export default OrderDetailModal;

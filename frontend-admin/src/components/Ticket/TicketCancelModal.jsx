@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 
 const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
   const [reason, setReason] = useState("");
+  useEffect(() => {
+    if (isOpen) {
+      setReason(""); // Reset reason khi modal được mở
+    }
+  }, [isOpen]);
   if (!isOpen) return null;
 
   return (
@@ -28,7 +33,6 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
                 className="w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 rows="4"
                 placeholder="Nhập lý do..."
-                value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 aria-label="Cancellation reason"
               />
@@ -47,7 +51,12 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
                   onConfirm(reason);
                   onClose();
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!reason.trim()}
+                className={`rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 ${
+                  !reason.trim()
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                }`}
                 aria-label="Submit"
               >
                 Xác nhận

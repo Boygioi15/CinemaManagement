@@ -17,7 +17,7 @@ import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import FoodCard from "../../Components/FoodCard";
 import TicketType from "../../Components/TicketType";
 
-const FilmDetailPage = ({ filmID = "675c2aeb09b5ff5eb1b0e08d" }) => {
+const FilmDetailPage = ({ filmID = "676169231b9eb475b2ae8bee" }) => {
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedSchedule, setSSelectedSchedule] = useState("19/12");
