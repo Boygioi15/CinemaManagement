@@ -9,6 +9,8 @@ import roomRouter from "./room/room.route.js";
 import seatRouter from "./seat/seat.route.js";
 import orderRouter from "./order/order.route.js";
 import paramRouter from "./param/param.route.js";
+import debugRouter from "./debug/debug.route.js";
+
 import additionalItemRouter from "./additionalItem/additionalItem.route.js";
 import paymentRouter from "./payment/payment.route.js";
 const router = express.Router();
@@ -25,6 +27,7 @@ router.use("/api/orders", orderRouter);
 router.use("/api/additional-items", additionalItemRouter);
 router.use("/api/payment", paymentRouter);
 router.use("/api/param", paramRouter);
+router.use("/api/debug", debugRouter);
 
 router.use((req, res) => {
   res.status(404).send("Not found route");
