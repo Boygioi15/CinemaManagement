@@ -17,7 +17,6 @@ const FilmShowChart = () => {
     "Theater 5",
   ];
 
-  // Updated events array with example film data
   const events = [
     {
       id: 1,
@@ -76,27 +75,30 @@ const FilmShowChart = () => {
     },
   ];
 
-  //   const getEventStyle = (startTime, duration) => {
-  //     const width = `${duration * 100}px`;
-  //     const left = `${startTime * 100 + 25}px`;
-  //     return { width, left };
-  //   };
-  const getEventStyle = (startTime, duration) => {
-    let endTime = startTime + duration;
-    let startPosition, endPosition;
-
-    if (endTime > 24) {
-      // Event spans across midnight
-      startPosition = startTime * 100;
-      endPosition = 24 * 100 - 25;
-      console.log("đã qua");
+  const getEventStyle = (startTime, duration, isSpanningEvent) => {
+    let width, left;
+    if (isSpanningEvent) {
+      // Event continues from a previous day
+      width = `${Math.min(duration, 24) * 100}px`;
+      left = "25px"; // Starts from 0:00 AM
     } else {
-      startPosition = startTime * 100;
-      endPosition = endTime * 100;
+      let endTime = startTime + duration;
+      let startPosition, endPosition;
+
+      if (endTime > 24) {
+        // Event spans across midnight
+        startPosition = startTime * 100;
+        endPosition = 24 * 100 - 25;
+      } else {
+        startPosition = startTime * 100;
+        endPosition = endTime * 100;
+      }
+
+      width = `${endPosition - startPosition}px`;
+      left = `${startPosition + 25}px`;
     }
 
-    const width = endPosition - startPosition;
-    return { width: `${width}px`, left: `${startPosition + 25}px` };
+    return { width, left };
   };
 
   const getCategoryColor = (category) => {
@@ -126,9 +128,25 @@ const FilmShowChart = () => {
     return `${hours}h ${minutes}m`;
   };
 
-  console.log("Selected Date:", startDate);
-  const filteredEvents = events.filter((event) => event.date === startDate);
-  console.log("Filtered Events:", filteredEvents);
+  const filteredEvents = events.filter((event) => {
+    const eventDate = new Date(event.date);
+    const startDateObj = new Date(startDate);
+
+    if (eventDate.getTime() === startDateObj.getTime()) {
+      // Same day event
+      return true;
+    }
+
+    // Event started the previous day and continues into the current day
+    if (
+      eventDate.getTime() === startDateObj.getTime() - 86400000 &&
+      event.startTime + event.duration > 24
+    ) {
+      return true;
+    }
+
+    return false;
+  });
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
@@ -171,8 +189,8 @@ const FilmShowChart = () => {
 
           <div className="relative">
             {rooms.map((room) => {
-              const filteredEvents = events.filter(
-                (event) => event.room === room && event.date === startDate
+              const filteredRoomEvents = filteredEvents.filter(
+                (event) => event.room === room
               );
 
               return (
@@ -184,29 +202,45 @@ const FilmShowChart = () => {
                     {room}
                   </div>
                   <div className="relative flex-grow h-full bg-white">
-                    {/* Chỉ hiển thị "No films scheduled" khi không có sự kiện */}
-                    {filteredEvents.length === 0 && (
+                    {filteredRoomEvents.length === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center text-gray-500">
                         No films scheduled
                       </div>
                     )}
 
-                    {/* Hiển thị danh sách sự kiện */}
-                    {filteredEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className={`absolute top-2 bottom-2 rounded-lg ${getCategoryColor(
-                          event.category
-                        )} text-white cursor-pointer transition-transform hover:scale-y-110`}
-                        style={getEventStyle(event.startTime, event.duration)}
-                        onClick={() => handleEventClick(event)}
-                      >
-                        <div className="p-2 text-sm flex items-center h-full">
-                          <FaPlay className="mr-2" />
-                          <span className="truncate">{event.film}</span>
+                    {filteredRoomEvents.map((event) => {
+                      const isSpanningEvent =
+                        new Date(event.date).getTime() <
+                        new Date(startDate).getTime();
+
+                      const adjustedStartTime = isSpanningEvent
+                        ? 0
+                        : event.startTime;
+
+                      const adjustedDuration = isSpanningEvent
+                        ? event.startTime + event.duration - 24
+                        : event.duration;
+
+                      return (
+                        <div
+                          key={event.id}
+                          className={`absolute top-2 bottom-2 rounded-lg ${getCategoryColor(
+                            event.category
+                          )} text-white cursor-pointer transition-transform hover:scale-y-110`}
+                          style={getEventStyle(
+                            adjustedStartTime,
+                            adjustedDuration,
+                            isSpanningEvent
+                          )}
+                          onClick={() => handleEventClick(event)}
+                        >
+                          <div className="p-2 text-sm flex items-center h-full">
+                            <FaPlay className="mr-2" />
+                            <span className="truncate">{event.film}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );

@@ -11,6 +11,9 @@ import InfrasManage from "./pages/Infrastructure/InfrasManage";
 import FilmShow from "./pages/FilmShow/filmshow";
 import FilmShowChart from "./pages/FilmShow/filmshowChart";
 
+import DailyReport from "./pages/Statistic/DailyReport";
+import RenevueOverview from "./pages/Statistic/RenevueOverview";
+
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
@@ -52,6 +55,14 @@ const router = createBrowserRouter([
       {
         path: "/admin/co-so-vat-chat",
         element: <InfrasManage />,
+      },
+      {
+        path: "/admin/thong-ke/ngay",
+        element: <DailyReport />,
+      },
+      {
+        path: "/admin/thong-ke/nam",
+        element: <RenevueOverview />,
       },
 
       // {
