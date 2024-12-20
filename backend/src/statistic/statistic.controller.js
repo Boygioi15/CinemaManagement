@@ -4,8 +4,8 @@ import orderModel from "../order/order.schema.js";
 class StatisticController {
     // Tỷ lệ vé đã phục vụ / vé có sẵn không tính vé từ chối phục vụ
     getTicketServeRate = expressAsyncHandler(async (req, res) => {
-        const totalTickets = await orderModel.countDocuments({ served: { $ne: false } });
-        const servedTickets = await orderModel.countDocuments({ served: true });
+        const totalTickets = await orderModel.countDocuments({ printed: { $ne: false } });
+        const servedTickets = await orderModel.countDocuments({ printed: true });
 
         res.json({
             totalTickets,
@@ -16,7 +16,7 @@ class StatisticController {
     // Tỷ lệ các thể loại vé đã phục vụ
     getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { $match: { served: true } },
+            { $match: { printed: true } },
             { $unwind: "$tickets" },
             {
                 $group: {
@@ -33,7 +33,7 @@ class StatisticController {
     // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ
     getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
         const items = await orderModel.aggregate([
-            { $match: { served: true } },
+            { $match: { printed: true } },
             { $unwind: "$items" },
             {
                 $group: {
@@ -50,7 +50,7 @@ class StatisticController {
     // Tỷ lệ vé theo phim
     getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { $match: { served: true } },
+            { $match: { printed: true } },
             {
                 $group: {
                     _id: "$filmName",
@@ -72,7 +72,7 @@ class StatisticController {
         }
 
         const monthlyStats = await orderModel.aggregate([
-            { $match: { served: true } },
+            { $match: { printed: true } },
             {
                 $project: {
                     month: { $month: "$createdAt" },
