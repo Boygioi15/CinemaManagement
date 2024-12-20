@@ -1,5 +1,5 @@
+import seatModel from "../seat/seat.schema.js";
 import roomModel from "./room.schema.js";
-import seatModel from "./seat.schema.js";
 
 export class RoomService {
   // Hàm tạo ghế cho phòng

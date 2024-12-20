@@ -1,0 +1,12 @@
+import express from "express";
+import statisticController from "./statistic.controller.js";
+
+const router = express.Router()
+
+router.get("/ticket-serve-rate", statisticController.getTicketServeRate);
+router.get("/ticket-category-rate", statisticController.getTicketCategoryRate);
+router.get("/additional-items-rate", statisticController.getAdditionalItemsRate);
+router.get("/ticket-rate-by-film", statisticController.getTicketRateByFilm);
+router.get("/monthly-stats", statisticController.getMonthlyStatistics);
+
+export default router;
