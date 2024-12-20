@@ -1,5 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
-import orderModel from "./order.schema.js";
+import orderModel from "../order/order.schema.js";
 
 class StatisticController {
     // Tỷ lệ vé đã phục vụ / vé có sẵn không tính vé từ chối phục vụ
