@@ -4,8 +4,13 @@ import orderModel from "../order/order.schema.js";
 class StatisticController {
     // Tỷ lệ vé đã phục vụ / vé có sẵn không tính vé từ chối phục vụ
     getTicketServeRate = expressAsyncHandler(async (req, res) => {
-        const totalTickets = await orderModel.countDocuments({ printed: { $ne: false } });
-        const servedTickets = await orderModel.countDocuments({ printed: true });
+        const totalTickets = await orderModel.countDocuments();
+        const servedTickets = await orderModel.countDocuments({
+            $or: [
+                { printed: true },
+                { served: true }
+            ]
+        });        
 
         res.json({
             totalTickets,
@@ -16,7 +21,14 @@ class StatisticController {
     // Tỷ lệ các thể loại vé đã phục vụ
     getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { $match: { printed: true } },
+            { 
+                $match: { 
+                    $or: [
+                        { printed: true },
+                        { served: true }
+                    ]
+                } 
+            },          
             { $unwind: "$tickets" },
             {
                 $group: {
@@ -33,7 +45,14 @@ class StatisticController {
     // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ
     getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
         const items = await orderModel.aggregate([
-            { $match: { printed: true } },
+            { 
+                $match: { 
+                    $or: [
+                        { printed: true },
+                        { served: true }
+                    ]
+                } 
+            },
             { $unwind: "$items" },
             {
                 $group: {
@@ -50,7 +69,14 @@ class StatisticController {
     // Tỷ lệ vé theo phim
     getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { $match: { printed: true } },
+            { 
+                $match: { 
+                    $or: [
+                        { printed: true },
+                        { served: true }
+                    ]
+                } 
+            },
             {
                 $group: {
                     _id: "$filmName",
@@ -72,7 +98,14 @@ class StatisticController {
         }
 
         const monthlyStats = await orderModel.aggregate([
-            { $match: { printed: true } },
+            { 
+                $match: { 
+                    $or: [
+                        { printed: true },
+                        { served: true }
+                    ]
+                } 
+            },
             {
                 $project: {
                     month: { $month: "$createdAt" },
