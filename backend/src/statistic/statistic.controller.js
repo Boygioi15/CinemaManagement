@@ -1,4 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
+import orderModel from "./order.schema.js";
 
 class StatisticController {
     // Tỷ lệ vé đã phục vụ / vé có sẵn không tính vé từ chối phục vụ
@@ -9,7 +10,6 @@ class StatisticController {
         res.json({
             totalTickets,
             servedTickets,
-            serveRate: ((servedTickets / totalTickets) * 100).toFixed(2) + "%",
         });
     });
 
