@@ -2,7 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
 
 class StatisticController {
-    // Tỷ lệ vé đã phục vụ / vé có sẵn không tính vé từ chối phục vụ
+    // Tỷ lệ vé đã phục vụ hoặc in/tổng vé
     getTicketServeRate = expressAsyncHandler(async (req, res) => {
         const totalTickets = await orderModel.countDocuments();
         const servedTickets = await orderModel.countDocuments({
@@ -10,7 +10,7 @@ class StatisticController {
                 { printed: true },
                 { served: true }
             ]
-        });        
+        });
 
         res.json({
             totalTickets,
@@ -18,17 +18,17 @@ class StatisticController {
         });
     });
 
-    // Tỷ lệ các thể loại vé đã phục vụ
+    // Tỷ lệ các thể loại vé đã phục vụ hoặc in
     getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { 
-                $match: { 
+            {
+                $match: {
                     $or: [
                         { printed: true },
                         { served: true }
                     ]
-                } 
-            },          
+                }
+            },
             { $unwind: "$tickets" },
             {
                 $group: {
@@ -42,16 +42,16 @@ class StatisticController {
         res.json(tickets);
     });
 
-    // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ
+    // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ hoặc in
     getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
         const items = await orderModel.aggregate([
-            { 
-                $match: { 
+            {
+                $match: {
                     $or: [
                         { printed: true },
                         { served: true }
                     ]
-                } 
+                }
             },
             { $unwind: "$items" },
             {
@@ -66,16 +66,16 @@ class StatisticController {
         res.json(items);
     });
 
-    // Tỷ lệ vé theo phim
+    // Tỷ lệ vé theo phim đã phục vụ hoặc in
     getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            { 
-                $match: { 
+            {
+                $match: {
                     $or: [
                         { printed: true },
                         { served: true }
                     ]
-                } 
+                }
             },
             {
                 $group: {
@@ -89,14 +89,14 @@ class StatisticController {
         res.json(tickets);
     });
 
-    // Tổng số vé, bắp, đồ uống đã phục vụ theo từng tháng
+    // Tổng số vé, bắp, đồ uống đã phục vụ hoặc in theo từng tháng
     getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
         const { year } = req.query;
         if (!year) {
             res.status(400);
             throw new Error("Year is required");
         }
-
+    
         const monthlyStats = await orderModel.aggregate([
             { 
                 $match: { 
@@ -118,24 +118,73 @@ class StatisticController {
             {
                 $group: {
                     _id: "$month",
-                    totalTickets: { $sum: { $sum: { $map: { input: "$tickets", as: "t", in: { $toInt: "$$t.quantity" } } } } },
-                    totalPopcorn: { $sum: { $sum: { $map: { input: "$items", as: "i", in: { $cond: [{ $eq: ["$$i.name", "Popcorn"] }, { $toInt: "$$i.quantity" }, 0] } } } } },
-                    totalDrinks: { $sum: { $sum: { $map: { input: "$items", as: "i", in: { $cond: [{ $eq: ["$$i.name", "Drink"] }, { $toInt: "$$i.quantity" }, 0] } } } } },
+                    // Tính doanh thu từ vé theo từng loại vé
+                    totalTicketRevenue: { 
+                        $sum: { 
+                            $sum: { 
+                                $map: { 
+                                    input: "$tickets", 
+                                    as: "t", 
+                                    in: { 
+                                        $multiply: [
+                                            { $toDouble: "$$t.quantity" }, // Chuyển quantity thành số nguyên
+                                            { $toDouble: "$$t.unitPrice" } // Chuyển unitPrice thành số thực
+                                        ] 
+                                    } 
+                                } 
+                            } 
+                        }
+                    },
+                    // Tính doanh thu từ bỏng ngô (bao gồm các tên như "Bắp rang bơ")
+                    totalPopcornRevenue: { 
+                        $sum: { 
+                            $sum: { 
+                                $map: { 
+                                    input: "$items", 
+                                    as: "i", 
+                                    in: { 
+                                        $cond: [
+                                            { $regexMatch: { input: "$$i.name", regex: "Bắp", options: "i" } }, 
+                                            { $multiply: [{ $toDouble: "$$i.quantity" }, { $toDouble: "$$i.unitPrice" }] },
+                                            0
+                                        ] 
+                                    } 
+                                } 
+                            } 
+                        }
+                    },
+                    // Tính doanh thu từ đồ uống (bao gồm các tên như "Nước coca")
+                    totalDrinksRevenue: { 
+                        $sum: { 
+                            $sum: { 
+                                $map: { 
+                                    input: "$items", 
+                                    as: "i", 
+                                    in: { 
+                                        $cond: [
+                                            { $regexMatch: { input: "$$i.name", regex: "Nước", options: "i" } }, 
+                                            { $multiply: [{ $toDouble: "$$i.quantity" }, { $toDouble: "$$i.unitPrice" }] },
+                                            0
+                                        ] 
+                                    } 
+                                } 
+                            } 
+                        }
+                    },
                 },
             },
             {
                 $project: {
                     month: "$_id",
-                    totalTickets: 1,
-                    totalPopcorn: 1,
-                    totalDrinks: 1,
+                    totalTicketRevenue: 1,
+                    totalPopcornRevenue: 1,
+                    totalDrinksRevenue: 1,
                     _id: 0,
                 },
             },
             { $sort: { month: 1 } },
         ]);
-
         res.json(monthlyStats);
-    });
+    });    
 }
 export default new StatisticController()
