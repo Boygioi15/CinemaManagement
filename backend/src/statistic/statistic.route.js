@@ -9,5 +9,5 @@ router.get("/additional-items-rate", statisticController.getAdditionalItemsRate)
 router.get("/ticket-rate-by-film", statisticController.getTicketRateByFilm);
 router.get("/monthly-statistic", statisticController.getMonthlyStatistics);
 router.get("/daily-statistic", statisticController.getDailyStatistics);
-
+router.get("/film-statistic",statisticController.getFilmStatisticsByDate);
 export default router;

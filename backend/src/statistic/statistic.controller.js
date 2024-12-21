@@ -1,5 +1,8 @@
 import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
+import filmShowModel from "../filmShow/filmShow.schema.js";
+import roomModel from "../room/room.schema.js";
+import filmModel from "../film/film.schema.js"
 
 class StatisticController {
     //Tỷ lệ vé đã phục vụ hoặc in theo ngày
@@ -70,7 +73,6 @@ class StatisticController {
             },
             { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
         ]);
-
         res.json(tickets);
     });
 
@@ -101,7 +103,6 @@ class StatisticController {
             },
             { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
         ]);
-
         res.json(items);
     });
 
@@ -344,5 +345,62 @@ class StatisticController {
             otherItemsQuantity: dailyStats[0]?.otherItemsQuantity || 0,
         });
     });
+
+    getFilmStatisticsByDate = async (req, res) => {
+        const { selectedDate } = req.query;
+        if (!selectedDate) {
+            res.status(400);
+            throw new Error("Vui lòng cung cấp ngày!");
+        }
+        const selectedDateObj = new Date(selectedDate);
+        const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+        const formattedStartDate = startOfDay.toString();
+        const formattedEndDate = endOfDay.toString();
+        const roomsSet = new Set();
+        const events = [];
+        const filmShows = await filmShowModel
+            .find({
+                showDate: { $gte: formattedStartDate, $lte: formattedEndDate },
+            })
+            .populate({ path: "roomId", select: "roomName" })
+            .populate({
+                path: "film",
+                select: "name filmDuration filmDescription tagsRef",
+                populate: { path: "tagsRef", select: "name" },
+            })
+            .exec();
+        filmShows.forEach((show, index) => {
+            const { roomId, film, showTime, showDate } = show;
+            if (!roomId || !roomId.roomName) {
+                console.warn(`Room not found for show: ${show._id}`);
+                return;
+            }
+            if (!film || !film.filmDuration) {
+                console.warn(`Film not found for show: ${show._id}`);
+                return;
+            }
+            roomsSet.add(roomId.roomName);
+            const startTimeParts = showTime.split(":");
+            let startTime = 0;
+            if (startTimeParts.length === 2) {
+                const hours = parseFloat(startTimeParts[0]);
+                const minutes = parseFloat(startTimeParts[1]) / 60;
+                startTime = hours + minutes;
+            }
+            const categoryNames = film.tagsRef.map(tag => tag.name);
+            events.push({
+                id: index + 1,
+                room: roomId.roomName,
+                starttime: startTime,
+                duration: film.filmDuration / 60,
+                category: categoryNames,
+                date: showDate.toISOString().split("T")[0],
+                description: film.filmDescription,
+            });
+        });
+        const rooms = Array.from(roomsSet);
+        return res.status(200).json({ rooms, events });
+    };
 }
 export default new StatisticController()
