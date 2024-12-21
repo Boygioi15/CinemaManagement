@@ -4,31 +4,37 @@ import orderModel from "../order/order.schema.js";
 class StatisticController {
     // Tỷ lệ vé đã phục vụ hoặc in/tổng vé
     getTicketServeRate = expressAsyncHandler(async (req, res) => {
-        const totalTickets = await orderModel.countDocuments();
-        const servedTickets = await orderModel.countDocuments({
-            $or: [
-                { printed: true },
-                { served: true }
-            ]
-        });
-
+        const totalTickets = await orderModel.aggregate([
+            { $unwind: "$tickets" },
+            {
+                $group: {
+                    _id: null,
+                    totalQuantity: { $sum: { $toInt: "$tickets.quantity" } },
+                },
+            },
+        ]);
+    
+        const servedTickets = await orderModel.aggregate([
+            { $match: { $or: [{ printed: true }, { served: true }] } },
+            { $unwind: "$tickets" },
+            {
+                $group: {
+                    _id: null,
+                    totalQuantity: { $sum: { $toInt: "$tickets.quantity" } },
+                },
+            },
+        ]);
+    
         res.json({
-            totalTickets,
-            servedTickets,
+            totalTickets: totalTickets[0]?.totalQuantity || 0,
+            servedTickets: servedTickets[0]?.totalQuantity || 0,
         });
-    });
+    });    
 
     // Tỷ lệ các thể loại vé đã phục vụ hoặc in
     getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            {
-                $match: {
-                    $or: [
-                        { printed: true },
-                        { served: true }
-                    ]
-                }
-            },
+            { $match: { $or: [{ printed: true }, { served: true }] } },
             { $unwind: "$tickets" },
             {
                 $group: {
@@ -38,21 +44,14 @@ class StatisticController {
             },
             { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
         ]);
-
+    
         res.json(tickets);
-    });
+    });    
 
     // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ hoặc in
     getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
         const items = await orderModel.aggregate([
-            {
-                $match: {
-                    $or: [
-                        { printed: true },
-                        { served: true }
-                    ]
-                }
-            },
+            { $match: { $or: [{ printed: true }, { served: true }] } },
             { $unwind: "$items" },
             {
                 $group: {
@@ -62,39 +61,34 @@ class StatisticController {
             },
             { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
         ]);
-
+    
         res.json(items);
     });
+    
 
     // Tỷ lệ vé theo phim đã phục vụ hoặc in
     getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
         const tickets = await orderModel.aggregate([
-            {
-                $match: {
-                    $or: [
-                        { printed: true },
-                        { served: true }
-                    ]
-                }
-            },
+            { $match: { $or: [{ printed: true }, { served: true }] } },
+            { $unwind: "$tickets" },
             {
                 $group: {
                     _id: "$filmName",
-                    totalTickets: { $sum: 1 },
+                    totalTickets: { $sum: { $toInt: "$tickets.quantity" } },
                 },
             },
             { $project: { filmName: "$_id", totalTickets: 1, _id: 0 } },
         ]);
-
+    
         res.json(tickets);
-    });
+    });    
 
-    // Tổng số vé, bắp, đồ uống đã phục vụ hoặc in theo từng tháng
+    // Tổng doanh số vé, bắp, đồ uống đã phục vụ hoặc in theo từng tháng
     getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
         const { year } = req.query;
         if (!year) {
             res.status(400);
-            throw new Error("Year is required");
+            throw new Error("Vui lòng cung cấp năm!");
         }
     
         const monthlyStats = await orderModel.aggregate([
