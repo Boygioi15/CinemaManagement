@@ -5,54 +5,51 @@ export class RoomService {
     roomName,
     noOfSeatRow,
     noOfSeatInEachRow,
+    seats,
     centerX1,
     centerX2,
     centerY1,
     centerY2,
+    roomNote,
   }) => {
-    // Initialize an empty array to store the generated seats
-    const seats = [];
-
-    // Nested loops to iterate through rows and columns
-    for (let i = 1; i <= noOfSeatRow - 1; i++) {
-      for (let j = 1; j <= noOfSeatInEachRow; j++) {
-        // Generate a random number to decide whether to create a seat (80% chance)
-        if (Math.random() <= 0.8) {
-          seats.push({
-            seatName: `S-${i}-${j}`,
-            seatRow: i,
-            seatCol: j,
-          });
-        }
-      }
+    if (
+      centerX2 < centerX1 ||
+      centerY2 < centerY1 ||
+      centerX2 > noOfSeatRow - 1 ||
+      centerY2 > noOfSeatInEachRow - 1
+    ) {
+      throw customError("Dữ liệu khu vực trung tâm không hợp lệ!");
     }
-    /*
-    seats.push({
-      seatName: "P01",
-      seatRow: 19,
-      seatCol: 1,
-    });
-    seats.push({
-      seatName: "P02",
-      seatRow: 19,
-      seatCol: 5,
-    });
-    seats.push({
-      seatName: "P03",
-      seatRow: 19,
-      seatCol: 11,
-    });
-    */
-    // Create and save the room with the generated seats
+    // Creating roomSeat-be
+    const roomSeatBe = [];
+    for (let i = 0; i < seats.length; i++) {
+      const row = [];
+      let seatNum = 0;
+      for (let j = 0; j < seats[i].length; j++) {
+        if (seats[i][j] !== "") {
+          seatNum++;
+        }
+        row.push({
+          seatName: String.fromCharCode(65 + i) + seatNum, // Convert row index to letter (A, B, C...)
+          seatType: seats[i][j] || "", // Copy the type from the input 2D matrix
+        });
+      }
+      roomSeatBe.push(row); // Add the row to the 2D array
+    }
+
+    //console.log("Transformed seats:", roomSeatBe);
+    //console.log("roomSeatBe:", JSON.stringify(roomSeatBe, null, 2));
+
     const newRoom = new roomModel({
       roomName,
       noOfSeatRow,
       noOfSeatInEachRow,
-      seats, // Include the dynamically generated seats
+      seats: roomSeatBe, // Include the dynamically generated seats
       centerX1,
       centerX2,
       centerY1,
       centerY2,
+      roomNote,
     });
 
     // Save the room document to the database
@@ -64,24 +61,24 @@ export class RoomService {
       // Tìm phòng theo roomId
       const room = await roomModel.findById(roomId);
       if (!room) {
-        throw new Error('Room not found');
+        throw new Error("Room not found");
       }
 
       const seatNames = room.seats
-        .filter(seat => seatIds.includes(seat._id.toString()))
-        .map(seat => seat.seatName);
+        .filter((seat) => seatIds.includes(seat._id.toString()))
+        .map((seat) => seat.seatName);
 
       if (seatNames.length === 0) {
-        throw new Error('No seats found');
+        throw new Error("No seats found");
       }
 
       // Trả về mảng seatName
       return {
         seatNames,
-        roomName: room.roomName
+        roomName: room.roomName,
       };
     } catch (error) {
       throw new Error(error.message);
     }
-  }
+  };
 }

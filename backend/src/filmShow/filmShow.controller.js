@@ -1,5 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
 import { FilmShowService } from "./filmShow.service.js";
+import filmModel from "../film/film.schema.js";
+import filmShowModel from "./filmShow.schema.js";
 
 class FilmShowController {
   createFilmShow = expressAsyncHandler(async (req, res, next) => {
@@ -29,7 +31,7 @@ class FilmShowController {
     });
   });
 
-  getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
+  getAllFilmShowByFilmId = expressAsyncHandler(async (req, res, next) => {
     const { filmId } = req.query;
     const response = await FilmShowService.getAllFilmShowByFilmId(filmId);
     return res.status(200).json({
@@ -41,6 +43,25 @@ class FilmShowController {
   getFilmShow = expressAsyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const response = await FilmShowService.getFilmShow(id);
+    return res.status(200).json({
+      msg: "Get film show successfully!",
+      success: true,
+      data: response,
+    });
+  });
+  getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
+    const original = await filmShowModel.find();
+    const response = original.map(async (element) => {
+      const film = await filmModel.findById(element.film.toString());
+      //console.log(element.film.toString());
+      return {
+        ...element,
+        filmName: film.filmName,
+        ageRestriction: film.ageRestriction,
+        duration: film.duration,
+        originatedCounter: film.originatedCountry,
+      };
+    });
     return res.status(200).json({
       msg: "Get film show successfully!",
       success: true,

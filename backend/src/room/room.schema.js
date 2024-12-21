@@ -5,58 +5,57 @@ const seatSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  isPairSeat: {
-    type: Boolean,
-    default: false,
-  },
-  seatCol: {
-    type: Number,
-    required: true,
-  },
-  seatRow: {
-    type: Number,
-    required: true,
+  seatType: {
+    type: String,
+    default: "",
   },
   usable: {
     type: Boolean,
     default: true,
   },
-  other: {
-    type: String,
-  },
 });
+
 const roomSChema = new mongoose.Schema(
   {
     roomName: {
       type: String,
       required: true,
     },
+
     noOfSeatRow: {
       type: Number,
       required: true,
+      min: [1, "Số hàng ghế phải là một số lớn hơn 0"], // Ensures greater than 0
     },
     noOfSeatInEachRow: {
       type: Number,
       required: true,
+      min: [1, "Số ghế mỗi hàng phải là một số lớn hơn 0"], // Ensures greater than 0
     },
-    seats: [seatSchema],
-    centerX2: {
-      type: Number,
-      require: true,
-    },
+
     centerX1: {
       type: Number,
-      require: true,
+      required: true,
+      min: [1, "centerX1 phải là một số lớn hơn 0"], // Ensures greater than 0
+    },
+    centerX2: {
+      type: Number,
+      required: true,
+      min: [1, "centerX2 phải là một số lớn hơn 0"], // Ensures greater than 0
     },
     centerY1: {
       type: Number,
-      require: true,
+      required: true,
+      min: [1, "centerY1 phải là một số lớn hơn 0"], // Ensures greater than 0
     },
     centerY2: {
       type: Number,
-      require: true,
+      required: true,
+      min: [1, "centerY2 phải là một số lớn hơn 0"], // Ensures greater than 0
     },
-    other: {
+
+    seats: [[seatSchema]],
+    roomNote: {
       type: String,
     },
     deleted: {
