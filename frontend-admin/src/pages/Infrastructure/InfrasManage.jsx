@@ -43,7 +43,7 @@ const InfrasManage = () => {
   };
 
   const columns = [
-    { header: "Tên phim", key: "name" },
+    { header: "Tên phòng", key: "name" },
     { header: "Thời lượng", key: "filmDuration" },
     { header: "Quốc gia", key: "originatedCountry" },
     { header: "Độ tuổi", key: "ageSymbol" },

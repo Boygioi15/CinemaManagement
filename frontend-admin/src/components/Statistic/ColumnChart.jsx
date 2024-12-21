@@ -41,6 +41,23 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
     return [...new Set(years)].sort((a, b) => b - a);
   };
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-2 shadow rounded-md border">
+          <p className="font-semibold text-gray-700">{`Tháng ${label}`}</p>
+          {payload.map((entry, index) => (
+            <p key={`item-${index}`} className="text-gray-600">
+              {`${entry.name}: ${entry.value.toLocaleString()} VNĐ`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
@@ -62,7 +79,7 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
-          <Tooltip />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Bar dataKey="vé" fill="#8884d8" />
           <Bar dataKey="sảnphẩmkhác" fill="#82ca9d" />

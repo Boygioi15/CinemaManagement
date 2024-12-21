@@ -46,11 +46,41 @@ const FilmShow = () => {
     setIsDetailModalOpen(false);
   };
   const columns = [
-    { header: "Phòng", key: "roomId" },
     { header: "Tên phim", key: "film" },
-    { header: "Suất chiếu", key: "showTime" },
     { header: "Ngày chiếu", key: "showDate" },
-    { header: "Dạng phim", key: "filmType" },
+    { header: "Suất chiếu", key: "showTime" },
+    { header: "Phòng", key: "roomId" },
+    {
+      header: "Trạng thái",
+      key: "status",
+      render: (_, row) => {
+        let statusText = "";
+        let statusClass = "";
+
+        if (row.invalidReason_Printed) {
+          statusText = "Từ chối in vé";
+          statusClass = "bg-red-100 text-red-800";
+        } else if (row.invalidReason_Served) {
+          statusText = "Từ chối phục vụ";
+          statusClass = "bg-red-100 text-red-800";
+        } else if (!row.printed) {
+          statusText = "Chưa in";
+          statusClass = "bg-yellow-100 text-yellow-800";
+        } else if (row.served) {
+          statusText = "Đã phục vụ";
+          statusClass = "bg-green-100 text-green-800";
+        } else if (row.printed) {
+          statusText = "Đã in";
+          statusClass = "bg-blue-100 text-blue-800";
+        }
+
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>
+            {statusText}
+          </span>
+        );
+      },
+    },
     {
       header: "Hành động",
       key: "actions",

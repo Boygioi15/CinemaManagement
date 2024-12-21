@@ -12,16 +12,25 @@ import PieCharts from "../../components/Statistic/PieChart";
 import axios from "axios";
 
 const DailyReport = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0] // Định dạng yyyy-mm-dd
+  );
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [ticketTypeData, setTicketTypeData] = useState([]);
   const [ticketMovieData, setTicketMovieData] = useState([]);
   const [itemData, setItemData] = useState([]);
 
-  const fetchticketType = async () => {
+  const [statistics, setStatistics] = useState({
+    totalTicket: 0,
+    totalRevenue: 0,
+    totalTicketRevenue: 0,
+    totalOtherItemsRevenue: 0,
+  });
+
+  const fetchticketType = async (day) => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/statistics/ticket-category-rate"
+        `http://localhost:8000/api/statistics/ticket-category-rate?selectedDate=${day}`
       );
 
       const data = response.data;
@@ -35,10 +44,10 @@ const DailyReport = () => {
     }
   };
 
-  const fetchticketMovie = async () => {
+  const fetchticketMovie = async (day) => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/statistics/ticket-rate-by-film"
+        `http://localhost:8000/api/statistics/ticket-rate-by-film?selectedDate=${day}`
       );
 
       const data = response.data;
@@ -46,16 +55,17 @@ const DailyReport = () => {
         name: item.filmName,
         value: item.totalTickets,
       }));
+
       setTicketMovieData(transformedData);
     } catch (error) {
       console.error("Error fetching films:", error);
     }
   };
 
-  const fetchadditionalItem = async () => {
+  const fetchadditionalItem = async (day) => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/statistics/additional-items-rate"
+        `http://localhost:8000/api/statistics/additional-items-rate?selectedDate=${day}`
       );
 
       const data = response.data;
@@ -69,18 +79,47 @@ const DailyReport = () => {
     }
   };
 
-  // Gọi API khi component được render lần đầu
-  useEffect(() => {
-    fetchticketType();
-    fetchticketMovie();
-    fetchadditionalItem();
-  }, []);
+  const fetchView = async (day) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/statistics/daily-statistic?selectedDate=${day}`
+      );
 
-  const statistics = {
-    employees: 45,
-    movies: 12,
-    screenings: 8,
+      const data = response.data;
+      setStatistics((prev) => ({
+        ...prev, // Giữ lại các giá trị cũ
+        totalRevenue: data.totalRevenue,
+        totalTicketRevenue: data.totalTicketRevenue,
+        totalOtherItemsRevenue: data.totalRevenue - data.totalTicketRevenue,
+      }));
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
   };
+
+  const fetchTicket = async (day) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/statistics/ticket-serve-rate?selectedDate=${day}`
+      );
+
+      const data = response.data;
+      setStatistics((prev) => ({
+        ...prev, // Giữ lại các giá trị cũ
+        totalTicket: data.servedTickets,
+      }));
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchView(selectedDate);
+    fetchTicket(selectedDate);
+    fetchticketType(selectedDate);
+    fetchticketMovie(selectedDate);
+    fetchadditionalItem(selectedDate);
+  }, [selectedDate]);
 
   const handleExport = () => {
     const csvData = revenueDataByYear[selectedYear];
@@ -116,7 +155,10 @@ const DailyReport = () => {
         <div className="flex items-center space-x-4">
           <DatePicker
             selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
+            onChange={(date) => {
+              const formattedDate = new Date(date).toISOString().split("T")[0]; // Định dạng yyyy-mm-dd
+              setSelectedDate(formattedDate);
+            }}
             className="p-2 border rounded-md"
           />
           <button
@@ -137,7 +179,7 @@ const DailyReport = () => {
                 Tổng vé đã bán
               </h3>
               <p className="text-3xl font-bold text-blue-600">
-                {statistics.employees}
+                {statistics.totalTicket}
               </p>
             </div>
           </div>
@@ -150,7 +192,7 @@ const DailyReport = () => {
                 Tổng doanh thu ngày
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.employees}
+                {statistics.totalRevenue.toLocaleString()}
               </p>
             </div>
           </div>
@@ -163,7 +205,7 @@ const DailyReport = () => {
                 Doanh thu từ vé
               </h3>
               <p className="text-3xl font-bold text-green-600">
-                {statistics.movies}
+                {statistics.totalTicketRevenue.toLocaleString()}
               </p>
             </div>
           </div>
@@ -176,7 +218,7 @@ const DailyReport = () => {
                 Sản phẩm khác
               </h3>
               <p className="text-3xl font-bold text-purple-600">
-                {statistics.screenings}
+                {statistics.totalOtherItemsRevenue.toLocaleString()}
               </p>
             </div>
           </div>
