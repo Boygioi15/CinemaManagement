@@ -21,6 +21,11 @@ const newTabs = [
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
+    name: "Biểu đồ suất phim",
+    path: "/admin/suat-phim/bieu-do",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
     name: "Tạo vé trực tiếp",
     path: "/admin/tab/tao-ve",
     icon: <RxDashboard className="w-6 h-6" />,
@@ -38,6 +43,16 @@ const newTabs = [
   {
     name: "Danh sách phòng",
     path: "/admin/co-so-vat-chat",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Báo cáo hằng ngày",
+    path: "/admin/thong-ke/ngay",
+    icon: <FiColumns className="w-6 h-6" />,
+  },
+  {
+    name: "Doanh thu hằng năm",
+    path: "/admin/thong-ke/nam",
     icon: <RxDashboard className="w-6 h-6" />,
   },
 ];
@@ -86,7 +101,7 @@ const RootLayout = () => {
         setIsSidebarOpen={setIsSidebarOpen}
         tabs={tabs}
       />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         <div className="p-6">
           <Navbar />
           <Outlet />

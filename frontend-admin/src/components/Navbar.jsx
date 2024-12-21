@@ -28,7 +28,7 @@ const Navbar = () => {
   return (
     <div className="flex items-center justify-between mb-6 bg-white rounded-lg shadow-sm p-3">
       <div className="flex items-center w-2/3">
-        <p>Xin chào Nguyễn Anh Quyền. Hôm nay là:{formatDateTime(time)}</p>
+        <p>Xin chào Nguyễn Anh Quyền. Hôm nay là: {formatDateTime(time)}</p>
         {/* <input
           type="text"
           placeholder="Search..."

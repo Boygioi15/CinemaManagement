@@ -49,7 +49,7 @@ const InVe = () => {
     setIsCancelModalOpen(true);
   };
 
-  //Nhấn nút in vé
+  //Nhấn nút xác nhận hủy vé
   const handleReason = (reason) => {
     setReason(reason);
     console.log(selectedOrder);

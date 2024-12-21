@@ -71,11 +71,11 @@ const FilmShow = () => {
   ];
   const itemsPerPage = 6;
 
-  const filteredData = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-      item.role.toLowerCase().includes(tableSearchQuery.toLowerCase())
+  const filteredData = filmshows.filter(
+    (filmshows) =>
+      filmshows.name.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
+      filmshows.email.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
+      filmshows.role.toLowerCase().includes(tableSearchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);

@@ -9,15 +9,20 @@ import PhucVuVe from "./pages/TicketManagement/PhucVuVe";
 
 import InfrasManage from "./pages/Infrastructure/InfrasManage";
 import FilmShow from "./pages/FilmShow/filmshow";
+import FilmShowChart from "./pages/FilmShow/filmshowChart";
+
+import DailyReport from "./pages/Statistic/DailyReport";
+import RenevueOverview from "./pages/Statistic/RenevueOverview";
 
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
+import "./App.css";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <RedirectToRoot />
+    element: <RedirectToRoot />,
   },
   {
     path: "/admin",
@@ -44,10 +49,21 @@ const router = createBrowserRouter([
         element: <FilmShow />,
       },
       {
+        path: "/admin/suat-phim/bieu-do",
+        element: <FilmShowChart />,
+      },
+      {
         path: "/admin/co-so-vat-chat",
         element: <InfrasManage />,
       },
-
+      {
+        path: "/admin/thong-ke/ngay",
+        element: <DailyReport />,
+      },
+      {
+        path: "/admin/thong-ke/nam",
+        element: <RenevueOverview />,
+      },
 
       // {
       //   path: "/admin/minh-hoa-ca-lam",
