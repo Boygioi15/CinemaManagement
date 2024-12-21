@@ -5,6 +5,10 @@ class StatisticController {
     //Tỷ lệ vé đã phục vụ hoặc in theo ngày
     getTicketServeRate = expressAsyncHandler(async (req, res) => {
         const { selectedDate } = req.query;
+        if (!selectedDate) {
+            res.status(400);
+            throw new Error("Vui lòng cung cấp ngày!");
+        }
         let matchCondition = { $or: [{ printed: true }, { served: true }] };
         if (selectedDate) {
             const selectedDateObj = new Date(selectedDate);
@@ -42,6 +46,10 @@ class StatisticController {
     // Tỷ lệ các thể loại vé đã phục vụ hoặc in theo ngày
     getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
         const { selectedDate } = req.query;
+        if (!selectedDate) {
+            res.status(400);
+            throw new Error("Vui lòng cung cấp ngày!");
+        }
         let matchCondition = { $or: [{ printed: true }, { served: true }] };
         if (selectedDate) {
             const selectedDateObj = new Date(selectedDate);
@@ -69,6 +77,10 @@ class StatisticController {
     // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ hoặc in theo ngày
     getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
         const { selectedDate } = req.query;
+        if (!selectedDate) {
+            res.status(400);
+            throw new Error("Vui lòng cung cấp ngày!");
+        }
         let matchCondition = { $or: [{ printed: true }, { served: true }] };
         if (selectedDate) {
             const selectedDateObj = new Date(selectedDate);
@@ -96,6 +108,10 @@ class StatisticController {
     // Tỷ lệ vé theo phim đã phục vụ hoặc in theo ngày
     getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
         const { selectedDate } = req.query;
+        if (!selectedDate) {
+            res.status(400);
+            throw new Error("Vui lòng cung cấp ngày!");
+        }
         let matchCondition = { $or: [{ printed: true }, { served: true }] };
         if (selectedDate) {
             const selectedDateObj = new Date(selectedDate);
@@ -127,7 +143,6 @@ class StatisticController {
             res.status(400);
             throw new Error("Vui lòng cung cấp năm!");
         }
-
         const monthlyStats = await orderModel.aggregate([
             {
                 $match: {
@@ -226,14 +241,11 @@ class StatisticController {
             res.status(400);
             throw new Error("Vui lòng cung cấp ngày!");
         }
-
         const selectedDateObj = new Date(selectedDate);
         const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
         const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-
         const formattedStartDate = startOfDay.toString();
         const formattedEndDate = endOfDay.toString();
-
         // Tính tổng doanh thu (totalMoney), doanh thu từ vé, và sản phẩm khác "bắp" và "nước"
         const dailyStats = await orderModel.aggregate([
             {
@@ -325,7 +337,6 @@ class StatisticController {
                 },
             },
         ]);
-
         res.json({
             totalRevenue: dailyStats[0]?.totalRevenue || 0,
             totalTicketRevenue: dailyStats[0]?.totalTicketRevenue || 0,
