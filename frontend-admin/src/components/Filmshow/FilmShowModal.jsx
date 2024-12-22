@@ -1,54 +1,69 @@
 import React, { useState, useEffect } from "react";
-import { FiCalendar, FiClock, FiFilm, FiHome, FiX } from "react-icons/fi";
+import { FiCalendar, FiSearch, FiX } from "react-icons/fi";
+import axios from "axios";
+import { Combobox } from "@headlessui/react";
 
 const FilmShowModal = ({ isOpen, onClose }) => {
-  const [selectedMovie, setSelectedMovie] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isMovieDropdownOpen, setIsMovieDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
 
   const [selectedRoom, setSelectedRoom] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState("");
 
-  const moviesList = [
-    "The Dark Knight",
-    "Inception",
-    "Interstellar",
-    "Pulp Fiction",
-    "The Godfather",
-    "Fight Club",
-    "Matrix",
-    "Forrest Gump",
-  ];
+  const [movies, setMovies] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
-  const roomsList = [
-    "Room 1 - IMAX",
-    "Room 2 - 3D",
-    "Room 3 - Standard",
-    "Room 4 - VIP",
-    "Room 5 - Standard",
-  ];
-
-  const filteredMovies = moviesList.filter((movie) =>
-    movie.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleMovieSelect = (movie) => {
-    setSelectedMovie(movie);
-    setIsMovieDropdownOpen(false);
-    setSearchQuery(movie);
+  const fetchRooms = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/rooms");
+      const data = response.data.data;
+      const processedData = data.map((room) => ({
+        id: room._id, // Lấy ID
+        name: room.roomName, // Lấy tên phòng
+      }));
+      setRooms(processedData); // Lưu dữ liệu vào state
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
   };
 
-  const handleRoomSelect = (room) => {
-    setSelectedRoom(room);
+  const fetchFilms = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/films");
+      const data = response.data.data;
+      const processedData = data.map((film) => ({
+        id: film._id, // Lấy ID
+        name: film.name, // Lấy tên phòng
+      }));
+      setMovies(processedData); // Lưu dữ liệu vào state
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
   };
+
+  useEffect(() => {
+    fetchRooms();
+    fetchFilms();
+  }, []);
+
+  const filteredMovies =
+    searchQuery === ""
+      ? movies
+      : movies.filter((movie) =>
+          movie.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split("T")[0];
+    today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00 để tránh lệch
+    const offset = today.getTimezoneOffset(); // Lấy độ lệch múi giờ (phút)
+    today.setMinutes(today.getMinutes() - offset); // Điều chỉnh giờ theo UTC
+    return today.toISOString().split("T")[0]; // Lấy ngày theo định dạng yyyy-mm-dd
   };
+  console.log(rooms);
 
   if (!isOpen) return null;
 
@@ -71,43 +86,62 @@ const FilmShowModal = ({ isOpen, onClose }) => {
           {/* Movie Selection - Combobox with Search */}
           <div className="relative">
             <label
-              htmlFor="movie"
+              htmlFor="film"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Chọn phim
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiFilm className="h-5 w-5 text-gray-400" />
+            <Combobox value={selectedMovie} onChange={setSelectedMovie}>
+              <div className="relative">
+                <div className="relative w-full cursor-default overflow-auto rounded-lg bg-white text-left border focus-within:ring-2 focus-within:ring-blue-500">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:outline-none"
+                    placeholder="Tìm kiếm phim..."
+                    displayValue={(movie) => movie?.name || ""}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <FiSearch
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <div className="relative z-50">
+                  <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {filteredMovies.length === 0 && searchQuery !== "" ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Không tìm thấy kết quả
+                      </div>
+                    ) : (
+                      filteredMovies.map((movie) => (
+                        <Combobox.Option
+                          key={movie._id}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-900"
+                            }`
+                          }
+                          value={movie}
+                        >
+                          {({ selected, active }) => (
+                            <span
+                              className={`block truncate ${
+                                selected ? "font-medium" : "font-normal"
+                              }`}
+                            >
+                              {movie.name}
+                            </span>
+                          )}
+                        </Combobox.Option>
+                      ))
+                    )}
+                  </Combobox.Options>
+                </div>
               </div>
-              <input
-                type="text"
-                id="movie"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setIsMovieDropdownOpen(true);
-                }}
-                onFocus={() => setIsMovieDropdownOpen(true)}
-                placeholder="Search for a movie"
-                aria-label="Search for a movie"
-              />
-            </div>
-
-            {isMovieDropdownOpen && filteredMovies.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 max-h-60 overflow-auto">
-                {filteredMovies.map((movie) => (
-                  <button
-                    key={movie}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:bg-blue-50 focus:text-blue-700"
-                    onClick={() => handleMovieSelect(movie)}
-                  >
-                    {movie}
-                  </button>
-                ))}
-              </div>
-            )}
+            </Combobox>
           </div>
 
           {/* Showtime Selection - Date and Time */}
@@ -190,15 +224,15 @@ const FilmShowModal = ({ isOpen, onClose }) => {
             <select
               id="room"
               value={selectedRoom}
-              onChange={handleRoomSelect}
+              onChange={(e) => setSelectedRoom(e.target.value)}
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="" disabled>
-                Select a room
+                Chọn phòng
               </option>
-              {roomsList.map((room) => (
-                <option key={room} value={room}>
-                  {room}
+              {rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
                 </option>
               ))}
             </select>
