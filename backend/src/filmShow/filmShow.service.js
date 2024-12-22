@@ -32,7 +32,7 @@ export class FilmShowService {
         const existingFilmDetails = await FilmService.getFilmDetails(existingShow.film);
         const existingFilmDuration = existingFilmDetails.filmDuration;
         const existingShowEnd = new Date(existingShowStart.getTime() + existingFilmDuration * 60000);
-  
+
         const isStartInsideExisting =
           showStart >= existingShowStart && showStart < existingShowEnd;
         const isEndInsideExisting =
@@ -40,7 +40,7 @@ export class FilmShowService {
         const isGapTooSmall =
           Math.abs(showStart - existingShowEnd) < 30 * 60000 ||
           Math.abs(showEnd - existingShowStart) < 30 * 60000;
-  
+
         return isStartInsideExisting || isEndInsideExisting || isGapTooSmall;
       })
     );
@@ -58,7 +58,7 @@ export class FilmShowService {
       film,
     });
   };
-  
+
   static getListFilmShowing = async () => {
     const filmShows = await filmShowModel
       .find({
@@ -241,4 +241,8 @@ export class FilmShowService {
     );
     return filmShow;
   });
+  static getAllFilmShows = async () => {
+    const filmShows = await filmShowModel.find({});
+    return filmShows;
+  };
 }

@@ -29,7 +29,7 @@ class FilmShowController {
     });
   });
 
-  getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
+  getAllFilmShowByFilmId = expressAsyncHandler(async (req, res, next) => {
     const { filmId } = req.query;
     const response = await FilmShowService.getAllFilmShowByFilmId(filmId);
     return res.status(200).json({
@@ -61,6 +61,14 @@ class FilmShowController {
     const response = await FilmShowService.refreshLockedSeat(id);
     return res.status(200).json({
       msg: "Refresh successfully!",
+      success: true,
+      data: response,
+    });
+  });
+  getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
+    const response = await FilmShowService.getAllFilmShows();
+    return res.status(200).json({
+      msg: "Get all film shows successfully!",
       success: true,
       data: response,
     });
