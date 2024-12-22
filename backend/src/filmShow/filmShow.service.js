@@ -10,7 +10,7 @@ export class FilmShowService {
   //Cho phép tạo suất chiếu cùng 1 phim nếu khác phòng
   static createFilmShow = async ({ roomId, showTime, showDate, film }) => {
     const showStart = new Date(`${showDate}T${showTime}`);
-    const filmDetails = await FilmService.getFilmDetails(film);
+    const filmDetails = await FilmService.getFilmDetail(film);
     if (!filmDetails) {
       throw customError("Phim không tồn tại", 404);
     }
@@ -21,18 +21,32 @@ export class FilmShowService {
       roomId,
       showDate,
       $or: [
-        { showTime: { $gte: new Date(showStart.getTime() - 30 * 60000).toISOString() } },
-        { showTime: { $lte: new Date(showEnd.getTime() + 30 * 60000).toISOString() } },
+        {
+          showTime: {
+            $gte: new Date(showStart.getTime() - 30 * 60000).toISOString(),
+          },
+        },
+        {
+          showTime: {
+            $lte: new Date(showEnd.getTime() + 30 * 60000).toISOString(),
+          },
+        },
       ],
     });
     // Kiểm tra trùng lặp thời gian
     const isOverlapping = await Promise.all(
       overlappingShows.map(async (existingShow) => {
-        const existingShowStart = new Date(`${existingShow.showDate}T${existingShow.showTime}`);
-        const existingFilmDetails = await FilmService.getFilmDetails(existingShow.film);
+        const existingShowStart = new Date(
+          `${existingShow.showDate}T${existingShow.showTime}`
+        );
+        const existingFilmDetails = await FilmService.getFilmDetails(
+          existingShow.film
+        );
         const existingFilmDuration = existingFilmDetails.filmDuration;
-        const existingShowEnd = new Date(existingShowStart.getTime() + existingFilmDuration * 60000);
-  
+        const existingShowEnd = new Date(
+          existingShowStart.getTime() + existingFilmDuration * 60000
+        );
+
         const isStartInsideExisting =
           showStart >= existingShowStart && showStart < existingShowEnd;
         const isEndInsideExisting =
@@ -40,7 +54,7 @@ export class FilmShowService {
         const isGapTooSmall =
           Math.abs(showStart - existingShowEnd) < 30 * 60000 ||
           Math.abs(showEnd - existingShowStart) < 30 * 60000;
-  
+
         return isStartInsideExisting || isEndInsideExisting || isGapTooSmall;
       })
     );
@@ -58,7 +72,7 @@ export class FilmShowService {
       film,
     });
   };
-  
+
   static getListFilmShowing = async () => {
     const filmShows = await filmShowModel
       .find({
@@ -241,4 +255,8 @@ export class FilmShowService {
     );
     return filmShow;
   });
+  static getAllFilmShows = async () => {
+    const filmShows = await filmShowModel.find({});
+    return filmShows;
+  };
 }

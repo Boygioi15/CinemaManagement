@@ -4,6 +4,18 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const PieCharts = ({ movieData, ticketStatusData, ticketTypeData }) => {
+  const CustomPieTooltip = ({ payload }) => {
+    if (payload && payload.length) {
+      const { name, value } = payload[0].payload;
+      return (
+        <div className="custom-tooltip bg-white p-2 rounded shadow">
+          <p className="label">{`${name}: ${value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 overflow-visible">
       <div className="bg-white p-4 rounded-lg shadow overflow-visible">
@@ -29,7 +41,7 @@ const PieCharts = ({ movieData, ticketStatusData, ticketTypeData }) => {
                 />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip content={<CustomPieTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -56,7 +68,7 @@ const PieCharts = ({ movieData, ticketStatusData, ticketTypeData }) => {
                 />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip content={<CustomPieTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -83,7 +95,7 @@ const PieCharts = ({ movieData, ticketStatusData, ticketTypeData }) => {
                 />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip content={<CustomPieTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>

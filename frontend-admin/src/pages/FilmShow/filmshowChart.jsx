@@ -1,79 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPlay, FaInfoCircle } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 
 const FilmShowChart = () => {
+  const [rooms, setRooms] = useState([]); // State cho rooms
+  const [events, setEvents] = useState([]); // State cho events
+
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0]
   );
 
-  const rooms = [
-    "Theater 1",
-    "Theater 2",
-    "Theater 3",
-    "Theater 4",
-    "Theater 5",
-  ];
+  const fetchData = async (date) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/statistics/film-statistic?selectedDate=${date}`
+      );
 
-  const events = [
-    {
-      id: 1,
-      room: "Theater 1",
-      film: "Inception",
-      startTime: 23,
-      duration: 1 + 47 / 60,
-      category: "Sci-Fi",
-      date: "2024-12-19",
-      description:
-        "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-    },
-    {
-      id: 2,
-      room: "Theater 2",
-      film: "The Dark Knight",
-      startTime: 10,
-      duration: 2.75,
-      category: "Action",
-      date: "2024-12-19",
-      description:
-        "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-    },
-    {
-      id: 3,
-      room: "Theater 3",
-      film: "Pulp Fiction",
-      startTime: 13,
-      duration: 2.8,
-      category: "Crime",
-      date: "2024-12-19",
-      description:
-        "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-    },
-    {
-      id: 4,
-      room: "Theater 1",
-      film: "The Matrix",
-      startTime: 15,
-      duration: 2.3,
-      category: "Sci-Fi",
-      date: "2024-12-19",
-      description:
-        "A computer programmer discovers that reality as he knows it is a simulation created by machines, and joins a rebellion to break free.",
-    },
-    {
-      id: 5,
-      room: "Theater 4",
-      film: "Heat",
-      startTime: 12,
-      duration: 2.9,
-      category: "Crime",
-      date: "2024-12-19",
-      description:
-        "A group of professional bank robbers start to feel the heat from police when they unknowingly leave a clue at their latest heist.",
-    },
-  ];
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      // Cập nhật rooms và events
+      setRooms(data.rooms);
+      setEvents(
+        data.events.map((event) => ({
+          id: event.id,
+          room: event.room,
+          film: event.film,
+          startTime: event.starttime,
+          duration: event.duration,
+          category: event.category.join(", "),
+          date: event.date,
+          description: event.description,
+        }))
+      );
+    } catch (err) {
+      setError(err.message); // Lưu lỗi
+    }
+  };
+
+  // Gọi API mỗi khi selectedDate thay đổi
+  useEffect(() => {
+    fetchData(startDate);
+  }, [startDate]);
+
+  console.log(rooms);
+  console.log(events);
 
   const getEventStyle = (startTime, duration, isSpanningEvent) => {
     let width, left;
@@ -103,12 +79,12 @@ const FilmShowChart = () => {
 
   const getCategoryColor = (category) => {
     const colors = {
-      Empty: "bg-gray-300",
+      Empty: "bg-blue-300",
       "Sci-Fi": "bg-blue-500",
       Action: "bg-red-500",
       Crime: "bg-purple-500",
     };
-    return colors[category] || "bg-gray-500";
+    return colors[category] || "bg-blue-500";
   };
 
   const handleEventClick = (event) => {
@@ -151,13 +127,13 @@ const FilmShowChart = () => {
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
-        Daily Schedule Chart
+        Biểu đồ suất phim
       </h1>
 
       {/* Date Selection */}
       <div className="mb-6 flex gap-4">
         <div className="flex items-center">
-          <label className="mr-2 text-gray-700">Selected Date:</label>
+          <label className="mr-2 text-gray-700">Chọn ngày:</label>
           <input
             type="date"
             value={startDate}
@@ -168,7 +144,7 @@ const FilmShowChart = () => {
       </div>
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">
-          {new Date(startDate).toLocaleDateString("en-US", {
+          {new Date(startDate).toLocaleDateString("vi-VN", {
             weekday: "long",
             year: "numeric",
             month: "long",
@@ -204,7 +180,7 @@ const FilmShowChart = () => {
                   <div className="relative flex-grow h-full bg-white">
                     {filteredRoomEvents.length === 0 && (
                       <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                        No films scheduled
+                        Không có lịch phim
                       </div>
                     )}
 
@@ -269,8 +245,8 @@ const FilmShowChart = () => {
               </p>
             </div>
             <div className="text-sm text-gray-500">
-              <p>Room: {selectedEvent.room}</p>
-              <p>Date: {selectedEvent.date}</p>
+              <p>Phòng: {selectedEvent.room}</p>
+              <p>Ngày: {selectedEvent.date}</p>
               <p>
                 Time: {formatTime(selectedEvent.startTime, 0)} -{" "}
                 {formatTime(
@@ -278,8 +254,8 @@ const FilmShowChart = () => {
                   Math.round((selectedEvent.duration % 1) * 60)
                 )}
               </p>
-              <p>Duration: {formatDuration(selectedEvent.duration)}</p>
-              <p>Category: {selectedEvent.category}</p>
+              <p>Thời lượng: {formatDuration(selectedEvent.duration)}</p>
+              <p>Thể loại: {selectedEvent.category}</p>
             </div>
           </div>
         </div>
