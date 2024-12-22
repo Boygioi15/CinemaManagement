@@ -12,5 +12,4 @@ router.get("/:id", filmShowController.getFilmShow);
 router.get("/:id/getHostRoom", filmShowController.getHostRoom);
 router.post("/:id/refresh-locked-seat", filmShowController.refreshLockedSeat);
 
-
 export default router;

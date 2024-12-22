@@ -31,7 +31,7 @@ class FilmController {
     const response = await FilmService.updateFilmById(id, req.body);
 
     return res.status(200).json({
-      msg: "Create film successfully!",
+      msg: "Update film successfully!",
       success: true,
       data: response,
     });

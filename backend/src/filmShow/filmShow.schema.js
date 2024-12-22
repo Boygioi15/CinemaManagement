@@ -20,8 +20,8 @@ const filmShowSchema = new mongoose.Schema(
       required: true,
       ref: "films",
     },
-    lockedSeatIds: {
-      type: [mongoose.Schema.Types.ObjectId],
+    lockedSeats: {
+      type: [],
       default: [],
     },
     filmType: {

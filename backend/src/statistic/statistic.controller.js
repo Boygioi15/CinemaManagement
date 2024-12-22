@@ -1,8 +1,8 @@
 import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
 import filmShowModel from "../filmShow/filmShow.schema.js";
-import roomModel from "../room/room.controller.js"
-import filmModel from "../film/film.schema.js"
+import roomModel from "../room/room.controller.js";
+import filmModel from "../film/film.schema.js";
 
 class StatisticController {
   //Tỷ lệ vé đã phục vụ hoặc in theo ngày
@@ -84,7 +84,6 @@ class StatisticController {
       },
       { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
     ]);
-
     res.json(tickets);
   });
 
@@ -118,7 +117,6 @@ class StatisticController {
       },
       { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
     ]);
-
     res.json(items);
   });
 
@@ -428,8 +426,27 @@ class StatisticController {
       throw new Error("Vui lòng cung cấp ngày!");
     }
     const selectedDateObj = new Date(selectedDate);
-    const startOfDayUTC = new Date(Date.UTC(selectedDateObj.getUTCFullYear(), selectedDateObj.getUTCMonth(), selectedDateObj.getUTCDate(), 0, 0, 0));
-    const endOfDayUTC = new Date(Date.UTC(selectedDateObj.getUTCFullYear(), selectedDateObj.getUTCMonth(), selectedDateObj.getUTCDate(), 23, 59, 59, 999));
+    const startOfDayUTC = new Date(
+      Date.UTC(
+        selectedDateObj.getUTCFullYear(),
+        selectedDateObj.getUTCMonth(),
+        selectedDateObj.getUTCDate(),
+        0,
+        0,
+        0
+      )
+    );
+    const endOfDayUTC = new Date(
+      Date.UTC(
+        selectedDateObj.getUTCFullYear(),
+        selectedDateObj.getUTCMonth(),
+        selectedDateObj.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
     const roomsSet = new Set();
     const events = [];
     const filmShows = await filmShowModel
@@ -461,7 +478,7 @@ class StatisticController {
         const minutes = parseFloat(startTimeParts[1]) / 60;
         startTime = hours + minutes;
       }
-      const categoryNames = film.tagsRef.map(tag => tag.name);
+      const categoryNames = film.tagsRef.map((tag) => tag.name);
       events.push({
         id: index + 1,
         room: roomId.roomName,
