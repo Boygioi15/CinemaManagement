@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const seatSchema = new mongoose.Schema({
     seatName: {
         type: String,
-        required: true,
+        required: true
     },
     isPairSeat: {
         type: Boolean,
@@ -11,20 +11,28 @@ const seatSchema = new mongoose.Schema({
     },
     seatCol: {
         type: Number,
-        required: true,
+        required: true
     },
     seatRow: {
         type: Number,
-        required: true,
+        required: true
     },
     usable: {
         type: Boolean,
         default: true
     },
-    other: {
-        type: String,
+    deleted: {
+        type: Boolean,
+        default: false
     },
-
+    other: {
+        type: String
+    },
+    roomId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "rooms",
+        required: true
+    },
 }, {
     timestamps: true,
 });

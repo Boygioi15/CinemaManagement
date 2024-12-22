@@ -34,7 +34,7 @@ export class AuthService {
         identifier,
         userPass,
     }) => {
-        const user = await UserService.checkExitAndActiveUser(identifier);
+        const user = await UserService.checkExitAndBlockedUser(identifier);
         if (!user) {
             throw customError("User not found", 400);
         }

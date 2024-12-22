@@ -1,0 +1,50 @@
+.custom-button {
+  position: relative;
+  inset: 0;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 7px; /* Ensure all elements have border-radius 7px */
+  overflow: hidden;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
+  cursor: pointer;
+  text-decoration: none; /* Remove underline from the <a> tag */
+  display: inline-flex; /* Use inline-flex to align text easily */
+  justify-content: center; /* Horizontally center the text */
+  align-items: center; /* Vertically center the text */
+  z-index: 2; /* Ensure text is above the background */
+  background: none; /* No direct background, to be used by child divs */
+  text-align: center;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+/* When hover, change text color using CSS variable */
+.custom-button:hover {
+  color: var(--hover-text-color);
+}
+
+/* Default background div */
+.button-background-default {
+  position: absolute;
+  inset: 0; /* Ensure background covers the entire button */
+  z-index: 1; /* Underneath the button content */
+}
+
+/* Hover background effect */
+.button-background-hover {
+  position: absolute;
+  inset: 0; /* Ensure hover background covers the entire button */
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1; /* Underneath the button text */
+}
+
+.custom-button:hover .button-background-hover {
+  transform: translateX(0);
+}
+
+/* Button text */
+.button-text {
+  position: relative;
+  z-index: 2; /* Ensure text is above the background */
+}
