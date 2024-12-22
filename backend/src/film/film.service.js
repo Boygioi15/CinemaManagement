@@ -69,7 +69,7 @@ export class FilmService {
   static createFilm = async (filmData) => {
     const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
     const tagsArray = JSON.parse(tagsRef);
-    console.log(filmData);
+    //console.log(filmData);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);
     // Kiểm tra định dạng 2D, 3D

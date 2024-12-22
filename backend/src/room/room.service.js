@@ -37,8 +37,24 @@ export class RoomService {
       }
       roomSeatBe.push(row); // Add the row to the 2D array
     }
-    await newRoom.save();
-    return newRoom;
+
+    //console.log("Transformed seats:", roomSeatBe);
+    //console.log("roomSeatBe:", JSON.stringify(roomSeatBe, null, 2));
+
+    const newRoom = new roomModel({
+      roomName,
+      noOfSeatRow,
+      noOfSeatInEachRow,
+      seats: roomSeatBe, // Include the dynamically generated seats
+      centerX1,
+      centerX2,
+      centerY1,
+      centerY2,
+      roomNote,
+    });
+
+    // Save the room document to the database
+    return await newRoom.save();
   };
 
   // Hàm lấy danh sách tên ghế dựa trên roomId và danh sách seatIds
