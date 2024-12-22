@@ -7,15 +7,11 @@ import DatePicker from "react-datepicker";
 import axios from "axios";
 
 const FilmShow = () => {
-  const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [filmNameQuery, setFilmNameQuery] = useState("");
-  const [countryQuery, setCountryQuery] = useState("");
-  const [ageRestriction, setAgeRestriction] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0] // Định dạng yyyy-mm-dd
-  );
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -33,7 +29,7 @@ const FilmShow = () => {
         );
         const data = response.data.data;
         console.log(data);
-
+        const now = new Date();
         const processedData = await Promise.all(
           data.map(async (show) => {
             // Lấy tên phim
@@ -49,22 +45,37 @@ const FilmShow = () => {
             const roomName = roomRes.data.data.roomName;
 
             //Láy ghế
-            const seatList = await Promise.all(
-              show.lockedSeatIds.map(async (seatId) => {
-                const seatResponse = await axios.get(
-                  `http://localhost:8000/api/seats/${seatId}`
-                );
-                const fullSeatName = `${seatResponse.data.data.seatName}${seatResponse.data.data.seatRow}${seatResponse.data.data.seatCol}`;
-                return fullSeatName; // Ví dụ trả về tên ghế
-              })
-            );
+            // const seatList = await Promise.all(
+            //   show.lockedSeatIds.map(async (seatId) => {
+            //     const seatResponse = await axios.get(
+            //       `http://localhost:8000/api/seats/${seatId}`
+            //     );
+            //     const fullSeatName = `${seatResponse.data.data.seatName}${seatResponse.data.data.seatRow}${seatResponse.data.data.seatCol}`;
+            //     return fullSeatName; // Ví dụ trả về tên ghế
+            //   })
+            // );
             // Xử lý dữ liệu để hiển thị
+            const showDate = new Date(show.showDate); // Ngày chiếu
+            const showTimeParts = show.showTime.split(":");
+            showDate.setHours(showTimeParts[0], showTimeParts[1]); // Giờ chiếu đầy đủ
+
+            let status = "Chưa chiếu";
+            if (showDate < now) {
+              status = "Đã chiếu";
+            } else if (
+              showDate.toDateString() === now.toDateString() && // Cùng ngày
+              showDate > now
+            ) {
+              status = "Đang chiếu";
+            }
+
             return {
               ...show,
               film: filmName,
               showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
               room: roomName,
-              seatList: seatList.join(", "),
+              status: status,
+              //  seatList: seatList.join(", "),
             };
           })
         );
@@ -111,37 +122,7 @@ const FilmShow = () => {
     { header: "Suất chiếu", key: "showTime" },
     { header: "Phòng", key: "room" },
     { header: "Ghế đã đặt", key: "seatList" },
-    {
-      header: "Trạng thái",
-      key: "status",
-      render: (_, row) => {
-        let statusText = "";
-        let statusClass = "";
-
-        if (row.invalidReason_Printed) {
-          statusText = "Từ chối in vé";
-          statusClass = "bg-red-100 text-red-800";
-        } else if (row.invalidReason_Served) {
-          statusText = "Từ chối phục vụ";
-          statusClass = "bg-red-100 text-red-800";
-        } else if (!row.printed) {
-          statusText = "Chưa in";
-          statusClass = "bg-yellow-100 text-yellow-800";
-        } else if (row.served) {
-          statusText = "Đã phục vụ";
-          statusClass = "bg-green-100 text-green-800";
-        } else if (row.printed) {
-          statusText = "Đã in";
-          statusClass = "bg-blue-100 text-blue-800";
-        }
-
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>
-            {statusText}
-          </span>
-        );
-      },
-    },
+    { header: "Trạng thái", key: "status" },
     {
       header: "Hành động",
       key: "actions",
@@ -149,7 +130,7 @@ const FilmShow = () => {
         <div className="flex space-x-3">
           <button
             className="text-blue-600 hover:text-blue-800"
-            onClick={() => handleEditClick(row)}
+            // onClick={() => handleEditClick(row)}
           >
             <FiEdit2 className="w-4 h-4" />
           </button>
@@ -162,16 +143,34 @@ const FilmShow = () => {
   ];
   const itemsPerPage = 6;
 
-  // const filteredData = filmshows.filter(
-  //   (filmshows) =>
-  //     filmshows.name.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-  //     filmshows.email.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-  //     filmshows.role.toLowerCase().includes(tableSearchQuery.toLowerCase())
-  // );
+  const filteredData = filmshows.filter((item) => {
+    const matchesName = filmNameQuery
+      ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
+      : true;
 
-  const totalPages = Math.ceil(filmshows.length / itemsPerPage);
+    const matchesCountry = countryQuery
+      ? item.originatedCountry
+          .toLowerCase()
+          .includes(countryQuery.toLowerCase())
+      : true;
+
+    // const matchesAge = ageRestriction
+    //   ? item.ageRestriction === ageRestriction
+    //   : true;
+    const matchesStatus =
+      statusQuery === "" ||
+      statusQuery === "all" ||
+      item.status === statusQuery;
+
+    return matchesName && matchesCountry && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filmshows.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
     <div>
@@ -207,18 +206,19 @@ const FilmShow = () => {
               <DatePicker
                 selected={selectedDate}
                 onChange={(date) => {
-                  const formattedDate = new Date(date)
+                  const offset = date.getTimezoneOffset() * 60000; // Lấy chênh lệch múi giờ
+                  const localDate = new Date(date.getTime() - offset) // Chuyển đổi về local time
                     .toISOString()
-                    .split("T")[0]; // Định dạng yyyy-mm-dd
-                  setSelectedDate(formattedDate);
+                    .split("T")[0]; // yyyy-mm-dd
+                  setSelectedDate(localDate);
                 }}
                 className="p-2 border rounded-md"
               />
               <div className="flex items-center w-[300px]">
                 <select
                   name="age"
-                  value={ageRestriction}
-                  onChange={(e) => setAgeRestriction(e.target.value)}
+                  value={statusQuery}
+                  onChange={(e) => setStatusQuery(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="" disabled>
@@ -251,17 +251,17 @@ const FilmShow = () => {
             disabled={currentPage === 1}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Previous
+            Trước
           </button>
           <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+            trang {currentPage} trên {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Next
+            Tiếp
           </button>
         </div>
       </div>
