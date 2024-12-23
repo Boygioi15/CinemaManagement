@@ -86,6 +86,8 @@ export class FilmService {
 
   // Get nội dung chi tiết của phim (cho trang film detail)
   static getFilmDetail = async (filmId) => {
+    console.log(filmId);
+
     const filmFound = await filmModel
       .findById(filmId)
       .populate("tagsRef", "name -_id")

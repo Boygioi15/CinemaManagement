@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FiCalendar, FiSearch, FiX } from "react-icons/fi";
 import axios from "axios";
 import { Combobox } from "@headlessui/react";
+import RefreshLoader from "../Loading";
+import Dialog from "../Film/ConfirmDialog";
+import SuccessDialog from "../Film/SuccessDialog";
 
 const FilmShowModal = ({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedHour, setSelectedHour] = useState("");
-  const [selectedMinute, setSelectedMinute] = useState("");
-
-  const [selectedRoom, setSelectedRoom] = useState("");
   const [selectedMovie, setSelectedMovie] = useState("");
 
   const [movies, setMovies] = useState([]);
   const [rooms, setRooms] = useState([]);
+
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
 
   const fetchRooms = async () => {
     try {
@@ -49,6 +52,7 @@ const FilmShowModal = ({ isOpen, onClose }) => {
     fetchFilms();
   }, []);
 
+  //search tên phim
   const filteredMovies =
     searchQuery === ""
       ? movies
@@ -56,6 +60,7 @@ const FilmShowModal = ({ isOpen, onClose }) => {
           movie.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
+  //điều chỉnh ngày không lệch múi giờ
   const getTodayDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00 để tránh lệch
@@ -63,7 +68,99 @@ const FilmShowModal = ({ isOpen, onClose }) => {
     today.setMinutes(today.getMinutes() - offset); // Điều chỉnh giờ theo UTC
     return today.toISOString().split("T")[0]; // Lấy ngày theo định dạng yyyy-mm-dd
   };
-  console.log(rooms);
+
+  //Chọn phim
+  const handleSelectMovie = (movie) => {
+    if (!movie) {
+      return;
+    }
+    setSelectedMovie(movie);
+    setFormData((prev) => ({
+      ...prev,
+      film: movie.id, // Lưu ID phim đã chọn vào formData
+    }));
+  };
+
+  const [formData, setFormData] = useState({
+    film: "",
+    showDate: "",
+    hour: "",
+    minute: "",
+    roomId: "",
+  });
+
+  //set rỗng data
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedMovie("");
+      setFormData({
+        film: "",
+        showDate: "",
+        hour: "",
+        minute: "",
+        roomId: "",
+      });
+    }
+  }, [isOpen]);
+
+  const isFormValid = useMemo(() => {
+    const requiredFields = ["film", "showDate", "hour", "minute", "roomId"];
+    return requiredFields.every(
+      (field) => String(formData[field]).trim() !== ""
+    );
+  }, [formData]);
+
+  //Nhấn xác nhận
+  const handleSubmit = () => {
+    setIsConfirmDialogOpen(true);
+
+    setDialogData({
+      title: "Xác nhận thêm mới suất chiếu",
+      message: "Thêm mới suất chiếu?",
+    });
+  };
+
+  //Add filmshow
+  const handleFilmshow = async () => {
+    setIsLoading(true);
+    try {
+      const { film, showDate, hour, minute, roomId } = formData;
+
+      // Ghép giờ và phút thành showTime
+      // const showTime = `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:00`;
+      const showTime = `${hour}:${minute}`;
+
+      const payload = {
+        film,
+        showDate,
+        showTime,
+        roomId,
+      };
+
+      console.log("Dữ liệu gửi đi:", payload);
+
+      // Gửi dữ liệu đến API
+
+      const response = await axios.post(
+        "http://localhost:8000/api/film-show",
+        payload
+      );
+      setDialogData({
+        title: "Thành công",
+        message: "Thêm suất chiếu thành công",
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setIsLoading(false); // Tắt trạng thái loading
+        setIsConfirmDialogOpen(false); // Đóng dialog xác nhận
+        setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
+      }
+    } catch (error) {
+      console.error("Lỗi từ server:", error.response?.data || error.message);
+      console.error("Chi tiết lỗi:", error.response?.data?.errors);
+      setIsLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -91,7 +188,10 @@ const FilmShowModal = ({ isOpen, onClose }) => {
             >
               Chọn phim
             </label>
-            <Combobox value={selectedMovie} onChange={setSelectedMovie}>
+            <Combobox
+              value={selectedMovie}
+              onChange={(movie) => handleSelectMovie(movie)}
+            >
               <div className="relative">
                 <div className="relative w-full cursor-default overflow-auto rounded-lg bg-white text-left border focus-within:ring-2 focus-within:ring-blue-500">
                   <Combobox.Input
@@ -162,8 +262,13 @@ const FilmShowModal = ({ isOpen, onClose }) => {
                   id="date"
                   min={getTodayDate()}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  value={formData.showDate}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      showDate: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -180,8 +285,10 @@ const FilmShowModal = ({ isOpen, onClose }) => {
                 <select
                   id="hour"
                   className="block w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={selectedHour}
-                  onChange={(e) => setSelectedHour(e.target.value)}
+                  value={formData.hour}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, hour: e.target.value }))
+                  }
                 >
                   <option value="" disabled>
                     Giờ
@@ -197,8 +304,10 @@ const FilmShowModal = ({ isOpen, onClose }) => {
                 <select
                   id="minute"
                   className="block w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={selectedMinute}
-                  onChange={(e) => setSelectedMinute(e.target.value)}
+                  value={formData.minute}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, minute: e.target.value }))
+                  }
                 >
                   <option value="" disabled>
                     Phút
@@ -219,12 +328,14 @@ const FilmShowModal = ({ isOpen, onClose }) => {
               htmlFor="room"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Select Room
+              Chọn phòng chiếu
             </label>
             <select
               id="room"
-              value={selectedRoom}
-              onChange={(e) => setSelectedRoom(e.target.value)}
+              value={formData.roomId}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, roomId: e.target.value }))
+              }
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="" disabled>
@@ -242,22 +353,37 @@ const FilmShowModal = ({ isOpen, onClose }) => {
         <div className="px-6 py-4 bg-gray-50 border-t rounded-b-lg">
           <button
             type="button"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={!isFormValid}
+            className={`w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              isFormValid
+                ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500" // Nếu hợp lệ
+                : "bg-gray-300 text-gray-500 cursor-not-allowed" // Nếu không hợp lệ
+            }`}
             onClick={() => {
-              console.log({
-                selectedMovie,
-                selectedDate,
-                selectedHour,
-                selectedMinute,
-                selectedRoom,
-              });
-              onClose();
+              handleSubmit();
             }}
           >
             Xác nhận
           </button>
         </div>
       </div>
+
+      <Dialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={handleFilmshow}
+        title={dialogData.title}
+        message={dialogData.message}
+      />
+      <SuccessDialog
+        isOpen={isSuccessDialogOpen}
+        onClose={() => {
+          isOpen = false;
+          setIsSuccessDialogOpen(false);
+        }}
+        title={dialogData.title}
+        message={dialogData.message}
+      />
     </div>
   );
 };

@@ -39,7 +39,7 @@ export class FilmShowService {
         const existingShowStart = new Date(
           `${existingShow.showDate}T${existingShow.showTime}`
         );
-        const existingFilmDetails = await FilmService.getFilmDetails(
+        const existingFilmDetails = await FilmService.getFilmDetail(
           existingShow.film
         );
         const existingFilmDuration = existingFilmDetails.filmDuration;

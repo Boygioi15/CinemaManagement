@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import Table from "../../components/Table";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
+import { TbCancel } from "react-icons/tb";
 import FilmShowModal from "../../components/Filmshow/FilmShowModal";
+import ViewModal from "../../components/Filmshow/Detail";
+import RefreshLoader from "../../components/Loading";
 import { BiRefresh } from "react-icons/bi";
 import DatePicker from "react-datepicker";
 import axios from "axios";
@@ -14,103 +17,96 @@ const FilmShow = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [mode, setMode] = useState("add");
   const [filmshows, setFilmShows] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
+  const fetchFilmShows = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/film-show/getAll"
+      );
+      const data = response.data.data;
+      console.log(data);
+      const now = new Date();
+      const processedData = await Promise.all(
+        data.map(async (show) => {
+          // Lấy tên phim
+          const filmRes = await axios.get(
+            `http://localhost:8000/api/films/${show.film}/getFilmDetail`
+          );
+          const filmName = filmRes.data.data.name;
+
+          // Lấy tên phòng
+          const roomRes = await axios.get(
+            `http://localhost:8000/api/rooms/${show.roomId}`
+          );
+          const roomName = roomRes.data.data.roomName;
+
+          //Láy ghế
+          // const seatList = await Promise.all(
+          //   show.lockedSeatIds.map(async (seatId) => {
+          //     const seatResponse = await axios.get(
+          //       `http://localhost:8000/api/seats/${seatId}`
+          //     );
+          //     const fullSeatName = `${seatResponse.data.data.seatName}${seatResponse.data.data.seatRow}${seatResponse.data.data.seatCol}`;
+          //     return fullSeatName; // Ví dụ trả về tên ghế
+          //   })
+          // );
+          // Xử lý dữ liệu để hiển thị
+          const showDate = new Date(show.showDate); // Ngày chiếu
+          const showTimeParts = show.showTime.split(":");
+          showDate.setHours(showTimeParts[0], showTimeParts[1]); // Giờ chiếu đầy đủ
+
+          let status = "Chưa chiếu";
+          if (showDate < now) {
+            status = "Đã chiếu";
+          } else if (
+            showDate.toDateString() === now.toDateString() && // Cùng ngày
+            showDate > now
+          ) {
+            status = "Đang chiếu";
+          }
+
+          return {
+            ...show,
+            film: filmName,
+            showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
+            room: roomName,
+            status: status,
+            //  seatList: seatList.join(", "),
+          };
+        })
+      );
+
+      setFilmShows(processedData);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchFilmShows = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8000/api/film-show/getAll"
-        );
-        const data = response.data.data;
-        console.log(data);
-        const now = new Date();
-        const processedData = await Promise.all(
-          data.map(async (show) => {
-            // Lấy tên phim
-            const filmRes = await axios.get(
-              `http://localhost:8000/api/films/${show.film}/getFilmDetail`
-            );
-            const filmName = filmRes.data.data.name;
-
-            // Lấy tên phòng
-            const roomRes = await axios.get(
-              `http://localhost:8000/api/rooms/${show.roomId}`
-            );
-            const roomName = roomRes.data.data.roomName;
-
-            //Láy ghế
-            // const seatList = await Promise.all(
-            //   show.lockedSeatIds.map(async (seatId) => {
-            //     const seatResponse = await axios.get(
-            //       `http://localhost:8000/api/seats/${seatId}`
-            //     );
-            //     const fullSeatName = `${seatResponse.data.data.seatName}${seatResponse.data.data.seatRow}${seatResponse.data.data.seatCol}`;
-            //     return fullSeatName; // Ví dụ trả về tên ghế
-            //   })
-            // );
-            // Xử lý dữ liệu để hiển thị
-            const showDate = new Date(show.showDate); // Ngày chiếu
-            const showTimeParts = show.showTime.split(":");
-            showDate.setHours(showTimeParts[0], showTimeParts[1]); // Giờ chiếu đầy đủ
-
-            let status = "Chưa chiếu";
-            if (showDate < now) {
-              status = "Đã chiếu";
-            } else if (
-              showDate.toDateString() === now.toDateString() && // Cùng ngày
-              showDate > now
-            ) {
-              status = "Đang chiếu";
-            }
-
-            return {
-              ...show,
-              film: filmName,
-              showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
-              room: roomName,
-              status: status,
-              //  seatList: seatList.join(", "),
-            };
-          })
-        );
-
-        setFilmShows(processedData);
-      } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
-      }
-    };
-
     fetchFilmShows();
   }, []);
 
   // Gọi API khi component được render lần đầu
 
-  const handleEditClick = (item) => {
+  const handleViewClick = (item) => {
     setSelectedItem(item);
-    setMode("edit");
     setIsDetailModalOpen(true);
   };
 
   const handleAddClick = () => {
-    setMode("add");
     setSelectedItem(null);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleEditConfirm = (item) => {
-    console.log(`Lấy được data:${item.name} `);
-    setIsDetailModalOpen(false);
+    setIsAddModalOpen(true);
   };
 
   const handleRefresh = async () => {
     setLoading(true);
-
+    fetchFilmShows();
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -121,8 +117,42 @@ const FilmShow = () => {
     { header: "Ngày chiếu", key: "showDate" },
     { header: "Suất chiếu", key: "showTime" },
     { header: "Phòng", key: "room" },
-    { header: "Ghế đã đặt", key: "seatList" },
-    { header: "Trạng thái", key: "status" },
+    { header: "Ghế đã đặt", key: "lockedSeats" },
+    {
+      header: "Trạng thái",
+      key: "status",
+      render: (_, row) => {
+        let statusClass = "";
+        let statusText = row.status; // Đảm bảo `rowData.status` có giá trị hợp lệ
+
+        // Kiểm tra giá trị status và gán class tương ứng
+        switch (row.status) {
+          case "Chưa chiếu":
+            statusClass = "bg-yellow-100 text-yellow-800"; // Màu vàng
+            break;
+          case "Đã hủy":
+            statusClass = "bg-red-100 text-red-800"; // Màu đỏ
+            break;
+          case "Đã chiếu":
+            statusClass = "bg-green-100 text-green-800"; // Màu xanh
+            break;
+          case "Đang chiếu":
+            statusClass = "bg-blue-100 text-blue-800"; // Màu xanh dương
+            break;
+          default:
+            statusClass = "bg-gray-100 text-gray-800"; // Màu mặc định
+            break;
+        }
+
+        return (
+          <span
+            className={`inline-block px-3 py-1 rounded-full ${statusClass}`}
+          >
+            {statusText}
+          </span>
+        );
+      },
+    },
     {
       header: "Hành động",
       key: "actions",
@@ -130,12 +160,12 @@ const FilmShow = () => {
         <div className="flex space-x-3">
           <button
             className="text-blue-600 hover:text-blue-800"
-            // onClick={() => handleEditClick(row)}
+            onClick={() => handleViewClick(row)}
           >
-            <FiEdit2 className="w-4 h-4" />
+            <FiSearch className="w-4 h-4" />
           </button>
           <button className="text-red-600 hover:text-red-800">
-            <FiTrash2 className="w-4 h-4" />
+            <TbCancel className="w-4 h-4" />
           </button>
         </div>
       ),
@@ -148,21 +178,19 @@ const FilmShow = () => {
       ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
       : true;
 
-    const matchesCountry = countryQuery
-      ? item.originatedCountry
-          .toLowerCase()
-          .includes(countryQuery.toLowerCase())
-      : true;
+    const matchesDate = selectedDate
+      ? item.showDate === new Date(selectedDate).toLocaleDateString()
+      : true; // Nếu không có ngày chọn thì không lọc theo ngày
 
-    // const matchesAge = ageRestriction
-    //   ? item.ageRestriction === ageRestriction
-    //   : true;
     const matchesStatus =
       statusQuery === "" ||
       statusQuery === "all" ||
       item.status === statusQuery;
 
-    return matchesName && matchesCountry && matchesStatus;
+    console.log(statusQuery);
+    console.log("status item:", item.status);
+
+    return matchesName && matchesDate && matchesStatus;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -225,10 +253,10 @@ const FilmShow = () => {
                     <span className="text-gray-400">Trạng thái</span>
                   </option>
                   <option value="all">Tất cả</option>
-                  <option value="all">Đã hủy</option>
-                  <option value="all">Đã chiếu</option>
-                  <option value="all">Chưa chiếu</option>
-                  <option value="all">Đang chiếu</option>
+                  <option value="Đã hủy">Đã hủy</option>
+                  <option value="Đã chiếu">Đã chiếu</option>
+                  <option value="Chưa chiếu">Chưa chiếu</option>
+                  <option value="Đang chiếu">Đang chiếu</option>
                 </select>
               </div>
             </div>
@@ -267,9 +295,17 @@ const FilmShow = () => {
       </div>
 
       <FilmShowModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
+
+      <ViewModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+        filmShowDetail={selectedItem}
       />
+
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };
