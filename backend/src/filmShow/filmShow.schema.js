@@ -24,10 +24,10 @@ const filmShowSchema = new mongoose.Schema(
       type: [],
       default: [],
     },
-    filmType: {
-      type: String,
-      enum: ["2D", "3D", "4D"],
-    },
+    // filmType: {
+    //   type: String,
+    //   enum: ["2D", "3D", "4D"],
+    // },
   },
   {
     timestamps: true,

@@ -9,14 +9,17 @@ import { RoomService } from "../room/room.service.js";
 export class FilmShowService {
   //Cho phép tạo suất chiếu cùng 1 phim nếu khác phòng
   static createFilmShow = async ({ roomId, showTime, showDate, film }) => {
-    const showStart = new Date(`${showDate}T${showTime}`);
+    const [hour, minute] = showTime.split(":").map(Number);
+    const showStart = new Date(showDate);
+    showStart.setHours(0, 0, 0, 0);
+    showStart.setMinutes(hour * 60 + minute); 
+
     const filmDetails = await FilmService.getFilmDetail(film);
     if (!filmDetails) {
       throw customError("Phim không tồn tại", 404);
     }
     const filmDuration = filmDetails.filmDuration;
     const showEnd = new Date(showStart.getTime() + filmDuration * 60000);
-    // Tìm các suất chiếu có khả năng trùng lặp
     const overlappingShows = await filmShowModel.find({
       roomId,
       showDate,
@@ -33,12 +36,20 @@ export class FilmShowService {
         },
       ],
     });
-    // Kiểm tra trùng lặp thời gian
     const isOverlapping = await Promise.all(
       overlappingShows.map(async (existingShow) => {
-        const existingShowStart = new Date(
-          `${existingShow.showDate}T${existingShow.showTime}`
-        );
+        if (!existingShow.showTime) {
+          throw customError(
+            "Dữ liệu không hợp lệ: Thiếu thời gian chiếu trong cơ sở dữ liệu.",
+            500
+          );
+        }
+        const [existingHour, existingMinute] = existingShow.showTime
+          .split(":")
+          .map(Number);
+        const existingShowStart = new Date(showDate);
+        existingShowStart.setHours(0, 0, 0, 0); 
+        existingShowStart.setMinutes(existingHour * 60 + existingMinute);
         const existingFilmDetails = await FilmService.getFilmDetail(
           existingShow.film
         );
@@ -46,7 +57,6 @@ export class FilmShowService {
         const existingShowEnd = new Date(
           existingShowStart.getTime() + existingFilmDuration * 60000
         );
-
         const isStartInsideExisting =
           showStart >= existingShowStart && showStart < existingShowEnd;
         const isEndInsideExisting =
@@ -60,11 +70,10 @@ export class FilmShowService {
     );
     if (isOverlapping.some((overlap) => overlap)) {
       throw customError(
-        "Khoảng thời gian không khả dụng. Vui lòng chọn thời điểm khác.",
+        "Khoảng thời gian không khả dụng. Các suất chiếu cách nhau tối thiểu 30p.",
         400
       );
     }
-    // Tạo suất chiếu
     return await filmShowModel.create({
       roomId,
       showTime,
