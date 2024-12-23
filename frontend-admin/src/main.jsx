@@ -13,6 +13,8 @@ import FilmShowChart from "./pages/FilmShow/filmshowChart";
 
 import DailyReport from "./pages/Statistic/DailyReport";
 import RenevueOverview from "./pages/Statistic/RenevueOverview";
+import LoginPage from "./pages/Auth/login";
+import ForgotPasswordPage from "./pages/Auth/fotgotpass";
 
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -82,6 +84,14 @@ const router = createBrowserRouter([
       //   element: <UserAccount />
       // }
     ],
+  },
+  {
+    path: "/admin/auth",
+    element: <LoginPage />,
+  },
+  {
+    path: "/admin/auth/forgot-pass",
+    element: <ForgotPasswordPage />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
