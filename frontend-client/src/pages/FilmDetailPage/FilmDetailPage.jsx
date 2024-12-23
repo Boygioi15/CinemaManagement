@@ -16,8 +16,10 @@ import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
 import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import FoodCard from "../../Components/FoodCard";
 import TicketType from "../../Components/TicketType";
+import { useParams } from "react-router-dom";
 
-const FilmDetailPage = ({ filmID = "676169231b9eb475b2ae8bee" }) => {
+const FilmDetailPage = () => {
+  const { filmID } = useParams();
   const ageLimit = 18;
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedSchedule, setSSelectedSchedule] = useState("19/12");

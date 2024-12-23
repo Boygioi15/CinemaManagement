@@ -51,7 +51,7 @@ const router = createBrowserRouter([
         element: <UserTransHistory />,
       },
       {
-        path: "/movie/detail",
+        path: "/movie/detail/:filmID",
         element: <FilmDetailPage />,
       },
       {

@@ -13,7 +13,8 @@ export class AdditionalItemService {
     const oldAdditional = await additionalItemModel.findByIdAndUpdate(
       additionalItemID,
       {
-        updateData,
+        thumbnailURL: updateData.thumbnailURL,
+        public_ID: updateData.public_ID,
       }
     );
     //destroy old img
