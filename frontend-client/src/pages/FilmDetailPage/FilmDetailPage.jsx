@@ -59,7 +59,7 @@ const FilmDetailPage = () => {
           <div className="relative border border-gray-300 rounded-lg ">
             {/* Hình ảnh phim */}
             <img
-              src="https://res.cloudinary.com/ddrfocetn/image/upload/v1732590791/rkq5zo350eovgemvkjyb.jpg"
+              src= {filmDetail.thumbnailURL}
               alt="Phim"
               className="w-full h-full object-cover rounded-lg "
             />
