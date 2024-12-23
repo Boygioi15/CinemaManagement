@@ -12,7 +12,7 @@ export class FilmShowService {
     const [hour, minute] = showTime.split(":").map(Number);
     const showStart = new Date(showDate);
     showStart.setHours(0, 0, 0, 0);
-    showStart.setMinutes(hour * 60 + minute); 
+    showStart.setMinutes(hour * 60 + minute);
 
     const filmDetails = await FilmService.getFilmDetail(film);
     if (!filmDetails) {
@@ -20,6 +20,7 @@ export class FilmShowService {
     }
     const filmDuration = filmDetails.filmDuration;
     const showEnd = new Date(showStart.getTime() + filmDuration * 60000);
+
     const overlappingShows = await filmShowModel.find({
       roomId,
       showDate,
@@ -36,6 +37,7 @@ export class FilmShowService {
         },
       ],
     });
+
     const isOverlapping = await Promise.all(
       overlappingShows.map(async (existingShow) => {
         if (!existingShow.showTime) {
@@ -44,12 +46,15 @@ export class FilmShowService {
             500
           );
         }
+
         const [existingHour, existingMinute] = existingShow.showTime
           .split(":")
           .map(Number);
+
         const existingShowStart = new Date(showDate);
-        existingShowStart.setHours(0, 0, 0, 0); 
+        existingShowStart.setHours(0, 0, 0, 0);
         existingShowStart.setMinutes(existingHour * 60 + existingMinute);
+
         const existingFilmDetails = await FilmService.getFilmDetail(
           existingShow.film
         );
@@ -57,23 +62,37 @@ export class FilmShowService {
         const existingShowEnd = new Date(
           existingShowStart.getTime() + existingFilmDuration * 60000
         );
+
+        // Kiểm tra các điều kiện trùng lặp
         const isStartInsideExisting =
           showStart >= existingShowStart && showStart < existingShowEnd;
         const isEndInsideExisting =
           showEnd > existingShowStart && showEnd <= existingShowEnd;
+        const isExistingStartInsideNew =
+          existingShowStart >= showStart && existingShowStart < showEnd;
+        const isExistingEndInsideNew =
+          existingShowEnd > showStart && existingShowEnd <= showEnd;
         const isGapTooSmall =
           Math.abs(showStart - existingShowEnd) < 30 * 60000 ||
           Math.abs(showEnd - existingShowStart) < 30 * 60000;
 
-        return isStartInsideExisting || isEndInsideExisting || isGapTooSmall;
+        return (
+          isStartInsideExisting ||
+          isEndInsideExisting ||
+          isExistingStartInsideNew ||
+          isExistingEndInsideNew ||
+          isGapTooSmall
+        );
       })
     );
+
     if (isOverlapping.some((overlap) => overlap)) {
       throw customError(
         "Khoảng thời gian không khả dụng. Các suất chiếu cách nhau tối thiểu 30p.",
         400
       );
     }
+
     return await filmShowModel.create({
       roomId,
       showTime,

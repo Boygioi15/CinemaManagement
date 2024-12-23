@@ -5,8 +5,7 @@ import filmShowModel from "./filmShow.schema.js";
 
 class FilmShowController {
   createFilmShow = expressAsyncHandler(async (req, res, next) => {
-    const { film, roomId, showDate, showTime } = req.query;
-    const response = await FilmShowService.createFilmShow({ film, roomId, showDate, showTime });
+    const response = await FilmShowService.createFilmShow(req.body);
     return res.status(200).json({
       msg: "Create film show successfully!",
       success: true,
