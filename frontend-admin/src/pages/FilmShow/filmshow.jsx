@@ -30,7 +30,7 @@ const FilmShow = () => {
         "http://localhost:8000/api/film-show/getAll"
       );
       const data = response.data.data;
-      console.log(data);
+
       const now = new Date();
       const processedData = await Promise.all(
         data.map(async (show) => {
@@ -39,36 +39,38 @@ const FilmShow = () => {
             `http://localhost:8000/api/films/${show.film}/getFilmDetail`
           );
           const filmName = filmRes.data.data.name;
-
+          const duration = filmRes.data.data.filmDuration;
           // Lấy tên phòng
           const roomRes = await axios.get(
             `http://localhost:8000/api/rooms/${show.roomId}`
           );
           const roomName = roomRes.data.data.roomName;
 
-          //Láy ghế
-          // const seatList = await Promise.all(
-          //   show.lockedSeatIds.map(async (seatId) => {
-          //     const seatResponse = await axios.get(
-          //       `http://localhost:8000/api/seats/${seatId}`
-          //     );
-          //     const fullSeatName = `${seatResponse.data.data.seatName}${seatResponse.data.data.seatRow}${seatResponse.data.data.seatCol}`;
-          //     return fullSeatName; // Ví dụ trả về tên ghế
-          //   })
-          // );
           // Xử lý dữ liệu để hiển thị
           const showDate = new Date(show.showDate); // Ngày chiếu
-          const showTimeParts = show.showTime.split(":");
-          showDate.setHours(showTimeParts[0], showTimeParts[1]); // Giờ chiếu đầy đủ
+
+          //xử lí lệch múi giờ
+          const timeZoneOffset = showDate.getTimezoneOffset() * 60000; // Chênh lệch múi giờ tính bằng ms
+          const localShowDate = new Date(showDate.getTime() - timeZoneOffset);
+
+          //gán giwof và phút vào date
+          const [hours, minutes] = show.showTime.split(":");
+          localShowDate.setHours(hours, minutes); // Gán giờ và phút vào showDate
+
+          //thười gian kết thúc
+          const endTime = new Date(localShowDate.getTime() + duration * 60000);
 
           let status = "Chưa chiếu";
-          if (showDate < now) {
-            status = "Đã chiếu";
-          } else if (
-            showDate.toDateString() === now.toDateString() && // Cùng ngày
-            showDate > now
-          ) {
+
+          if (now < localShowDate) {
+            // Trước giờ chiếu
+            status = "Chưa chiếu";
+          } else if (now <= endTime) {
+            // Đang chiếu (trong khoảng thời gian chiếu phim)
             status = "Đang chiếu";
+          } else {
+            // Sau giờ chiếu + thời lượng
+            status = "Đã chiếu";
           }
 
           return {
@@ -187,9 +189,6 @@ const FilmShow = () => {
       statusQuery === "all" ||
       item.status === statusQuery;
 
-    console.log(statusQuery);
-    console.log("status item:", item.status);
-
     return matchesName && matchesDate && matchesStatus;
   });
 
@@ -297,6 +296,7 @@ const FilmShow = () => {
       <FilmShowModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onAddSuccess={fetchFilmShows}
       />
 
       <ViewModal

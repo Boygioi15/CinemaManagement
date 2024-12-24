@@ -6,7 +6,7 @@ import RefreshLoader from "../Loading";
 import Dialog from "../Film/ConfirmDialog";
 import SuccessDialog from "../Film/SuccessDialog";
 
-const FilmShowModal = ({ isOpen, onClose }) => {
+const FilmShowModal = ({ isOpen, onClose, onAddSuccess }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -154,6 +154,9 @@ const FilmShowModal = ({ isOpen, onClose }) => {
         setIsLoading(false); // Tắt trạng thái loading
         setIsConfirmDialogOpen(false); // Đóng dialog xác nhận
         setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
+        if (onAddSuccess) {
+          onAddSuccess(); // Gọi lại hàm fetchFilmShows
+        }
       }
     } catch (error) {
       console.error("Lỗi từ server:", error.response?.data || error.message);
@@ -294,7 +297,7 @@ const FilmShowModal = ({ isOpen, onClose }) => {
                     Giờ
                   </option>
                   {[...Array(24).keys()].map((hour) => (
-                    <option key={hour} value={hour}>
+                    <option key={hour} value={hour < 10 ? `0${hour}` : hour}>
                       {hour < 10 ? `0${hour}` : hour}
                     </option>
                   ))}
@@ -313,7 +316,10 @@ const FilmShowModal = ({ isOpen, onClose }) => {
                     Phút
                   </option>
                   {[...Array(60).keys()].map((minute) => (
-                    <option key={minute} value={minute}>
+                    <option
+                      key={minute}
+                      value={minute < 10 ? `0${minute}` : minute}
+                    >
                       {minute < 10 ? `0${minute}` : minute}
                     </option>
                   ))}
@@ -378,12 +384,13 @@ const FilmShowModal = ({ isOpen, onClose }) => {
       <SuccessDialog
         isOpen={isSuccessDialogOpen}
         onClose={() => {
-          isOpen = false;
+          onClose();
           setIsSuccessDialogOpen(false);
         }}
         title={dialogData.title}
         message={dialogData.message}
       />
+      <RefreshLoader isOpen={isLoading} />
     </div>
   );
 };
