@@ -1,5 +1,6 @@
 import React from "react";
 import { FiPrinter, FiArrowLeft } from "react-icons/fi";
+import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
 
 const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
   if (!isOpen) return null;
@@ -148,7 +149,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
             {/* Total */}
             <div className="flex justify-between items-center font-bold text-lg text-green-600">
               <span>Tổng thanh toán: </span>
-              <span>{order.totalMoney} VNĐ</span>
+              <span>{formatCurrencyNumber(order.totalMoney)  } VNĐ</span>
             </div>
           </div>
           {/* Actions */}

@@ -5,12 +5,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #663399; /* Màu thanh cuộn */
+  background: rgb(200,200,200); /* Màu thanh cuộn */
   border-radius: 10px; /* Bo góc thanh cuộn */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1; /* Màu khi hover */
+  background: rgb(180,180,180); /* Màu khi hover */
 }
 
 ::-webkit-scrollbar-track {

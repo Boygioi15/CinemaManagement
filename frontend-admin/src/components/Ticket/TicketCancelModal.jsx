@@ -49,7 +49,6 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
               <button
                 onClick={() => {
                   onConfirm(reason);
-                  onClose();
                 }}
                 disabled={!reason.trim()}
                 className={`rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 ${

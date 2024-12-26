@@ -10,6 +10,7 @@ import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
 import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
 import RefreshLoader from "../../components/Loading";
+import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
 
 const InVe = () => {
   const [orders, setOrders] = useState([]);
@@ -52,9 +53,9 @@ const InVe = () => {
   //Nhấn nút xác nhận hủy vé
   const handleReason = (reason) => {
     setReason(reason);
-    console.log(selectedOrder);
-    console.log("a");
-    console.log(reason);
+    console.log("Nhấn xác nhận hủy vé")
+    console.log("Thông tin đơn: " + JSON.stringify(selectedOrder));
+    console.log("Lý do: " + reason)
     setIsConfirmModalOpen(true);
 
     setDialogData({
@@ -62,7 +63,7 @@ const InVe = () => {
       message: "Bạn chắc chắn muốn hủy vé này ?",
     });
   };
-
+  useEffect(()=>{console.log("Modal open: " + isConfirmModalOpen)},[isConfirmModalOpen])
   //Đóng modal
   const handleCloseModal = () => {
     setIsTicketModalOpen(false);
@@ -172,10 +173,9 @@ const InVe = () => {
     const matchesStatus =
       statusQuery === "all" ||
       (!order.printed && statusQuery === "Chưa in") ||
-      (order.printed && statusQuery === "Đã in") ||
       (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
+      (order.printed && statusQuery === "Đã in") ||
       (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
-      (!order.served && statusQuery === "Chưa phục vụ") ||
       (order.served && statusQuery === "Đã phục vụ");
 
     // Kết hợp cả hai điều kiện
@@ -190,10 +190,9 @@ const InVe = () => {
   );
   const statusOptions = [
     "Chưa in",
-    "Đã in",
     "Từ chối in vé",
+    "Đã in",
     "Từ chối phục vụ",
-    "Chưa phục vụ",
     "Đã phục vụ",
   ];
 
@@ -211,7 +210,7 @@ const InVe = () => {
       render: (value) => new Date(value).toLocaleDateString(),
     },
     { header: "Giờ chiếu", key: "time" },
-    { header: "Tổng tiền", key: "totalMoney" },
+    { header: "Tổng tiền(VNĐ)", key: "totalMoney",  render: (value) => formatCurrencyNumber(value), },
     {
       header: "Trạng thái",
       key: "status",
@@ -225,9 +224,7 @@ const InVe = () => {
         } else if (row.invalidReason_Served) {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
-        } else if (!row.printed) {
-          statusText = "Chưa in";
-          statusClass = "bg-yellow-100 text-yellow-800";
+
         } else if (row.served) {
           statusText = "Đã phục vụ";
           statusClass = "bg-green-100 text-green-800";
