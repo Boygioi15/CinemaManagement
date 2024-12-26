@@ -7,7 +7,7 @@ import { Combobox, ComboboxOption } from "@headlessui/react";
 import { FiSearch } from "react-icons/fi";
 import Dialog from "./ConfirmDialog";
 import SuccessDialog from "./SuccessDialog";
-import slugify from "slugify"
+import slugify from "slugify";
 import slugifyOption from "../../ulitilities/slugifyOption";
 const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   if (!isOpen) return null;
@@ -30,7 +30,9 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   /////////////////////////fetch tags and ageRes///////////////////////////
   const fetchAgeRes = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/param/age-restriction-symbol");
+      const response = await axios.get(
+        "http://localhost:8000/api/param/age-restriction-symbol"
+      );
       setAgeResData(response.data.data);
     } catch (err) {
       setError(err.message);
@@ -49,15 +51,21 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     fetchFilmTags();
     fetchAgeRes();
   }, []);
-/////////////////////////fetch tags and ageRes///////////////////////////
-const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((tag) =>
-  slugify(tag.name, slugifyOption).includes(slugify(queryTagText), slugifyOption)
-);
+  /////////////////////////fetch tags and ageRes///////////////////////////
+  const filteredTags =
+    queryTagText === ""
+      ? filmTags
+      : (filmTags || []).filter((tag) =>
+          slugify(tag.name, slugifyOption).includes(
+            slugify(queryTagText),
+            slugifyOption
+          )
+        );
   const handleTagSelection = (tag) => {
-    if(!tag){
+    if (!tag) {
       return;
     }
-    if (!selectedTags.some(selectedTag => selectedTag._id === tag._id)) {
+    if (!selectedTags.some((selectedTag) => selectedTag._id === tag._id)) {
       setSelectedTags([...selectedTags, tag]);
     }
   };
@@ -74,14 +82,16 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
     }));
   }, [selectedTags]);
   const initTagChoices = (tagIDs) => {
-    tagIDs.forEach(tagID => {
-      const tagExists = filmTags.find(filmTag => filmTag._id === tagID); // Check if tag exists in filmTags
-  
+    tagIDs.forEach((tagID) => {
+      const tagExists = filmTags.find((filmTag) => filmTag._id === tagID); // Check if tag exists in filmTags
+
       if (tagExists) {
         setSelectedTags((prevSelectedTags) => {
           // Check if the tag already exists in the selectedTags
-          const alreadySelected = prevSelectedTags.some(tag => tag._id === tagExists._id);
-          
+          const alreadySelected = prevSelectedTags.some(
+            (tag) => tag._id === tagExists._id
+          );
+
           // Only add the tag if it's not already in the list
           if (!alreadySelected) {
             return [...prevSelectedTags, tagExists];
@@ -90,14 +100,14 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
         });
       }
     });
-  /*
+    /*
     console.log("TAGGGG");
     console.log(tagIDs);
     console.log(selectedTags);
     */
   };
   const initAgeChoice = (ageSymbol) => {
-    const age = ageResData.find(ageItem => ageItem === ageSymbol);
+    const age = ageResData.find((ageItem) => ageItem === ageSymbol);
     /*
     console.log("AGEGE")
     console.log(ageSymbol);
@@ -105,9 +115,9 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
     setFormData((prev) => ({
       ...prev,
       ageRestriction: age,
-    }))
+    }));
   };
-  
+
   const [formData, setFormData] = useState({
     name: film?.name || "",
     trailerURL: film?.trailerURL || "",
@@ -122,18 +132,18 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
     originatedCountry: film?.originatedCountry || "",
     twoDthreeD: film?.twoDthreeD || "",
     filmDescription: film?.filmDescription || "",
-    filmContent: film?.filmContent|| "",
+    filmContent: film?.filmContent || "",
 
     beginDate: film?.beginDate || "",
   });
-  useEffect(()=> {
-    if(!isEditMode){
+  useEffect(() => {
+    if (!isEditMode) {
       return;
     }
     //console.log("Film value: " + JSON.stringify(film));
     initAgeChoice(film.ageRestriction);
     initTagChoices(film.tagsRef);
-  },[film,filmTags,ageResData])
+  }, [film, filmTags, ageResData]);
   const isFormValid = useMemo(() => {
     const requiredFields = [
       "name",
@@ -146,11 +156,14 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
       "twoDthreeD",
       "filmDescription",
       "filmContent",
-      "beginDate"
+      "beginDate",
     ];
     console.log("Form data : " + JSON.stringify(formData));
 
-    return requiredFields.every((field) => !!formData[field]) && (formData.thumbnailFile || formData.thumbnailURL); // Chuyển đổi giá trị thành Boolean
+    return (
+      requiredFields.every((field) => !!formData[field]) &&
+      (formData.thumbnailFile || formData.thumbnailURL)
+    ); // Chuyển đổi giá trị thành Boolean
   }, [formData]);
 
   const handleSubmit = () => {
@@ -167,6 +180,7 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
       });
     }
   };
+
   const handleFilm = async () => {
     setIsLoading(true);
     try {
@@ -194,9 +208,9 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
           title: "Successs",
           message: "Cập nhật phim thành công",
         });
-      } else {  
-        await axios.post("http://localhost:8000/api/films",data);
-        
+      } else {
+        await axios.post("http://localhost:8000/api/films", data);
+
         setDialogData({
           title: "Successs",
           message: "Thêm phim thành công",
@@ -255,17 +269,16 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 /> */}
-                <Combobox
-                  value={selectedTags}
-                  onChange={handleTagSelection}
-                >
+                <Combobox value={selectedTags} onChange={handleTagSelection}>
                   <div className="relative">
                     <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left border focus-within:ring-2 focus-within:ring-blue-500">
                       <Combobox.Input
                         name="type"
                         //value={formData.type.join(", ")}
                         className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:outline-none"
-                        onChange={(event) => setQueryTagText(event.target.value)}
+                        onChange={(event) =>
+                          setQueryTagText(event.target.value)
+                        }
                         displayValue={() => ""}
                         placeholder="Search types..."
                       />
@@ -311,20 +324,22 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
                 </Combobox>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedTags && Array.isArray(selectedTags) && selectedTags.map((tag) => (
-                    <div
-                      key={tag._id}
-                      className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
-                    >
-                      {tag.name}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="ml-2 text-blue-600 hover:text-blue-800"
+                  {selectedTags &&
+                    Array.isArray(selectedTags) &&
+                    selectedTags.map((tag) => (
+                      <div
+                        key={tag._id}
+                        className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm"
                       >
-                        <FiX className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                        {tag.name}
+                        <button
+                          onClick={() => removeTag(tag)}
+                          className="ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          <FiX className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                 </div>
               </div>
               <div>
@@ -362,7 +377,7 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
                   <option value="" disabled>
                     Vui lòng chọn độ tuổi
                   </option>
-                  {ageResData.map((ageRes,index) => (
+                  {ageResData.map((ageRes, index) => (
                     <option key={index} value={ageRes}>
                       {`${ageRes}`}
                     </option>
@@ -432,7 +447,10 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
                   name="beginDate"
                   value={formData.beginDate}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, beginDate: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      beginDate: e.target.value,
+                    }))
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -445,7 +463,9 @@ const filteredTags = queryTagText === "" ? filmTags : (filmTags || []).filter((t
               {(formData.thumbnailFile || formData.thumbnailURL) && (
                 <img
                   src={
-                    formData.thumbnailFile ? URL.createObjectURL(formData.thumbnailFile) : formData.thumbnailURL
+                    formData.thumbnailFile
+                      ? URL.createObjectURL(formData.thumbnailFile)
+                      : formData.thumbnailURL
                   }
                   alt="Film"
                   className="w-full h-4/5 object-cover rounded-lg mb-2"

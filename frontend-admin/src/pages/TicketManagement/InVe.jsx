@@ -85,7 +85,6 @@ const InVe = () => {
 
   const handleRefresh = async () => {
     setLoading(true);
-    fetchOrder();
     setTimeout(() => {
       setLoading(false);
       setIsSuccessModalOpen(true);

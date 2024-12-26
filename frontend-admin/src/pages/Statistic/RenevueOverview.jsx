@@ -15,7 +15,7 @@ const RenevueOverview = () => {
   const fetchData = async (year) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/statistics/monthly-stats?year=${year}`
+        `http://localhost:8000/api/statistics/monthly-statistic?year=${year}`
       );
       const transformedData = transformApiDataToRevenueData(
         response.data,
@@ -32,15 +32,20 @@ const RenevueOverview = () => {
 
   const transformApiDataToRevenueData = (apiData, year) => {
     return apiData.map((item) => {
-      const { month, totalTickets, totalPopcorn, totalDrinks } = item;
+      const {
+        month,
+        totalTicketRevenue,
+        totalPopcornRevenue,
+        totalDrinksRevenue,
+      } = item;
       const monthName = new Date(0, month - 1).toLocaleString("en-US", {
-        month: "short",
+        month: "2-digit",
       });
 
       return {
         month: monthName,
-        vé: totalTickets,
-        sảnphẩmkhác: totalPopcorn + totalDrinks,
+        vé: totalTicketRevenue,
+        sảnphẩmkhác: totalPopcornRevenue + totalDrinksRevenue,
       };
     });
   };

@@ -86,6 +86,14 @@ class FilmShowController {
       data: response,
     });
   });
+  getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
+    const response = await FilmShowService.getAllFilmShows();
+    return res.status(200).json({
+      msg: "Get all film shows successfully!",
+      success: true,
+      data: response,
+    });
+  });
 }
 
 export default new FilmShowController();

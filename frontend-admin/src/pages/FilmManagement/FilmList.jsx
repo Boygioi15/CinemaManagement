@@ -236,7 +236,7 @@ const AdminFilm = () => {
               className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
               onClick={() => handleAddClick()}
             >
-              Thêm phim mới +
+              Thêm phim +
             </button>
           </div>
         </div>

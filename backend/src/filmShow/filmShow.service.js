@@ -9,48 +9,90 @@ import { RoomService } from "../room/room.service.js";
 export class FilmShowService {
   //Cho phép tạo suất chiếu cùng 1 phim nếu khác phòng
   static createFilmShow = async ({ roomId, showTime, showDate, film }) => {
-    const showStart = new Date(`${showDate}T${showTime}`);
-    const filmDetails = await FilmService.getFilmDetails(film);
+    const [hour, minute] = showTime.split(":").map(Number);
+    const showStart = new Date(showDate);
+    showStart.setHours(0, 0, 0, 0);
+    showStart.setMinutes(hour * 60 + minute);
+
+    const filmDetails = await FilmService.getFilmDetail(film);
     if (!filmDetails) {
       throw customError("Phim không tồn tại", 404);
     }
     const filmDuration = filmDetails.filmDuration;
     const showEnd = new Date(showStart.getTime() + filmDuration * 60000);
-    // Tìm các suất chiếu có khả năng trùng lặp
+
     const overlappingShows = await filmShowModel.find({
       roomId,
       showDate,
       $or: [
-        { showTime: { $gte: new Date(showStart.getTime() - 30 * 60000).toISOString() } },
-        { showTime: { $lte: new Date(showEnd.getTime() + 30 * 60000).toISOString() } },
+        {
+          showTime: {
+            $gte: new Date(showStart.getTime() - 30 * 60000).toISOString(),
+          },
+        },
+        {
+          showTime: {
+            $lte: new Date(showEnd.getTime() + 30 * 60000).toISOString(),
+          },
+        },
       ],
     });
-    // Kiểm tra trùng lặp thời gian
+
     const isOverlapping = await Promise.all(
       overlappingShows.map(async (existingShow) => {
-        const existingShowStart = new Date(`${existingShow.showDate}T${existingShow.showTime}`);
-        const existingFilmDetails = await FilmService.getFilmDetails(existingShow.film);
+        if (!existingShow.showTime) {
+          throw customError(
+            "Dữ liệu không hợp lệ: Thiếu thời gian chiếu trong cơ sở dữ liệu.",
+            500
+          );
+        }
+
+        const [existingHour, existingMinute] = existingShow.showTime
+          .split(":")
+          .map(Number);
+
+        const existingShowStart = new Date(showDate);
+        existingShowStart.setHours(0, 0, 0, 0);
+        existingShowStart.setMinutes(existingHour * 60 + existingMinute);
+
+        const existingFilmDetails = await FilmService.getFilmDetail(
+          existingShow.film
+        );
         const existingFilmDuration = existingFilmDetails.filmDuration;
-        const existingShowEnd = new Date(existingShowStart.getTime() + existingFilmDuration * 60000);
-  
+        const existingShowEnd = new Date(
+          existingShowStart.getTime() + existingFilmDuration * 60000
+        );
+
+        // Kiểm tra các điều kiện trùng lặp
         const isStartInsideExisting =
           showStart >= existingShowStart && showStart < existingShowEnd;
         const isEndInsideExisting =
           showEnd > existingShowStart && showEnd <= existingShowEnd;
+        const isExistingStartInsideNew =
+          existingShowStart >= showStart && existingShowStart < showEnd;
+        const isExistingEndInsideNew =
+          existingShowEnd > showStart && existingShowEnd <= showEnd;
         const isGapTooSmall =
           Math.abs(showStart - existingShowEnd) < 30 * 60000 ||
           Math.abs(showEnd - existingShowStart) < 30 * 60000;
-  
-        return isStartInsideExisting || isEndInsideExisting || isGapTooSmall;
+
+        return (
+          isStartInsideExisting ||
+          isEndInsideExisting ||
+          isExistingStartInsideNew ||
+          isExistingEndInsideNew ||
+          isGapTooSmall
+        );
       })
     );
+
     if (isOverlapping.some((overlap) => overlap)) {
       throw customError(
-        "Khoảng thời gian không khả dụng. Vui lòng chọn thời điểm khác.",
+        "Khoảng thời gian không khả dụng. Các suất chiếu cách nhau tối thiểu 30p.",
         400
       );
     }
-    // Tạo suất chiếu
+
     return await filmShowModel.create({
       roomId,
       showTime,
@@ -58,7 +100,7 @@ export class FilmShowService {
       film,
     });
   };
-  
+
   static getListFilmShowing = async () => {
     const filmShows = await filmShowModel
       .find({
@@ -241,4 +283,8 @@ export class FilmShowService {
     );
     return filmShow;
   });
+  static getAllFilmShows = async () => {
+    const filmShows = await filmShowModel.find({});
+    return filmShows;
+  };
 }
