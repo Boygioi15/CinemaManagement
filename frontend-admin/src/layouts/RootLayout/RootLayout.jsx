@@ -27,7 +27,7 @@ const newTabs = [
   },
   {
     name: "Tạo vé trực tiếp",
-    path: "/admin/tab/tao-ve",
+    path: "/offline-ticket",
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {

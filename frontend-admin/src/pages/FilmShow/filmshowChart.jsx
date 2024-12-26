@@ -123,7 +123,7 @@ const FilmShowChart = () => {
 
     return false;
   });
-
+  useEffect(()=>{console.log(filteredEvents),[filteredEvents]})
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
@@ -152,76 +152,88 @@ const FilmShowChart = () => {
           })}
         </h2>
         <div className="relative overflow-x-auto">
-          <div className="flex ml-40 mb-4">
-            {Array.from({ length: 48 }, (_, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-[50px] text-sm text-gray-600 text-center"
-              >
-                {formatTime(Math.floor(i / 2), (i % 2) * 30)}
+          {filteredEvents.length===0? (
+            <h1 style={{textAlign:"center"}}>
+              Không có lịch chiếu
+            </h1>
+
+          )
+          :
+          (
+            <>
+              <div className="flex ml-40 mb-4">
+                {Array.from({ length: 48 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 w-[50px] text-sm text-gray-600 text-center"
+                  >
+                    {formatTime(Math.floor(i / 2), (i % 2) * 30)}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <div className="relative">
+                {rooms.map((room) => {
+                  const filteredRoomEvents = filteredEvents.filter(
+                    (event) => event.room === room
+                  );
 
-          <div className="relative">
-            {rooms.map((room) => {
-              const filteredRoomEvents = filteredEvents.filter(
-                (event) => event.room === room
-              );
-
-              return (
-                <div
-                  key={`${room}-${startDate}`}
-                  className="flex items-center h-20 border-t border-gray-200"
-                >
-                  <div className="w-40 flex-shrink-0 font-medium text-gray-700 pr-4">
-                    {room}
-                  </div>
-                  <div className="relative flex-grow h-full bg-white">
-                    {filteredRoomEvents.length === 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                        Không có lịch phim
+                  return (
+                    <div
+                      key={`${room}-${startDate}`}
+                      className="flex items-center h-20 border-t border-gray-200"
+                    >
+                      <div className="w-40 flex-shrink-0 font-medium text-gray-700 pr-4">
+                        {room}
                       </div>
-                    )}
-
-                    {filteredRoomEvents.map((event) => {
-                      const isSpanningEvent =
-                        new Date(event.date).getTime() <
-                        new Date(startDate).getTime();
-
-                      const adjustedStartTime = isSpanningEvent
-                        ? 0
-                        : event.startTime;
-
-                      const adjustedDuration = isSpanningEvent
-                        ? event.startTime + event.duration - 24
-                        : event.duration;
-
-                      return (
-                        <div
-                          key={event.id}
-                          className={`absolute top-2 bottom-2 rounded-lg ${getCategoryColor(
-                            event.category
-                          )} text-white cursor-pointer transition-transform hover:scale-y-110`}
-                          style={getEventStyle(
-                            adjustedStartTime,
-                            adjustedDuration,
-                            isSpanningEvent
-                          )}
-                          onClick={() => handleEventClick(event)}
-                        >
-                          <div className="p-2 text-sm flex items-center h-full">
-                            <FaPlay className="mr-2" />
-                            <span className="truncate">{event.film}</span>
+                      <div className="relative flex-grow h-full bg-white">
+                        {filteredRoomEvents.length === 0 && (
+                          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                            Không có lịch phim
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                        )}
+
+                        {filteredRoomEvents.map((event) => {
+                          const isSpanningEvent =
+                            new Date(event.date).getTime() <
+                            new Date(startDate).getTime();
+
+                          const adjustedStartTime = isSpanningEvent
+                            ? 0
+                            : event.startTime;
+
+                          const adjustedDuration = isSpanningEvent
+                            ? event.startTime + event.duration - 24
+                            : event.duration;
+
+                          return (
+                            <div
+                              key={event.id}
+                              className={`absolute top-2 bottom-2 rounded-lg ${getCategoryColor(
+                                event.category
+                              )} text-white cursor-pointer transition-transform hover:scale-y-110`}
+                              style={getEventStyle(
+                                adjustedStartTime,
+                                adjustedDuration,
+                                isSpanningEvent
+                              )}
+                              onClick={() => handleEventClick(event)}
+                            >
+                              <div className="p-2 text-sm flex items-center h-full">
+                                <FaPlay className="mr-2" />
+                                <span className="truncate">{event.film}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )
+          }
+          
         </div>
       </div>
 

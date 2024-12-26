@@ -20,6 +20,8 @@ import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import "./App.css";
+import RoomCreate from "./pages/CreateRoom/RoomCreate";
+import OffLineTicketBooking from "./pages/OfflineTicketBooking/OfflineTicketBooking";
 
 const router = createBrowserRouter([
   {
@@ -92,6 +94,14 @@ const router = createBrowserRouter([
   {
     path: "/admin/auth/forgot-pass",
     element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/create-room",
+    element: <RoomCreate />
+  },
+  {
+    path: "/offline-ticket",
+    element: <OffLineTicketBooking />
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

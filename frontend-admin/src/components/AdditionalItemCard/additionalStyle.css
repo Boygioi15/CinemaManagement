@@ -1,0 +1,61 @@
+.AdditionalItemCard{
+    display: inline-flex;
+    flex-direction: row;
+    justify-items: center;
+    gap: 10px;
+    height: 180px;
+    width: 400px
+}
+
+.AdditionalItemCard img{
+    width: 160px;
+    height: 180px;
+    border-radius: 5px;
+}
+.AdditionalItemCard .item-details{
+    font-size: 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: start;
+}
+.AdditionalItemCard .name{
+    
+    font-weight: bold;
+}
+.QuantitySelector{
+    font-size: 20px;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 2px; 
+    border-color: black;
+    border-width:2px;
+    border-style: solid;
+}
+
+.QuantitySelector .button{
+    font-size: 40px;
+    font-weight: bold;
+    background-color: white;
+    border: none;
+    padding: 10px 15px;
+}
+.QuantitySelector .button:hover{
+    background-color: rgb(230, 230, 230);
+    cursor: pointer;
+}
+.QuantitySelector .button:active{
+    background-color: rgb(210, 210, 210);
+}
+.QuantitySelector{
+    position: absolute;
+    bottom: 0px;
+    width: 150px;
+    display: flex;
+    justify-content: space-between;
+}

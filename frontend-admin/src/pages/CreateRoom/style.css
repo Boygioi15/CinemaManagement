@@ -1,0 +1,415 @@
+
+* {
+  box-sizing: border-box;
+}
+
+.input-grid {
+  display: grid;  
+  grid-template-columns: 120px 200px; /* Set fixed widths for label and input */
+  gap: 10px; /* Add spacing between rows */
+  align-items: center; /* Vertically align labels and inputs */
+}
+.input-grid-after {
+  margin-top: 40px;
+  display: grid;  
+  grid-template-columns: 100px 600px; /* Set fixed widths for label and input */
+  gap: 10px; /* Add spacing between rows */
+}
+.input-grid-after textArea {
+  font-family: Arial, Helvetica, sans-serif;
+  height: 100px;
+}
+.input-grid input {
+  font-family: Arial;
+  padding: 5px;
+  border: none; /* Remove all borders */
+  border-bottom: 1px solid rgb(50,50,50); /* Add border only at the bottom */
+  border-radius: 0; /* Ensure no rounding occurs */
+  outline: none; /* Remove focus outline */
+}
+.input-grid input:focus {
+  border-bottom: 2px solid black; /* Add border only at the bottom */
+   /* Change border color on focus (optional) */
+}
+.input-grid label {
+  font-family: Arial;
+}
+.CreateRoomPage{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px;
+  padding-top: 0px;
+  padding-bottom: 100px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.roomInputs{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.CreateRoomPage h1{
+  font-family: Arial;
+}
+
+.RoomDisplay{
+  display: inline-flex;
+  flex-direction: column;
+  text-align: center;
+  align-self: center;
+
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+.RoomDisplay .screen{
+  height: 100px;
+  position: relative;
+  z-index: -2;
+}
+.RoomDisplay .screen img{ 
+  width: 101%;
+  height: 100px;
+}
+.center-text {
+  position: absolute; 
+  top: 40px; 
+  width: 100%; 
+}
+.RoomSeats{
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: large;
+}
+
+.RoomSeats .col{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.RoomSeats .row{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+.RoomSeats .row-label{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20px;
+}
+.RoomSeats .seatRow{
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+.SeatSlot_Empty{
+  position: relative;
+  background-color: rgb(230,230,230);
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  width: 50px;
+  height: 40px;
+  color: white;
+  
+}
+.SeatSlot_Empty:hover{
+  cursor: pointer;
+  background-color: rgb(210,210,210);
+}
+.SeatSlot_Empty:active{
+  background-color: rgb(190,190,190);
+}
+.SeatSlot_Normal{
+  position: relative;
+  background-color: #7F4CCB;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  width: 50px;
+  height: 40px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+}
+.SeatSlot_Normal:hover{
+  cursor: pointer;
+  background-color: #6B38CB;
+}
+.SeatSlot_Normal:active{
+  background-color: #5736B4;
+}
+.SeatSlot_VIP{
+  position: relative;
+  background-color: #ED252E;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  width: 50px;
+  height: 40px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+}
+.SeatSlot_VIP:hover{
+  cursor: pointer;
+  background-color: #D9111A;
+}
+.SeatSlot_VIP:active{
+  background-color: #C50006;
+}
+.SeatSlot_Pair{
+  position: relative;
+  background-color: #EC2F99;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+  width: 115px;
+  height: 40px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+}
+.SeatSlot_Pair:hover{
+  cursor: pointer;
+  background-color: #D81B85;
+}
+.SeatSlot_Pair:active{
+  background-color: #C40771;
+}
+.stickyToolbar {
+  position: fixed;
+  align-self: flex-end;
+  top: 0px; /* Toolbar will "stick" 20px from the top */
+  right: 0px;
+  height: 100vh;
+
+  padding: 10px;
+  background-color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  overflow: visible;
+}
+.stickyToolbar > div:hover{
+  cursor: pointer;
+}
+.stickyToolbar .selectAll{
+  font-size: 36px;
+}
+.stickyToolbar .selected{
+  border-width: 4px;
+  border-color: black;
+  border-style: solid;
+}
+.stickyToolbar .deselectAll{
+  font-size: 36px;
+}
+.stickyToolbar .selectAll:hover{
+  cursor: pointer;
+}
+.stickyToolbar .deselectAll:hover{
+  cursor: pointer;
+}
+.stickyToolbar .deselect{
+  width: 36px;
+  height: 36px;
+  display: block;
+  border-radius: 2px;
+  background-color: rgb(230,230,230);
+  box-sizing: initial;
+}
+.stickyToolbar .selectNormal{
+  width: 36px;
+  height: 36px;
+  display: block;
+  border-radius: 2px;
+  background-color: #7F4CCB;
+  box-sizing: initial;
+}
+.stickyToolbar .selectNormal:hover{
+  background-color: #7542CB;
+}
+.stickyToolbar .selectNormal:active{
+  background-color: #6B38C1;
+}
+
+
+.stickyToolbar .selectVIP{
+  width: 36px;
+  height: 36px;
+  display: block;
+  border-radius: 2px;
+  background-color: #ED252E;
+  box-sizing: initial;
+}
+.stickyToolbar .selectVIP:hover{
+  background-color: #E31B36;
+}
+.stickyToolbar .selectVIP:active{
+  background-color: #D9111A;
+}
+
+
+.stickyToolbar .selectPair{
+  width: 36px;
+  height: 36px;
+  display: block;
+  border-radius: 2px;
+  background-color: #E73194;
+  box-sizing: initial;
+}
+.stickyToolbar .selectPair:hover{
+  background-color: #DD278A;
+}
+.stickyToolbar .selectPair:active{
+  background-color: #D31D80;
+}
+
+.tooltip{
+  overflow: visible;
+  max-width: 200%;
+}
+
+.confirmBar{
+  position: fixed;
+  bottom: 0;
+  padding: 10px;
+  padding-right: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  z-index: 1;
+  background-color: white;
+
+  /* Flex settings */
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end; /* Align items to the end of the row */
+  align-items: center; /* Center items vertically */
+  gap: 20px; /* Add spacing between items */
+}
+.confirm-button{
+  padding: 5px 20px;
+  border-radius: 5px;
+  font-size: large;
+  font-family: Arial;
+  color: white;
+  background-color: #1677FF;
+  border-style: none;
+}
+.confirm-button:hover{
+  background-color: #0C6DF5;
+  cursor: pointer
+}
+.confirm-button:active{
+  background-color: #0958D9;
+}
+.return-button{
+  padding: 5px 20px;
+  border-radius: 5px;
+  font-size: large;
+  font-family: Arial;
+  color: black;
+  background-color: rgb(200,200,200);
+  border-style: none;
+}
+.return-button:hover{
+  background-color: rgb(180,180,180);
+  cursor: pointer
+}
+.return-button:active{
+  background-color: rgb(150,150,150);
+}
+
+.Room-Legend{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+  gap: 50px;
+}
+.Room-Legend .item{
+  display: inline-flex;
+  gap: 10px;
+  align-items: center
+}
+.item .box-unselected{
+  width: 40px;
+  height: 40px;
+  display: block;
+  background-color: rgb(230,230,230);
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}
+.item .box-normal{
+  width: 40px;
+  height: 40px;
+  display: block;
+  background-color: #5736B4;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}
+.item .box-VIP{
+  width: 40px;
+  height: 40px;
+  display: block;
+  background-color: #C50006;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}
+.item .box-pair{
+  width: 100px;
+  height: 40px;
+  display: block;
+  background-color: #EC2F99;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}
+.item .box-selected{
+  width: 40px;
+  height: 40px;
+  display: block;
+  background-color: #DED615;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}
+.item .box-booked{
+  width: 40px;
+  height: 40px;
+  display: block;
+  background-color: #5736B4;
+  opacity: 0.5;
+  border-radius: 5px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+}

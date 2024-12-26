@@ -4,8 +4,10 @@ import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import SeatModal from "../../components/SeatModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const InfrasManage = () => {
+  const navigate = useNavigate();
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,7 +24,7 @@ const InfrasManage = () => {
   };
 
   const handleAddRoom = () => {
-    setIsAddRoomModalOpen(true);
+    navigate('/create-room')
   };
 
   const handleCloseAddRoomModal = () => {
