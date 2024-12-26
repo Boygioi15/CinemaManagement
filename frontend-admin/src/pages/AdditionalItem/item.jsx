@@ -2,16 +2,26 @@ import { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import ItemModal from "../../components/AdditionalItem/modal";
+import Dialog from "../../components/Film/ConfirmDialog";
+import SuccessDialog from "../../components/Film/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
 import axios from "axios";
 
-const Item = () => {
+const AdditionalItem = () => {
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
   const [mode, setMode] = useState("add");
+  const [actionType, setActionType] = useState("");
   const [items, setItems] = useState([]);
+
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [loading, setLoading] = useState(false);
 
   const fetchItems = async () => {
     try {
@@ -29,26 +39,116 @@ const Item = () => {
     fetchItems();
   }, []);
 
+  //set action cho modal
+  const openConfirmDialog = (action, item = null) => {
+    setActionType(action); // Xác định loại hành động
+    setSelectedItem(item); // Gán item được chọn nếu có
+    setDialogData({
+      title: "Xác nhận",
+      message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
+    });
+    setIsConfirmModalOpen(true);
+  };
+
+  //lấy message
+  const getDialogMessage = (action, item) => {
+    switch (action) {
+      case "delete":
+        return `Bạn chắc chắn muốn xóa sản phẩm này ?`;
+      case "add":
+        return "Bạn chắc chắn muốn thêm sản phẩm này ?";
+      case "edit":
+        return `Bạn chắc chắn muốn cập nhật sản phẩm này ?`;
+      default:
+        return "Xác nhận hành động?";
+    }
+  };
+
+  //lấy message thành công
+  const getSuccessMessage = (action) => {
+    switch (action) {
+      case "delete":
+        return "Xóa sản phẩm thành công";
+      case "add":
+        return "Thêm sản phẩm thành công";
+      case "edit":
+        return "Cập nhật sản phẩm thành công";
+      default:
+        return "Thao tác thành công";
+    }
+  };
+
+  //Chọn cập nhật item
   const handleEditClick = (item) => {
     setSelectedItem(item);
     setMode("edit");
     setIsDetailModalOpen(true);
   };
 
+  //thêm mới item
   const handleAddClick = () => {
     setMode("add");
     setSelectedItem(null);
     setIsDetailModalOpen(true);
   };
 
-  const handleEditConfirm = (item) => {
-    console.log(`Lấy được data:${item.name} `);
-    setIsDetailModalOpen(false);
+  //chọn xóa item
+  const handleDelete = (item) => {
+    openConfirmDialog("delete", item);
   };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchItems();
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
+
+  const handleConfirmClick = async () => {
+    console.log("haha: ", selectedItem);
+    try {
+      if (actionType === "delete") {
+        await axios.delete(
+          `http://localhost:8000/api/additional-items/${selectedItem._id}`
+        );
+      } else if (actionType === "edit") {
+        await axios.put(
+          `http://localhost:8000/api/additional-items/${selectedItem._id}`,
+          selectedItem
+        );
+      } else if (actionType === "add") {
+        await axios.post(
+          "http://localhost:8000/api/additional-items",
+          selectedItem
+        );
+      }
+      await handleRefresh(); // Làm mới dữ liệu sau khi thành công
+      // Hiển thị thông báo thành công
+      setDialogData({
+        title: "Thành công",
+        message: getSuccessMessage(actionType),
+      });
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsConfirmModalOpen(false);
+    }
+  };
+
+  const handleEditConfirm = (item) => {
+    setSelectedItem(item);
+
+    // Xác định loại hành động dựa trên chế độ hiện tại
+    const action = mode === "add" ? "add" : "edit";
+
+    // Gọi dialog xác nhận với loại hành động tương ứng
+    openConfirmDialog(action, item);
+  };
+
   const columns = [
     { header: "Tên sản phẩm", key: "name" },
-    { header: "Mô tả", key: "description" },
-    { header: "Số lượng", key: "inStorage" },
     { header: "Giá", key: "price" },
     {
       header: "Hành động",
@@ -61,7 +161,10 @@ const Item = () => {
           >
             <FiEdit2 className="w-4 h-4" />
           </button>
-          <button className="text-red-600 hover:text-red-800">
+          <button
+            className="text-red-600 hover:text-red-800"
+            onClick={() => handleDelete(row)}
+          >
             <FiTrash2 className="w-4 h-4" />
           </button>
         </div>
@@ -70,11 +173,8 @@ const Item = () => {
   ];
   const itemsPerPage = 6;
 
-  const filteredData = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(tableSearchQuery.toLowerCase()) ||
-      item.role.toLowerCase().includes(tableSearchQuery.toLowerCase())
+  const filteredData = items.filter((item) =>
+    item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -94,7 +194,7 @@ const Item = () => {
           <div className="flex items-center w-[300px]">
             <input
               type="text"
-              placeholder="Enter film name here..."
+              placeholder="Nhập tên sản phẩm..."
               value={tableSearchQuery}
               onChange={(e) => setTableSearchQuery(e.target.value)}
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
@@ -105,10 +205,9 @@ const Item = () => {
           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddClick()}
         >
-          Add Item +
+          Thêm sản phẩm +
         </button>
       </div>
-
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
@@ -118,21 +217,20 @@ const Item = () => {
             disabled={currentPage === 1}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Previous
+            Trước
           </button>
           <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+            Trang {currentPage} trên {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Next
+            Tiếp
           </button>
         </div>
       </div>
-
       <ItemModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
@@ -140,8 +238,22 @@ const Item = () => {
         item={selectedItem}
         mode={mode}
       />
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmClick}
+      />
+      <SuccessDialog
+        isOpen={isSuccessModalOpen && !loading}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => setIsSuccessModalOpen(false)}
+      />
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };
 
-export default Item;
+export default AdditionalItem;

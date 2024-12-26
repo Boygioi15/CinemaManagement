@@ -9,7 +9,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
   if (!isOpen) return null;
 
   const isEditMode = mode === "edit";
-  const title = isEditMode ? "Edit Item Details" : "Add New Item";
+  const title = isEditMode ? "Cập nhật sản phẩm" : "Thêm mới sản phẩm";
 
   const [query, setQuery] = useState("");
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -22,20 +22,13 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
   const [formData, setFormData] = useState({
     _id: item?._id || "",
     name: item?.name || "",
-    description: item?.description || "",
     price: item?.price || "",
-    inStorage: item?.inStorage || "",
     thumbnailURL: item?.thumbnailURL || "",
+    file: null,
   });
 
   const isFormValid = useMemo(() => {
-    const requiredFields = [
-      "name",
-      "description",
-      "price",
-      "inStorage",
-      "thumbnailURL",
-    ];
+    const requiredFields = ["name", "price", "thumbnailURL"];
     console.log(formData);
 
     return requiredFields.every((field) => !!formData[field]); // Chuyển đổi giá trị thành Boolean
@@ -55,38 +48,6 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
         message: "Bạn có chắc chắn là thêm phim này không ?",
       });
     }
-  };
-
-  const handleFilm = async () => {
-    // setIsLoading(true);
-    // try {
-    //   console.log(`data nè heheh:${data.otherDescription} `);
-    //   // Gọi API tùy thuộc vào mode
-    //   if (mode === "edit") {
-    //     await axios.put(`http://localhost:8000/api/films/${data.id}`, data);
-    //     setDialogData({
-    //       title: "Successs",
-    //       message: "Cập nhật phim thành công",
-    //     });
-    //   } else {
-    //     await axios.post("http://localhost:8000/api/films", data);
-    //     setDialogData({
-    //       title: "Successs",
-    //       message: "Thêm phim thành công",
-    //     });
-    //   }
-    //   if (response.status === 200 || response.status === 201) {
-    //     // Cập nhật state và hiển thị success dialog
-    //     // Sau khi thành công, hiển thị dialog success
-    //     setIsLoading(false); // Tắt trạng thái loading
-    //     setIsConfirmDialogOpen(false); // Đóng dialog xác nhận
-    //     setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
-    //   }
-    // } catch (error) {
-    //   console.error("Error updating/adding film:", error);
-    //   alert("An error occurred while updating the film. Please try again.");
-    //   setIsLoading(false); // Tắt trạng thái loading
-    // }
   };
 
   return (
@@ -119,40 +80,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mô tả
-                </label>
-                <input
-                  type="text"
-                  name="country"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      originatedCountry: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Số lượng kho
-                </label>
-                <input
-                  type="text"
-                  name="duration"
-                  value={formData.inStorage}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      filmDuration: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Giá
@@ -162,7 +90,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
                   name="voice"
                   value={formData.price}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, voice: e.target.value }))
+                    setFormData((prev) => ({ ...prev, price: e.target.value }))
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -170,7 +98,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
             </div>
             <div className="w-1/3">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Image
+                Ảnh
               </label>
               {formData.thumbnailURL && (
                 <img
@@ -190,6 +118,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
                     const imageUrl = URL.createObjectURL(file);
                     setFormData((prev) => ({
                       ...prev,
+                      file: file,
                       thumbnailURL: imageUrl,
                     }));
                   }
@@ -203,7 +132,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
               onClick={onClose}
               className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+              Hủy
             </button>
             <button
               onClick={handleSubmit}
@@ -214,7 +143,7 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
                   : "bg-gray-400 cursor-not-allowed"
               } text-white`}
             >
-              {isEditMode ? "Save Changes" : "Add Film"}
+              {isEditMode ? "Lưu thay đổi" : "Thêm mới"}
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import Table from "../../components/Table";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import SeatModal from "../../components/SeatModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -8,15 +8,38 @@ import { useNavigate } from "react-router";
 
 const InfrasManage = () => {
   const navigate = useNavigate();
+
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddRoomModalOpen, setIsAddRoomModalOpen] = useState(false);
+
   const [seatStates, setSeatStates] = useState({});
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const fetchRoom = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/rooms");
+      // Lọc những order có printed === false
+      setRooms(response.data.data);
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
+  };
+
+  // Gọi API khi component được render lần đầu
+  useEffect(() => {
+    fetchRoom();
+  }, []);
+  if (!rooms) {
+    return;
+  }
+
+  console.log(rooms);
 
   const handleEditClick = () => {
     setModalMode("edit");
@@ -24,7 +47,7 @@ const InfrasManage = () => {
   };
 
   const handleAddRoom = () => {
-    navigate('/create-room')
+    navigate("/create-room");
   };
 
   const handleCloseAddRoomModal = () => {
@@ -45,12 +68,7 @@ const InfrasManage = () => {
   };
 
   const columns = [
-    { header: "Tên phòng", key: "name" },
-    { header: "Thời lượng", key: "filmDuration" },
-    { header: "Quốc gia", key: "originatedCountry" },
-    { header: "Độ tuổi", key: "ageSymbol" },
-    { header: "Mô tả", key: "filmDescription" },
-    { header: "Thể loại", key: "otherDescription" },
+    { header: "Tên phòng", key: "roomName" },
     {
       header: "Hành động",
       key: "actions",
@@ -60,11 +78,11 @@ const InfrasManage = () => {
             className="text-blue-600 hover:text-blue-800"
             onClick={() => handleEditClick(row)}
           >
-            <FiEdit2 className="w-4 h-4" />
+            <FiSearch className="w-4 h-4" />
           </button>
-          <button className="text-red-600 hover:text-red-800">
+          {/* <button className="text-red-600 hover:text-red-800">
             <FiTrash2 className="w-4 h-4" />
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -73,7 +91,7 @@ const InfrasManage = () => {
   const itemsPerPage = 6;
 
   const filteredData = rooms.filter((item) =>
-    item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
+    item.roomName.toLowerCase().includes(tableSearchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -88,12 +106,12 @@ const InfrasManage = () => {
       <div className="mb-6 flex justify-between items-center pr-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Room Information
+            Thông tin phòng
           </h2>
           <div className="flex items-center w-[300px]">
             <input
               type="text"
-              placeholder="Enter film name here..."
+              placeholder="Nhập tên phòng..."
               value={tableSearchQuery}
               onChange={(e) => setTableSearchQuery(e.target.value)}
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
@@ -104,7 +122,7 @@ const InfrasManage = () => {
           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddRoom()}
         >
-          Add Room +
+          Thêm phòng mới +
         </button>
       </div>
 
@@ -117,17 +135,17 @@ const InfrasManage = () => {
             disabled={currentPage === 1}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Previous
+            Trước
           </button>
           <span className="text-sm text-gray-600">
-            Page {currentPage} of {totalPages}
+            Trang {currentPage} trên {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
           >
-            Next
+            Tiếp
           </button>
         </div>
       </div>

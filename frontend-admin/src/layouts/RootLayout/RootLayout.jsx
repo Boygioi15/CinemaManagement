@@ -55,6 +55,21 @@ const newTabs = [
     path: "/admin/thong-ke/nam",
     icon: <RxDashboard className="w-6 h-6" />,
   },
+  {
+    name: "Sản phẩm khác",
+    path: "/admin/additional-item",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Quản lý nhân viên",
+    path: "/admin/manage-user",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Các quy định khác",
+    path: "/admin/another-rule",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
 ];
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

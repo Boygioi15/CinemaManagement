@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
-import { TbCancel } from "react-icons/tb";
 import { FiSearch } from "react-icons/fi";
+import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
-import OrderDetailModal from "../../components/Ticket/OrderDetailModal";
+import slugify from "slugify";
+import TicketDetailModal from "../../components/Ticket/TicketDetailModal";
 import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
 import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
+import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
 
-export default function PhucVuVe() {
-  const [orders, setOrders] = useState([]);
+const UserList = () => {
+  const [users, setUsers] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reason, setReason] = useState("");
 
@@ -25,32 +28,38 @@ export default function PhucVuVe() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [title, setTitle] = useState("");
+  const [view, setView] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [view, setView] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  //mở modal phục vụ
+  //Mở modal chi tiết vé
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
     setIsTicketModalOpen(true);
     setView(true);
   };
 
-  //mở modal hủy phục vụ
+  //Mở modal xem thông tin vé ( ko có nút in)
+  const handleViewClick = (order) => {
+    setSelectedOrder(order);
+    setIsTicketModalOpen(true);
+    setView(false);
+  };
+
+  //Mở modal nhập lý do hủy vé
   const handleCancelClick = (order) => {
     setSelectedOrder(order);
-    setTitle("Lý do từ chối phục vụ");
+    setTitle("Lý do từ chối vé");
     setIsCancelModalOpen(true);
   };
 
-  //Nhấn nút xác nhạn hủy phục vụ
+  //Nhấn nút xác nhận hủy vé
   const handleReason = (reason) => {
     setReason(reason);
-    console.log(selectedOrder);
-    console.log("a");
-    console.log(reason);
+    console.log("Nhấn xác nhận hủy vé");
+    console.log("Thông tin đơn: " + JSON.stringify(selectedOrder));
+    console.log("Lý do: " + reason);
     setIsConfirmModalOpen(true);
 
     setDialogData({
@@ -58,24 +67,20 @@ export default function PhucVuVe() {
       message: "Bạn chắc chắn muốn hủy vé này ?",
     });
   };
-
-  //đóng modal
+  useEffect(() => {
+    console.log("Modal open: " + isConfirmModalOpen);
+  }, [isConfirmModalOpen]);
+  //Đóng modal
   const handleCloseModal = () => {
     setIsTicketModalOpen(false);
     setIsCancelModalOpen(false);
     setIsConfirmModalOpen(false);
     setIsSuccessModalOpen(false);
+
     setSelectedOrder(null);
   };
 
-  //mở modal view
-  const handleViewClick = (order) => {
-    setSelectedOrder(order);
-    setIsTicketModalOpen(true);
-    setView(false);
-  };
-
-  //Xác nhận phục vụ
+  //Nhấn nút in vé
   const handleConfirmModal = (order) => {
     setIsConfirmModalOpen(true);
     setSelectedOrder(order);
@@ -90,15 +95,14 @@ export default function PhucVuVe() {
     fetchOrder();
     setTimeout(() => {
       setLoading(false);
-      setIsSuccessModalOpen(true);
     }, 2000);
   };
 
-  //Bấm Xác nhận hủy phục vụ
+  //Xác nhận hủy vé
   const handleCancelConfirmClick = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/orders/${selectedOrder._id}/disapprove-serve`,
+        `http://localhost:8000/api/orders/${selectedOrder._id}/disapprove-print`,
         { reason }
       );
       if (response.status === 200) {
@@ -117,7 +121,7 @@ export default function PhucVuVe() {
     setIsConfirmModalOpen(false);
   };
 
-  //Confirm modal hiện ra và bấm xác nhận
+  //Xác nhận in vé
   const handleConfirmClick = async () => {
     console.log(selectedOrder._id);
     if (
@@ -128,7 +132,7 @@ export default function PhucVuVe() {
     } else {
       try {
         const response = await axios.put(
-          `http://localhost:8000/api/orders/${selectedOrder._id}/serve`
+          `http://localhost:8000/api/orders/${selectedOrder._id}/print`
         );
         if (response.status === 200) {
           console.log("thành công");
@@ -147,14 +151,11 @@ export default function PhucVuVe() {
     }
   };
 
-  const fetchOrder = async () => {
+  const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/orders");
+      const response = await axios.get("http://localhost:8000/api/user");
       // Lọc những order có printed === false
-      const filteredOrders = response.data.filter(
-        (order) => order.printed === true
-      );
-      setOrders(filteredOrders);
+      setUsers(response.data);
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -162,14 +163,16 @@ export default function PhucVuVe() {
 
   // Gọi API khi component được render lần đầu
   useEffect(() => {
-    fetchOrder();
+    fetchUser();
   }, []);
-  if (!orders) {
+  if (!users) {
     return;
   }
+
+  console.log(users);
+
   const itemsPerPage = 7;
-  const filteredData = orders.filter((order) => {
-    //lọc theo tên khách hàng
+  const filteredData = users.filter((order) => {
     const matchesName = cusNameQuery
       ? order.customerInfo.name
           .toLowerCase()
@@ -181,39 +184,28 @@ export default function PhucVuVe() {
       !tableSearchQuery ||
       order.verifyCode?.toLowerCase().includes(tableSearchQuery.toLowerCase());
 
-    // Lọc theo trạng thái
-    const matchesStatus =
-      statusQuery === "all" ||
-      (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
-      (!order.served &&
-        statusQuery === "Chưa phục vụ" &&
-        !order.invalidReason_Served) ||
-      (order.served && statusQuery === "Đã phục vụ");
-
-    // Kết hợp cả ba điều kiện
+    // Kết hợp cả hai điều kiện
     return matchesCode && matchesStatus && matchesName;
   });
+
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(
     startIndex,
     startIndex + itemsPerPage
   );
-
-  const statusOptions = ["Từ chối phục vụ", "Chưa phục vụ", "Đã phục vụ"];
+  const statusOptions = [
+    "Chưa in",
+    "Từ chối in vé",
+    "Đã in",
+    "Từ chối phục vụ",
+    "Đã phục vụ",
+  ];
 
   const columns = [
-    {
-      header: "Tên khách hàng",
-      key: "customerName",
-      render: (_, row) => row.customerInfo.name,
-    },
-    { header: "Verify Code", key: "verifyCode" },
-    {
-      header: "Ngày chiếu",
-      key: "date",
-      render: (value) => new Date(value).toLocaleDateString(),
-    },
+    { header: "Tên người dùng", key: "name" },
+    { header: "Email", key: "email" },
+    { header: "Số điện thoại", key: "phone" },
     {
       header: "Trạng thái",
       key: "status",
@@ -221,18 +213,22 @@ export default function PhucVuVe() {
         let statusText = "";
         let statusClass = "";
 
-        if (row.invalidReason_Served) {
+        if (row.invalidReason_Printed) {
+          statusText = "Từ chối in vé";
+          statusClass = "bg-red-100 text-red-800";
+        } else if (row.invalidReason_Served) {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
+        } else if (!row.printed) {
+          statusText = "Chưa in";
+          statusClass = "bg-yellow-100 text-yellow-800";
         } else if (row.served) {
           statusText = "Đã phục vụ";
           statusClass = "bg-green-100 text-green-800";
-        } else {
-          statusText = "Chưa phục vụ";
-          statusClass = "bg-yellow-100 text-yellow-800";
+        } else if (row.printed) {
+          statusText = "Đã in";
+          statusClass = "bg-blue-100 text-blue-800";
         }
-
-        if (row.verifyCode === "CJKKGEDN") console.log(statusText);
 
         return (
           <span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>
@@ -246,25 +242,7 @@ export default function PhucVuVe() {
       key: "actions",
       render: (_, row) => (
         <div className="flex space-x-3">
-          <button className="text-gray-600 hover:text-gray-800">
-            <FiSearch
-              className="w-4 h-4"
-              onClick={() => handleViewClick(row)}
-            />
-          </button>
-          <button
-            className="text-blue-600 hover:text-blue-800"
-            disabled={row.served || row.invalidReason_Served}
-          >
-            <FaPrint
-              className="w-4 h-4"
-              onClick={() => handlePrintClick(row)}
-            />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            disabled={row.served || row.invalidReason_Served}
-          >
+          <button className="text-red-600 hover:text-red-800">
             <TbCancel
               className="w-5 h-5"
               onClick={() => handleCancelClick(row)}
@@ -279,7 +257,7 @@ export default function PhucVuVe() {
     <div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Thông tin bắp nước
+          Thông tin người dùng
         </h2>
         <div className="flex items-center gap-4">
           <button
@@ -358,7 +336,7 @@ export default function PhucVuVe() {
         </div>
       </div>
 
-      <OrderDetailModal
+      <TicketDetailModal
         order={selectedOrder}
         isOpen={isTicketModalOpen}
         onClose={handleCloseModal}
@@ -386,6 +364,10 @@ export default function PhucVuVe() {
         message={dialogData.message}
         onClose={handleCloseModal}
       />
+
+      <RefreshLoader isOpen={loading} />
     </div>
   );
-}
+};
+
+export default UserList;

@@ -16,6 +16,9 @@ import RenevueOverview from "./pages/Statistic/RenevueOverview";
 import LoginPage from "./pages/Auth/login";
 import ForgotPasswordPage from "./pages/Auth/fotgotpass";
 
+import AdditionalItem from "./pages/AdditionalItem/item";
+import UserList from "./pages/User/userList";
+import AnotherRule from "./pages/Rule/AnotherRule";
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
@@ -68,6 +71,18 @@ const router = createBrowserRouter([
         path: "/admin/thong-ke/nam",
         element: <RenevueOverview />,
       },
+      {
+        path: "/admin/additional-item",
+        element: <AdditionalItem />,
+      },
+      {
+        path: "/admin/manage-user",
+        element: <UserList />,
+      },
+      {
+        path: "/admin/another-rule",
+        element: <AnotherRule />,
+      },
 
       // {
       //   path: "/admin/minh-hoa-ca-lam",
@@ -97,11 +112,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/create-room",
-    element: <RoomCreate />
+    element: <RoomCreate />,
   },
   {
     path: "/offline-ticket",
-    element: <OffLineTicketBooking />
+    element: <OffLineTicketBooking />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

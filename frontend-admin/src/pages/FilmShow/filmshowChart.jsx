@@ -92,7 +92,9 @@ const FilmShowChart = () => {
     setShowModal(true);
   };
 
-  const formatTime = (hour, minute) => {
+  const formatTime = (time) => {
+    const hour = Math.floor(time); // Lấy phần nguyên làm giờ
+    const minute = Math.round((time - hour) * 60);
     return `${hour.toString().padStart(2, "0")}:${minute
       .toString()
       .padStart(2, "0")}`;
@@ -123,7 +125,9 @@ const FilmShowChart = () => {
 
     return false;
   });
-  useEffect(()=>{console.log(filteredEvents),[filteredEvents]})
+  useEffect(() => {
+    console.log(filteredEvents), [filteredEvents];
+  });
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
@@ -152,16 +156,11 @@ const FilmShowChart = () => {
           })}
         </h2>
         <div className="relative overflow-x-auto">
-          {filteredEvents.length===0? (
-            <h1 style={{textAlign:"center"}}>
-              Không có lịch chiếu
-            </h1>
-
-          )
-          :
-          (
+          {filteredEvents.length === 0 ? (
+            <h1 style={{ textAlign: "center" }}>Không có lịch chiếu</h1>
+          ) : (
             <>
-              <div className="flex ml-40 mb-4">
+              <div className="flex ml-40 mb-4 ">
                 {Array.from({ length: 48 }, (_, i) => (
                   <div
                     key={i}
@@ -171,7 +170,10 @@ const FilmShowChart = () => {
                   </div>
                 ))}
               </div>
-              <div className="relative">
+              <div
+                className="relative bg-white" // Thêm nền trắng
+                style={{ minWidth: "2540px" }}
+              >
                 {rooms.map((room) => {
                   const filteredRoomEvents = filteredEvents.filter(
                     (event) => event.room === room
@@ -180,12 +182,12 @@ const FilmShowChart = () => {
                   return (
                     <div
                       key={`${room}-${startDate}`}
-                      className="flex items-center h-20 border-t border-gray-200"
+                      className="flex items-center h-20 border-t border-gray-300"
                     >
                       <div className="w-40 flex-shrink-0 font-medium text-gray-700 pr-4">
                         {room}
                       </div>
-                      <div className="relative flex-grow h-full bg-white">
+                      <div className="relative h-full bg-white">
                         {filteredRoomEvents.length === 0 && (
                           <div className="absolute inset-0 flex items-center justify-center text-gray-500">
                             Không có lịch phim
@@ -231,9 +233,7 @@ const FilmShowChart = () => {
                 })}
               </div>
             </>
-          )
-          }
-          
+          )}
         </div>
       </div>
 
@@ -261,10 +261,11 @@ const FilmShowChart = () => {
               <p>Ngày: {selectedEvent.date}</p>
               <p>
                 Time: {formatTime(selectedEvent.startTime, 0)} -{" "}
-                {formatTime(
+                {/* {formatTime(
                   selectedEvent.startTime + Math.floor(selectedEvent.duration),
                   Math.round((selectedEvent.duration % 1) * 60)
-                )}
+                )} */}
+                {formatTime(selectedEvent.startTime + selectedEvent.duration)}
               </p>
               <p>Thời lượng: {formatDuration(selectedEvent.duration)}</p>
               <p>Thể loại: {selectedEvent.category}</p>

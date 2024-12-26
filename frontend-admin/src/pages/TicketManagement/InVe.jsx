@@ -4,6 +4,7 @@ import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
+import { BiRefresh } from "react-icons/bi";
 import slugify from "slugify";
 import TicketDetailModal from "../../components/Ticket/TicketDetailModal";
 import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
@@ -17,6 +18,7 @@ const InVe = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reason, setReason] = useState("");
 
+  const [cusNameQuery, setCusNameQuery] = useState("");
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("all");
 
@@ -25,6 +27,7 @@ const InVe = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [title, setTitle] = useState("");
   const [view, setView] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,15 +50,16 @@ const InVe = () => {
   //Mở modal nhập lý do hủy vé
   const handleCancelClick = (order) => {
     setSelectedOrder(order);
+    setTitle("Lý do từ chối vé");
     setIsCancelModalOpen(true);
   };
 
   //Nhấn nút xác nhận hủy vé
   const handleReason = (reason) => {
     setReason(reason);
-    console.log("Nhấn xác nhận hủy vé")
+    console.log("Nhấn xác nhận hủy vé");
     console.log("Thông tin đơn: " + JSON.stringify(selectedOrder));
-    console.log("Lý do: " + reason)
+    console.log("Lý do: " + reason);
     setIsConfirmModalOpen(true);
 
     setDialogData({
@@ -63,7 +67,9 @@ const InVe = () => {
       message: "Bạn chắc chắn muốn hủy vé này ?",
     });
   };
-  useEffect(()=>{console.log("Modal open: " + isConfirmModalOpen)},[isConfirmModalOpen])
+  useEffect(() => {
+    console.log("Modal open: " + isConfirmModalOpen);
+  }, [isConfirmModalOpen]);
   //Đóng modal
   const handleCloseModal = () => {
     setIsTicketModalOpen(false);
@@ -86,9 +92,9 @@ const InVe = () => {
 
   const handleRefresh = async () => {
     setLoading(true);
+    fetchOrder();
     setTimeout(() => {
       setLoading(false);
-      setIsSuccessModalOpen(true);
     }, 2000);
   };
 
@@ -164,6 +170,12 @@ const InVe = () => {
   }
   const itemsPerPage = 7;
   const filteredData = orders.filter((order) => {
+    const matchesName = cusNameQuery
+      ? order.customerInfo.name
+          .toLowerCase()
+          .includes(cusNameQuery.toLowerCase())
+      : true;
+
     // Lọc theo mã code
     const matchesCode =
       !tableSearchQuery ||
@@ -172,14 +184,19 @@ const InVe = () => {
     // Lọc theo trạng thái
     const matchesStatus =
       statusQuery === "all" ||
-      (!order.printed && statusQuery === "Chưa in") ||
+      (!order.printed &&
+        statusQuery === "Chưa in" &&
+        !order.invalidReason_Printed) ||
       (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
-      (order.printed && statusQuery === "Đã in") ||
+      (order.printed &&
+        statusQuery === "Đã in" &&
+        !order.served &&
+        !order.invalidReason_Served) ||
       (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
       (order.served && statusQuery === "Đã phục vụ");
 
     // Kết hợp cả hai điều kiện
-    return matchesCode && matchesStatus;
+    return matchesCode && matchesStatus && matchesName;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -210,7 +227,11 @@ const InVe = () => {
       render: (value) => new Date(value).toLocaleDateString(),
     },
     { header: "Giờ chiếu", key: "time" },
-    { header: "Tổng tiền(VNĐ)", key: "totalMoney",  render: (value) => formatCurrencyNumber(value), },
+    {
+      header: "Tổng tiền(VNĐ)",
+      key: "totalMoney",
+      render: (value) => formatCurrencyNumber(value),
+    },
     {
       header: "Trạng thái",
       key: "status",
@@ -224,7 +245,9 @@ const InVe = () => {
         } else if (row.invalidReason_Served) {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
-
+        } else if (!row.printed) {
+          statusText = "Chưa in";
+          statusClass = "bg-yellow-100 text-yellow-800";
         } else if (row.served) {
           statusText = "Đã phục vụ";
           statusClass = "bg-green-100 text-green-800";
@@ -289,6 +312,28 @@ const InVe = () => {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Thông tin vé</h2>
         <div className="flex items-center gap-4">
+          <button
+            onClick={handleRefresh}
+            className="r p-4 rounded-full hover:bg-gray-100 transition-all duration-300"
+            disabled={loading}
+          >
+            <BiRefresh
+              className={`text-4xl text-black hover:text-black ${
+                loading
+                  ? "animate-spin"
+                  : "hover:rotate-180 transition-transform duration-300"
+              }`}
+            />
+          </button>
+          <div className="flex items-center w-[300px]">
+            <input
+              type="text"
+              placeholder="Tên khách hàng...."
+              value={cusNameQuery}
+              onChange={(e) => setCusNameQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+            />
+          </div>
           <div className="flex items-center w-1/4">
             <input
               type="text"
@@ -354,6 +399,7 @@ const InVe = () => {
         isOpen={isCancelModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleReason}
+        title={title}
       />
 
       <Dialog

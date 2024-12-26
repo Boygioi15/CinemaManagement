@@ -72,9 +72,9 @@ const AdminFilm = () => {
     setItemToDelete(item);
     setIsConfirmDialogOpen(true);
     setDialogData({
-      title: "Confirm Delete",
+      title: "Xác nhận xóa",
       message:
-        "Are you sure you want to delete this item? This action cannot be undone.",
+        "Bạn có chắc chắn muốn xóa phim này không? Việc này không thể trở lại.",
     });
   };
 

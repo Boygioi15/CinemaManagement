@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { IoClose } from "react-icons/io5";
 
-const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
+const TicketCancelModal = ({ isOpen, onClose, onConfirm, title }) => {
   const [reason, setReason] = useState("");
   useEffect(() => {
     if (isOpen) {
@@ -17,7 +17,7 @@ const TicketCancelModal = ({ isOpen, onClose, onConfirm }) => {
           <div className="relative rounded-lg bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-200 p-4">
               <h2 className="text-xl font-bold text-gray-800" id="modal-title">
-                Lý do từ chối vé
+                {title}
               </h2>
               <button
                 onClick={onClose}

@@ -107,9 +107,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
               </div>
             </div>
           )}
-          (order.filmName &&(
-          <hr className="border-gray-200" />
-          ))
+          {order.filmName && <hr className="border-gray-200" />}
           {/* Payment Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -149,7 +147,7 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
             {/* Total */}
             <div className="flex justify-between items-center font-bold text-lg text-green-600">
               <span>Tổng thanh toán: </span>
-              <span>{formatCurrencyNumber(order.totalMoney)  } VNĐ</span>
+              <span>{formatCurrencyNumber(order.totalMoney)} VNĐ</span>
             </div>
           </div>
           {/* Actions */}
