@@ -19,6 +19,8 @@ import ForgotPasswordPage from "./pages/Auth/fotgotpass";
 import AdditionalItem from "./pages/AdditionalItem/item";
 import UserList from "./pages/User/userList";
 import AnotherRule from "./pages/Rule/AnotherRule";
+import Role from "./pages/Role/role";
+
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
@@ -82,6 +84,10 @@ const router = createBrowserRouter([
       {
         path: "/admin/another-rule",
         element: <AnotherRule />,
+      },
+      {
+        path: "/admin/role",
+        element: <Role />,
       },
 
       // {

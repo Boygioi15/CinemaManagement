@@ -70,6 +70,11 @@ const newTabs = [
     path: "/admin/another-rule",
     icon: <RxDashboard className="w-6 h-6" />,
   },
+  {
+    name: "Phân quyền",
+    path: "/admin/role",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
 ];
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
