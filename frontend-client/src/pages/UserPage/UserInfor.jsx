@@ -3,58 +3,54 @@ import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserInforComponent from "../../Components/UserInforComponent";
 import UserInfoLayout from "../../layouts/UserSpaceLayout";
+import { useAuth } from "../../Context/AuthContext";
 
 const UserInfoPage = () => {
   const handleSave = (e) => {};
   const { state } = useLocation(); // Lấy thông tin từ state
   const [fields, setFields] = useState([]);
-  // const convertDateToISO = (date) => {
-  //   const [day, month, year] = date.split("/"); // Nếu date có định dạng DD/MM/YYYY
-  //   return `${year}-${month}-${day}`; // Chuyển sang YYYY-MM-DD
-  // };
+  const convertDateToISO = (isoDate) => {
+    if (!isoDate) return ""; // Xử lý khi không có giá trị đầu vào
+    return isoDate.split("T")[0]; // Tách phần trước "T"
+  };
+  const { user, setUser, loading } = useAuth();
 
   useEffect(() => {
     const updateFields = () => {
-      const userInfo = state?.userInfo || {};
-      console.log(userInfo);
-
       const updatedFields = [
         {
-          for: "fullname",
+          for: "name",
           text: "Họ và tên",
           type: "text",
-          value: userInfo.fullname || "",
+          value: user.name || "",
           required: true,
         },
         {
-          for: "dob",
+          for: "birth",
           text: "Ngày sinh",
           type: "date",
-          // value: convertDateToISO(userInfo.dob) || "",
+          value: convertDateToISO(user.birth) || "",
           required: true,
         },
         {
           for: "email",
           text: "Email",
           type: "email",
-          value: userInfo.email || "",
+          value: user.email || "",
           required: true,
         },
         {
-          for: "SDT",
+          for: "phone",
           text: "Số điện thoại",
           type: "text",
-          value: userInfo.sdt || "",
+          value: user.phone || "",
           required: true,
         },
       ];
-
-      console.log("updated fields: ", updatedFields); // Kiểm tra kết quả
       setFields(updatedFields);
     };
     updateFields();
   }, [state]);
-  console.log("fields: ", fields);
 
   return (
     <UserInfoLayout>

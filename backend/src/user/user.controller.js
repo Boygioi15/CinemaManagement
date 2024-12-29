@@ -1,4 +1,7 @@
 import {
+  customError
+} from "../middlewares/errorHandlers.js";
+import {
   UserService
 } from "./user.service.js";
 import expressAsyncHandler from "express-async-handler";
@@ -23,7 +26,9 @@ class UserController {
     const {
       _id
     } = req.params;
+
     const updatedUser = await UserService.updateUserById(_id, req.body);
+
     if (updatedUser?.error) {
       return res.status(400).json({
         msg: updatedUser.error,
@@ -154,6 +159,31 @@ class UserController {
     return res.status(200).json({
       msg: "Password reset successfully!",
       success: true
+    });
+  });
+
+  changePassword = expressAsyncHandler(async (req, res, next) => {
+
+    const {
+      id
+    } = req.params;
+
+    const {
+      oldPassword,
+      newPassword,
+      confirmNewPassword
+    } = req.body;
+
+    if (newPassword !== confirmNewPassword) throw customError("Mật khẩu mới không khớp")
+    const update = await UserService.changePassword(id, {
+      oldPassword,
+      newPassword,
+      confirmNewPassword
+    })
+    return res.status(200).json({
+      msg: "Update password successfully!",
+      success: true,
+      data: update
     });
   });
 }

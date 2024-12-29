@@ -1,7 +1,9 @@
 import React from "react";
 import Sidebar from "../Components/SideBarUser";
+import { useAuth } from "../Context/AuthContext";
 
 const UserInfoLayout = ({ children }) => {
+  const { user, setUser, loading } = useAuth();
   const menuItems = [
     {
       label: "Thông tin người dùng",
@@ -27,12 +29,12 @@ const UserInfoLayout = ({ children }) => {
     <div className="h-screen">
       <div className="flex items-start justify-center ml-40 pt-28">
         {/* Sidebar */}
-        <div className="flex">
-          <Sidebar userName="Hoàng Tiến Đạt" menuItems={menuItems} />
+        <div className="flex ">
+          <Sidebar userName={user.name} menuItems={menuItems} />
         </div>
 
         {/* Main Content */}
-        <div className="w-4/5">{children}</div>
+        <div className="w-4/5 ">{children}</div>
       </div>
     </div>
   );

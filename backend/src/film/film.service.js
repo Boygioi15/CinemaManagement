@@ -1,9 +1,15 @@
 import filmModel from "./film.schema.js";
-import { AgeRestrictionModel } from "../param/param.schema.js";
-import { customError } from "../middlewares/errorHandlers.js";
+import {
+  AgeRestrictionModel
+} from "../param/param.schema.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
 import mongoose from "mongoose";
 import tagModel from "../tag/tag.schema.js";
-import { handleDestroyCloudinary } from "../ulitilities/cloudinary.js";
+import {
+  handleDestroyCloudinary
+} from "../ulitilities/cloudinary.js";
 
 export class FilmService {
   // Hàm kiểm tra ageValue và ageSymbol
@@ -43,7 +49,11 @@ export class FilmService {
     }
     // Fetch tags from the database that match the tagIDs
     const tagsInDB = await tagModel
-      .find({ _id: { $in: tagIDs } })
+      .find({
+        _id: {
+          $in: tagIDs
+        }
+      })
       .select("_id");
     // Compare the number of matching tags with the input tagIDs
     if (tagsInDB.length !== tagIDs.length) {
@@ -67,7 +77,12 @@ export class FilmService {
 
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
+    const {
+      tagsRef,
+      ageRestriction,
+      twoDthreeD,
+      ...rest
+    } = filmData;
     const tagsArray = JSON.parse(tagsRef);
     //console.log(filmData);
     // Kiểm tra tuổi
@@ -97,21 +112,30 @@ export class FilmService {
   };
 
   static getAllFilm = async () => {
-    return await filmModel.find({ deleted: false });
+    return await filmModel.find({
+      deleted: false
+    });
   };
 
   // Xóa một bộ phim
   static deleteFilmById = async (filmId) => {
     return await filmModel.findByIdAndUpdate(
-      filmId,
-      { deleted: true },
-      { new: true }
+      filmId, {
+        deleted: true
+      }, {
+        new: true
+      }
     );
   };
 
   // Tương tự, cập nhật updateFilmById
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = updateData;
+    const {
+      tagsRef,
+      ageRestriction,
+      twoDthreeD,
+      ...rest
+    } = updateData;
     const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);

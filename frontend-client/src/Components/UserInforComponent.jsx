@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { updateUser } from "../config/api";
+import { useAuth } from "../Context/AuthContext";
+import { toast } from "react-toastify";
 
 const UserInforComponent = ({ title, fields, buttontitle, onSubmit }) => {
   const [formValues, setFormValues] = useState({});
+  const { user, handleAccount } = useAuth();
+
   useEffect(() => {
     // Cập nhật formValues khi fields thay đổi
     if (fields && fields.length > 0) {
@@ -21,15 +26,17 @@ const UserInforComponent = ({ title, fields, buttontitle, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (onSubmit) {
-      onSubmit(formValues, isChecked);
+  const handleSubmit = async () => {
+    const response = await updateUser(user.id, formValues);
+    if (response.success) {
+      await handleAccount();
+      toast.success("Cập nhật thành công");
     }
   };
 
   return (
-    <div className="flex items-center">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded  max-w-[1000px] shadow-lg">
+    <div className="flex items-center w-full">
+      <div className="bg-white bg-opacity-90 text-black p-5 rounded w-full shadow-lg">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}

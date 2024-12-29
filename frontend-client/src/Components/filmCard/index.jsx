@@ -147,7 +147,6 @@ const FilmCard = ({
               videoUrl={trailerURL}
             />
 
-            {/* Custom button */}
             <CustomButton
               defaultColor="#F3EA28" /* Default background color */
               gradientFrom="#663399" /* Gradient start color */

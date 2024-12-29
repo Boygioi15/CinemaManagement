@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserChangePassComponent from "../../Components/UserChangePassComponent";
 import UserInfoLayout from "../../layouts/UserSpaceLayout";
-
 const UserChangePass = () => {
   const handleSave = (e) => {};
   const { state } = useLocation(); // Lấy thông tin từ state
@@ -20,31 +19,29 @@ const UserChangePass = () => {
 
       const updatedFields = [
         {
-          for: "oldPass",
+          for: "oldPassword",
           text: "Nhập mật khẩu cũ",
           type: "password",
           required: true,
         },
         {
-          for: "newPass",
+          for: "newPassword",
           text: "Nhập mật khẩu mới",
           type: "password",
           required: true,
         },
         {
-          for: "confirmNewPass",
+          for: "confirmNewPassword",
           text: "Xác nhận mật khẩu mới",
           type: "password",
           required: true,
         },
       ];
 
-      console.log("updated fields: ", updatedFields); // Kiểm tra kết quả
       setFields(updatedFields);
     };
     updateFields();
   }, [state]);
-  console.log("fields: ", fields);
 
   return (
     <UserInfoLayout>

@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginComponent from "../../Components/LoginComponent";
 import SignUpComponent from "../../Components/SignUpComponent";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
+import { callLogin, callSignUp } from "../../config/api";
+import { toast } from "react-toastify";
 
 function ParentForm() {
   const [display, setDisplay] = useState(true);
@@ -14,7 +15,9 @@ function ParentForm() {
   if (display) {
     displayContent = <LoginForm />;
   } else {
-    displayContent = <SignUpForm switchToLogin={switchToLogin} />;
+    displayContent = (
+      <SignUpForm switchToLogin={switchToLogin} setDisplay={setDisplay} />
+    );
   }
   return (
     <div className="authForm">
@@ -56,34 +59,35 @@ function LoginForm() {
     password: "",
   });
 
-  const handleLogin = (formValues) => {
-    const { username, password } = formValues;
-    console.log(username);
-    if (username === "irisus" && password === "123") {
-      setUser({ fullName: "Irisus User" }); // Lưu thông tin người dùng
-      alert("Thành công");
+  const handleLogin = async (formValues) => {
+    const response = await callLogin(formValues);
+    console.log("🚀 ~ handleLogin ~ response:", response);
+    if (response.success) {
+      const { accesssToken } = response.data.tokens;
+      setUser(response.data);
+      localStorage.setItem("accessToken", accesssToken);
+      toast.success("Đăng nhập thành công!");
       navigate("/");
-    } else {
-      alert("Sai tên đăng nhập hoặc mật khẩu!");
     }
   };
 
   const fields = [
     {
-      for: "username",
+      for: "identifier",
       text: "Tài khoản, Email hoặc số điện thoại *",
       type: "text",
       placeholder: "irsus123",
       required: true,
     },
     {
-      for: "password",
+      for: "userPass",
       text: "Mật khẩu *",
       type: "password",
       placeholder: "abc",
       required: true,
     },
   ];
+
   return (
     <div className="">
       <LoginComponent
@@ -97,49 +101,55 @@ function LoginForm() {
     </div>
   );
 }
-function SignUpForm({ switchToLogin }) {
-  console.log("switchToLogin:", switchToLogin);
-  const handleRegister = (formValues, isChecked) => {
-    console.log("Đăng nhập với username:");
+
+function SignUpForm({ switchToLogin, setDisplay }) {
+  const handleRegister = async (formValues, isChecked) => {
+    const response = await callSignUp(formValues);
+    if (response.success === true) {
+      toast.success("Đăng kí thành công");
+      setDisplay(true);
+    } else {
+      toast.error(response.msg);
+    }
   };
   const fields = [
     {
-      for: "username",
+      for: "name",
       text: "Họ và tên *",
       type: "text",
       placeholder: "Họ và tên",
       required: true,
     },
     {
-      for: "userBirth",
+      for: "birth",
       text: "Ngày sinh *",
       type: "date",
       placeholder: "abc",
       required: true,
     },
     {
-      for: "userPhone",
+      for: "phone",
       text: "Số điện thoại *",
       type: "text",
       placeholder: "012...",
       required: true,
     },
     {
-      for: "userAccount",
+      for: "account",
       text: "Tên đăng nhập *",
       type: "text",
       placeholder: "abc",
       required: true,
     },
     {
-      for: "userEmail",
+      for: "email",
       text: "Email *",
       type: "email",
       placeholder: "abc",
       required: true,
     },
     {
-      for: "userPass",
+      for: "password",
       text: "Mật khẩu *",
       type: "password",
       placeholder: "abc",

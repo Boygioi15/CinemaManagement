@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { changePasword } from "../config/api";
+import { toast } from "react-toastify";
+import { useAuth } from "../Context/AuthContext";
 
 const UserChangePassComponent = ({ title, fields, buttontitle, onSubmit }) => {
   const [formValues, setFormValues] = useState({});
+  const { user } = useAuth();
+  const initialValues = fields.reduce((acc, field) => {
+    acc[field.for] = field.value || "";
+    return acc;
+  }, {});
+
   useEffect(() => {
-    // Cập nhật formValues khi fields thay đổi
     if (fields && fields.length > 0) {
-      const initialValues = fields.reduce((acc, field) => {
-        acc[field.for] = field.value || "";
-        return acc;
-      }, {});
       setFormValues(initialValues);
     }
   }, [fields]);
@@ -21,9 +25,13 @@ const UserChangePassComponent = ({ title, fields, buttontitle, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (onSubmit) {
-      onSubmit(formValues, isChecked);
+  const handleSubmit = async () => {
+    const response = await changePasword(user.id, { ...formValues });
+    if (response.success) {
+      setFormValues(initialValues);
+      toast.success("Cập nhật mật khẩu thành công");
+    } else {
+      toast.error(response.msg);
     }
   };
 

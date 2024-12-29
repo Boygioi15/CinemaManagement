@@ -15,7 +15,6 @@ class AuthController {
 
     signIn = expressAsyncHandler(async (req, res, next) => {
         const response = await AuthService.signIn(req.body);
-        // set refresh token in cookies 
         res.cookie("refresh_token", response.tokens.refreshToken, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
@@ -51,6 +50,14 @@ class AuthController {
             msg: "Process new token successfully!",
             success: true,
             data: response,
+        });
+    })
+
+    fetchAccount = expressAsyncHandler(async (req, res, next) => {
+        return res.status(200).json({
+            msg: "Fetch account successfully!",
+            success: true,
+            data: await AuthService.fetchAccount(req),
         });
     })
 }

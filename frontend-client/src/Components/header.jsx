@@ -1,28 +1,25 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-
+import { callSignOut } from "../config/api";
+import { toast } from "react-toastify";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Trạng thái hiển thị menu
-  const { user } = useAuth();
+  const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    console.log("Đăng xuất");
-    navigate("/auth");
+  const handleLogout = async () => {
+    const response = await callSignOut();
+    if (response.success) {
+      localStorage.clear();
+      setUser(null);
+      toast.success("Đăng xuất thành công");
+      navigate("/auth");
+    }
   };
 
   const handleProfile = () => {
-    navigate("/profile", {
-      state: {
-        userInfo: {
-          fullname: "Hoàng Tiến Đạt",
-          dob: "21/09/2004",
-          email: "dat2109@gmail.com",
-          sdt: "0123456788",
-        },
-      },
-    });
+    navigate("/user/user-space/infor");
   };
 
   const timerRef = useRef(null);
@@ -39,9 +36,7 @@ const Header = () => {
 
   return (
     <div className="bg-blue-900 p-2.5 flex items-center justify-between">
-      {/* Logo và Lịch chiếu */}
       <div className="flex items-center space-x-6">
-        {/* Logo */}
         <div className="flex items-center space-x-2">
           <img
             alt="Cinestar Logo"
@@ -49,9 +44,10 @@ const Header = () => {
             src="/Images/logo.svg"
             className="h-8"
           />
-          <span className="text-white text-lg font-bold">Nhóm 22</span>
+          <span className="text-white text-lg font-bold">
+            <Link to={"/"}>Nhóm 22</Link>
+          </span>
         </div>
-        {/* Lịch chiếu */}
         <div>
           <a
             href="#"
@@ -63,23 +59,17 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Search bar và Nav Links */}
       <div className="flex items-center space-x-6">
-        {/* Search Bar */}
         <div className="search-bar flex items-center bg-white rounded-full px-2 h-10 w-72">
-          {/* Input */}
           <input
             placeholder="Tìm phim"
             type="text"
             className="flex-grow outline-none text-xs text-gray-800 placeholder-gray-400 px-2"
           />
-          {/* Button với ảnh kính lúp */}
           <button className="bg-transparent border-none flex items-center justify-center p-1">
             <img alt="search" src="/Images/search.svg" className="h-4 w-4" />
           </button>
         </div>
-
-        {/* Additional Links */}
         <div className="additional-links flex items-center space-x-6">
           {user ? (
             <div
@@ -96,11 +86,9 @@ const Header = () => {
                   src="/Images/account icon.svg"
                   className="h-5 w-5"
                 />
-                <span>{user.fullName || "Người dùng"}</span>{" "}
-                {/* Hiển thị họ và tên */}
+                <span>{user.name}</span>{" "}
               </a>
 
-              {/* Menu hiển thị khi hover */}
               {isMenuOpen && (
                 <div className="absolute top-10 right-0 bg-white text-black p-2 shadow-lg rounded-md w-40">
                   <button

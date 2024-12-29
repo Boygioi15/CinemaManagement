@@ -3,7 +3,7 @@ import FilmCard from "../../Components/filmCard/index";
 const FilmUpComing = () => {
   return (
     <div className="flex flex-col justify-center items-center gap-20 py-20">
-    <h1 className="font-interExtraBold">PHIM SẮP CHIẾU</h1>
+      <h1 className="font-interExtraBold">PHIM SẮP CHIẾU</h1>
       <div className="flex flex-wrap justify-center items-center gap-4 md:gap-12">
         <FilmCard
           imageUrl={
@@ -27,7 +27,7 @@ const FilmUpComing = () => {
           ageLimit={13}
           isShowing={false}
         />
-         <FilmCard
+        <FilmCard
           imageUrl={
             "https://cinestar.com.vn/_next/image/?url=https%3A%2F%2Fapi-website.cinestar.com.vn%2Fmedia%2Fwysiwyg%2FPosters%2F12-2024%2Fchi-dau.png&w=640&q=50"
           }
@@ -38,7 +38,7 @@ const FilmUpComing = () => {
           ageLimit={13}
           isShowing={false}
         />
-         <FilmCard
+        <FilmCard
           imageUrl={
             "https://cinestar.com.vn/_next/image/?url=https%3A%2F%2Fapi-website.cinestar.com.vn%2Fmedia%2Fwysiwyg%2FPosters%2F12-2024%2Fchi-dau.png&w=640&q=50"
           }
@@ -49,7 +49,7 @@ const FilmUpComing = () => {
           ageLimit={13}
           isShowing={false}
         />
-         <FilmCard
+        <FilmCard
           imageUrl={
             "https://cinestar.com.vn/_next/image/?url=https%3A%2F%2Fapi-website.cinestar.com.vn%2Fmedia%2Fwysiwyg%2FPosters%2F12-2024%2Fchi-dau.png&w=640&q=50"
           }
@@ -60,8 +60,6 @@ const FilmUpComing = () => {
           ageLimit={13}
           isShowing={false}
         />
-
-
       </div>
     </div>
   );

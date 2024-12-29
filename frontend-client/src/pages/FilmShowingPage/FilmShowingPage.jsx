@@ -4,14 +4,12 @@ import axios from "axios";
 
 const FilmShowingPage = () => {
   const [filmShowing, setFilmShowing] = useState([]);
-  console.log("🚀 ~ FilmShowingPage ~ filmShowing:", filmShowing);
 
   useEffect(() => {
     const fetchFilmShowing = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/films`);
         if (response && response.data.data) {
-          console.log("🚀 ~ fetchFilmShowing ~ response:", response);
           setFilmShowing(response.data.data);
         }
       } catch {

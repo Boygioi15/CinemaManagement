@@ -1,10 +1,16 @@
-import { UserService } from "../user/user.service.js";
-import { EmailService } from "./email.service.js";
+import {
+  UserService
+} from "../user/user.service.js";
+import {
+  EmailService
+} from "./email.service.js";
 import expressAsyncHandler from "express-async-handler";
 
 class EmailController {
   sendConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const { userEmail } = req.body;
+    const {
+      userEmail
+    } = req.body;
 
     const user = await UserService.findUserByEmail(userEmail);
     if (!user) {
@@ -40,7 +46,10 @@ class EmailController {
   });
 
   checkConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const { userEmail, userVerificationCode } = req.body;
+    const {
+      userEmail,
+      userVerificationCode
+    } = req.body;
 
     const user = await UserService.findUserByEmail(userEmail);
     if (!user) {
@@ -77,8 +86,7 @@ class EmailController {
       date: "06-10-2022",
       roomName: "SỐ 01",
       seatNames: ["A1", "A2", "A3"],
-      tickets: [
-        {
+      tickets: [{
           name: "ĐƠn",
           quantity: 2,
           price: 50000,
@@ -89,8 +97,7 @@ class EmailController {
           price: 30000,
         },
       ],
-      items: [
-        {
+      items: [{
           name: "Popcorn",
           quantity: 2,
           price: 50000,

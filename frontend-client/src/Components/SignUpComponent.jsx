@@ -15,7 +15,6 @@ const SignUpComponent = ({
 }) => {
   const [formValues, setFormValues] = useState({});
   useEffect(() => {
-    // Cập nhật formValues khi fields thay đổi
     if (fields && fields.length > 0) {
       const initialValues = fields.reduce((acc, field) => {
         acc[field.for] = field.value || "";
@@ -96,7 +95,7 @@ const SignUpComponent = ({
             {links.map((link, index) => (
               <Link
                 key={index}
-                to={link.path} // Dùng `to` thay vì `onClick`
+                to={link.path}
                 className="text-black underline hover:underline cursor-pointer"
                 onMouseOver={(e) => (e.currentTarget.style.color = "purple")}
                 onMouseOut={(e) => (e.currentTarget.style.color = "black")}

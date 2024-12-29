@@ -2,31 +2,44 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  birth: Date,
+  name: {
+    type: String,
+    required: true,
+  },
+  birth: {
+    type: Date,
+  },
   email: {
     type: String,
-    unique: true
+    unique: true,
+    required: true,
   },
   phone: {
     type: String,
-    unique: true
+    unique: true,
+    required: true,
   },
-  account: String,
-  password: String,
+  account: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
   blocked: {
     type: Boolean,
-    default: false
+    default: false,
   },
   deleted: {
     type: Boolean,
-    default: false
+    default: false,
   },
   verificationCode: String,
   vFCodeExpirationTime: Date,
   isConfirmed: {
     type: Boolean,
-    default: false
+    default: false,
   },
 }, {
   timestamps: true,

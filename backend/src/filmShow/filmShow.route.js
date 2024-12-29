@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("", filmShowController.createFilmShow);
 router.get("/showing", filmShowController.showingFilm);
-router.get("/upcoming", filmShowController.showingFilm);
+router.get("/upcoming", filmShowController.upComingFilm);
 router.get("/getByDate", filmShowController.getAllFilmShowByFilmId);
 router.get("/getAll", filmShowController.getAllFilmShow);
 router.get("/:id", filmShowController.getFilmShow);

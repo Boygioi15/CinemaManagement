@@ -1,14 +1,36 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { callAccount } from "../config/api";
+import LoadingSpinner from "../pages/LoadingSpiner";
 
-// Tạo Context
 const AuthContext = createContext();
 
-// Provider để bao bọc ứng dụng
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleAccount = async () => {
+    setLoading(true);
+    const response = await callAccount();
+    if (response.success) {
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
+    } else {
+      setUser(null);
+      localStorage.removeItem("user");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    handleAccount();
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, loading, handleAccount }}>
       {children}
     </AuthContext.Provider>
   );

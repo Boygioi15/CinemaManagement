@@ -23,13 +23,13 @@ app.use(
 );
 app.use(
   cors({
-    origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  })
+    credentials: true, // Cho phép gửi cookie và thông tin xác thực
+    origin: 'http://localhost:5173', // Chỉ định domain frontend của bạn
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức HTTP được phép
+    preflightContinue: false, // Không chuyển tiếp yêu cầu OPTIONS
+    optionsSuccessStatus: 204, // Trả về status code 204 cho yêu cầu OPTIONS
+  }),
 );
-
 app.use(mainRouter);
 
 //special function to catch unhandled error.

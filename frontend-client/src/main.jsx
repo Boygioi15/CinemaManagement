@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { AuthProvider } from "./Context/AuthContext";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import LoginPage from "./pages/LoginPage/LoginPage";
@@ -16,12 +15,18 @@ import FilmDetailPage from "./pages/FilmDetailPage/FilmDetailPage";
 import FoodPage from "./pages/FoodPage/FootPage";
 import FilmShowingPage from "./pages/FilmShowingPage/FilmShowingPage";
 import FilmUpComing from "./pages/FIlmUpComing/FilmUpComing";
-//specified element here
+import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./Context/AuthContext";
+import HomePage from "./pages/HomePage/HomePage";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
     children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
       {
         path: "auth",
         element: <LoginPage />,
@@ -60,7 +65,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/movie/upcoming",
-        element: <FilmUpComing/>
+        element: <FilmUpComing />,
       },
       {
         path: "/food",
@@ -74,5 +79,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <AuthProvider>
       <RouterProvider router={router} />
     </AuthProvider>
+    <ToastContainer
+      position="top-right"
+      autoClose={1000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeButton={true}
+      pauseOnHover={true}
+      draggable={true}
+      rtl={false}
+    />
   </React.StrictMode>
 );
