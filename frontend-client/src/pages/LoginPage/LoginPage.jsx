@@ -121,7 +121,7 @@ function SignUpForm({ switchToLogin, setDisplay }) {
       required: true,
     },
     {
-      for: "birth",
+      for: "birthDate",
       text: "Ngày sinh *",
       type: "date",
       placeholder: "abc",

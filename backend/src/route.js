@@ -13,6 +13,8 @@ import statisticRouter from "./statistic/statistic.route.js";
 
 import additionalItemRouter from "./additionalItem/additionalItem.route.js";
 import paymentRouter from "./payment/payment.route.js";
+import permissionRouter from "./permission/permission.route.js";
+
 const router = express.Router();
 
 router.use("/api/auth", authRouter);
@@ -28,7 +30,7 @@ router.use("/api/payment", paymentRouter);
 router.use("/api/param", paramRouter);
 router.use("/api/debug", debugRouter);
 router.use("/api/statistics", statisticRouter);
-
+router.use("/api/permission", permissionRouter);
 router.use((req, res) => {
   res.status(404).send("Not found route");
 });

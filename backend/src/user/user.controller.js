@@ -1,9 +1,5 @@
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
-import {
-  UserService
-} from "./user.service.js";
+import { customError } from "../middlewares/errorHandlers.js";
+import { UserService, EmployeeService } from "./user.service.js";
 import expressAsyncHandler from "express-async-handler";
 
 class UserController {
@@ -23,9 +19,7 @@ class UserController {
   });
 
   updateUser = expressAsyncHandler(async (req, res, next) => {
-    const {
-      _id
-    } = req.params;
+    const { _id } = req.params;
 
     const updatedUser = await UserService.updateUserById(_id, req.body);
 
@@ -49,9 +43,7 @@ class UserController {
   });
 
   deleteUser = expressAsyncHandler(async (req, res, next) => {
-    const {
-      _id
-    } = req.params;
+    const { _id } = req.params;
     const deletedUser = await UserService.deleteUserById(_id);
     if (!deletedUser) {
       return res.status(404).json({
@@ -74,118 +66,93 @@ class UserController {
     });
   });
 
-  sendConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const {
-      email
-    } = req.body;
-    const user = (await UserService.findUserByEmail(email));
-    if (!user) {
-      return res.status(404).json({
-        msg: "User not found",
-        success: false
-      });
-    }
-
-    const randomVerificationCode = () => {
-      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      let code = "";
-      for (let i = 0; i < 6; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        code += characters[randomIndex];
-      }
-      return code;
-    };
-
-    const verificationCode = randomVerificationCode();
-    await UserService.sendEmail(identifier, "Verification Code", `Your verification code is: ${verificationCode}`);
-    await UserService.storeConfirmCode(identifier, verificationCode);
-    return res.status(200).json({
-      msg: "Verification code sent successfully!",
-      success: true
-    });
-  });
-
-  checkConfirmCode = expressAsyncHandler(async (req, res, next) => {
-    const {
-      email,
-      userVerificationCode
-    } = req.body;
-
-    const user = (await UserService.findUserByEmail(email));
-    if (!user) {
-      return res.status(404).json({
-        msg: "User not found!",
-        success: false
-      });
-    }
-
-    if (user.userVerificationCode !== userVerificationCode || user.userVFCodeExpirationTime < new Date()) {
-      return res.status(404).json({
-        msg: "Invalid verification code!",
-        success: false
-      });
-    }
-
-    user.isConfirmed = true;
-    await user.save();
-
-    return res.status(200).json({
-      msg: "Confirmed successfully!",
-      success: true
-    });
-  });
-
-  resetPassword = expressAsyncHandler(async (req, res, next) => {
-    const {
-      email,
-      newPassword
-    } = req.body;
-
-    const user = (await UserService.findUserByEmail(email));
-    if (!user) {
-      return res.status(404).json({
-        msg: "User not found!",
-        success: false
-      });
-    }
-
-    user.password = newPassword;
-    user.isConfirmed = false;
-    user.verificationCode = undefined;
-    user.vFCodeExpirationTime = new Date(0);
-
-    await user.save();
-
-    return res.status(200).json({
-      msg: "Password reset successfully!",
-      success: true
-    });
-  });
-
   changePassword = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
 
-    const {
-      id
-    } = req.params;
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    const {
-      oldPassword,
-      newPassword,
-      confirmNewPassword
-    } = req.body;
-
-    if (newPassword !== confirmNewPassword) throw customError("Mật khẩu mới không khớp")
+    if (newPassword !== confirmNewPassword)
+      throw customError("Mật khẩu mới không khớp");
     const update = await UserService.changePassword(id, {
       oldPassword,
       newPassword,
-      confirmNewPassword
-    })
+      confirmNewPassword,
+    });
     return res.status(200).json({
       msg: "Update password successfully!",
       success: true,
-      data: update
+      data: update,
     });
   });
 }
+class EmployeeController {
+  createEmployee = expressAsyncHandler(async (req, res, next) => {
+    const createdEmployee = await EmployeeService.createEmployee(req.body);
+    if (createdEmployee?.error) {
+      return res.status(400).json({
+        msg: createdEmployee.error,
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      msg: "Tạo mới nhân viên thành công!",
+      success: true,
+      user: createdEmployee,
+    });
+  });
 
-export default new UserController();
+  updateEmployee = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+
+    const updatedEmployee = await EmployeeService.updateEmployeeById(
+      { _id: id },
+      req.body
+    );
+
+    if (updatedEmployee?.error) {
+      return res.status(400).json({
+        msg: updatedEmployee.error,
+        success: false,
+      });
+    }
+    if (!updatedEmployee) {
+      return res.status(400).json({
+        msg: "Không tìm thấy nhân viên!",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      msg: "Cập nhật nhân viên thành công!",
+      success: true,
+      user: updatedEmployee,
+    });
+  });
+
+  deleteEmployee = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const deletedEmployee = await EmployeeService.deleteEmployeeById(id);
+    if (!deletedEmployee) {
+      return res.status(400).json({
+        msg: "Không tìm thấy nhân viên!",
+        success: false,
+      });
+    }
+    res.status(200).json({
+      msg: "Xóa nhân viên thành công!",
+      success: true,
+      user: deletedEmployee,
+    });
+  });
+
+  getAllEmployees = expressAsyncHandler(async (req, res, next) => {
+    const users = await EmployeeService.getAllEmployees();
+    res.status(200).json({
+      msg: "Get all employees successfully",
+      data: users,
+      success: true,
+    });
+  });
+}
+const userController = new UserController(),
+  employeeController = new EmployeeController();
+export { userController, employeeController };

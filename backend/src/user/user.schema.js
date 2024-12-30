@@ -1,49 +1,73 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    birthDate: {
+      type: Date,
+      required: true,
+    },
+    email: {
+      type: String,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    account: {
+      type: String,
+    },
+    password: {
+      type: String,
+    },
+    blocked: {
+      type: Boolean,
+      default: false,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: String,
+    vFCodeExpirationTime: Date,
+    isConfirmed: {
+      type: Boolean,
+      default: false,
+    },
+
+    ////////EMPLOYEE/////////////
+    jobTitle: {
+      type: String,
+    },
+    salary: {
+      type: Number,
+    },
+    shiftStart: {
+      type: {
+        hour: Number,
+        minute: Number,
+      },
+    },
+    shiftEnd: {
+      type: {
+        hour: Number,
+        minute: Number,
+      },
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "employee"],
+    },
   },
-  birth: {
-    type: Date,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  phone: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  account: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  blocked: {
-    type: Boolean,
-    default: false,
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
-  },
-  verificationCode: String,
-  vFCodeExpirationTime: Date,
-  isConfirmed: {
-    type: Boolean,
-    default: false,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
