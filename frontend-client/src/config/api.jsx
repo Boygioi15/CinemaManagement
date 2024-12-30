@@ -25,9 +25,17 @@ export const changePasword = async (id, updateData) => {
 };
 
 export const getShowingFilms = async () => {
-  return await axios.get(`http://localhost:8000/api/film-show/showing`);
+  return await axios.get(`film-show/showing`);
 };
 
 export const getUpcommingFilms = async () => {
-  return await axios.get(`http://localhost:8000/api/film-show/upcoming`);
+  return await axios.get(`film-show/upcoming`);
+};
+
+export const searchFilm = async ({ keyword, page = 1, limit = 2 }) => {
+  return await axios.post(`films/searchFilm`, {
+    keyword,
+    page,
+    limit,
+  });
 };

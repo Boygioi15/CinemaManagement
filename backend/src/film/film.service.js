@@ -150,4 +150,107 @@ export class FilmService {
     //destroy old img
     handleDestroyCloudinary(oldFilm.public_ID);
   };
+
+  static async searchFilms(keyword = '', page = 1, limit = 3) {
+    try {
+      if (!keyword.trim()) {
+        throw new Error('Search keyword is required');
+      }
+
+      const skip = (page - 1) * limit;
+
+      const pipeline = [{
+          $lookup: {
+            from: 'tags',
+            localField: 'tagsRef',
+            foreignField: '_id',
+            as: 'tags'
+          }
+        },
+        {
+          $match: {
+            deleted: false,
+            $or: [{
+                name: {
+                  $regex: keyword,
+                  $options: 'i'
+                }
+              },
+              {
+                filmContent: {
+                  $regex: keyword,
+                  $options: 'i'
+                }
+              },
+              {
+                'tags.name': {
+                  $regex: keyword,
+                  $options: 'i'
+                }
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            thumbnailURL: 1,
+            filmContent: 1,
+            trailerURL: 1,
+            filmDuration: 1,
+            beginDate: 1,
+            filmDescription: 1,
+            ageRestriction: 1,
+            originatedCountry: 1,
+            twoDthreeD: 1,
+            voice: 1,
+            tags: {
+              _id: 1,
+              name: 1
+            }
+          }
+        },
+        {
+          $facet: {
+            metadata: [{
+                $count: 'total'
+              },
+              {
+                $addFields: {
+                  currentPage: page,
+                  totalPages: {
+                    $ceil: {
+                      $divide: ['$total', limit]
+                    }
+                  }
+                }
+              }
+            ],
+            films: [{
+                $skip: skip
+              },
+              {
+                $limit: limit
+              }
+            ]
+          }
+        }
+      ];
+
+      const [result] = await filmModel.aggregate(pipeline);
+
+      return {
+        films: result.films,
+        metadata: result.metadata[0] || {
+          total: 0,
+          currentPage: page,
+          totalPages: 0
+        }
+      };
+
+    } catch (error) {
+      throw new Error(`Error searching films: ${error.message}`);
+    }
+  }
+
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import FilmCard from "../../Components/filmCard/index";
 import axios from "axios";
+import { getShowingFilms } from "../../config/api";
 
 const FilmShowingPage = () => {
   const [filmShowing, setFilmShowing] = useState([]);
@@ -8,9 +9,9 @@ const FilmShowingPage = () => {
   useEffect(() => {
     const fetchFilmShowing = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/films`);
-        if (response && response.data.data) {
-          setFilmShowing(response.data.data);
+        const response = await getShowingFilms();
+        if (response && response.data) {
+          setFilmShowing(response.data);
         }
       } catch {
         throw new Error("There is an error while getting film detail");

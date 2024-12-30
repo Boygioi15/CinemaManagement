@@ -4,11 +4,12 @@ import QuickBooking from "../../Components/homePage/QuickBooking";
 
 import { getShowingFilms, getUpcommingFilms } from "../../config/api";
 import FilmListSection from "../../Components/homePage/FilmListSection";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [filmShowing, setFilmShowing] = useState([]);
   const [upcomingFilm, setUpcomingFilm] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchFilmShowing = async () => {
       try {
@@ -34,6 +35,12 @@ const HomePage = () => {
     fetchFilmUpcoming();
     fetchFilmShowing();
   }, []);
+  const handleOnClickSeeMoreInShowing = () => {
+    navigate("/movie/showing");
+  };
+  const handleOnClickSeeMoreInUpComing = () => {
+    navigate("/movie/upcoming");
+  };
   return (
     <>
       <div className="container mx-auto px-4 md:px-6 lg:px-8 py-6 max-w-7xl">
@@ -47,8 +54,16 @@ const HomePage = () => {
 
         {/* Phim đang chiếu */}
 
-        <FilmListSection title="PHIM ĐANG CHIẾU " filmList={filmShowing} />
-        <FilmListSection title="PHIM SẮP CHIẾU " filmList={upcomingFilm} />
+        <FilmListSection
+          title="PHIM ĐANG CHIẾU "
+          filmList={filmShowing}
+          onCLickSeeMore={handleOnClickSeeMoreInShowing}
+        />
+        <FilmListSection
+          title="PHIM SẮP CHIẾU "
+          filmList={upcomingFilm}
+          onCLickSeeMore={handleOnClickSeeMoreInUpComing}
+        />
       </div>
     </>
   );

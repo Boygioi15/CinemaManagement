@@ -6,6 +6,7 @@ import userModel from "../user/user.schema.js";
 import {
   customError
 } from "./errorHandlers.js";
+
 const validateToken = expressAsyncHandler(async function (req, res, next) {
   let authHeader = req?.headers?.authorization;
   if (!authHeader) {

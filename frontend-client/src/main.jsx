@@ -18,6 +18,7 @@ import FilmUpComing from "./pages/FIlmUpComing/FilmUpComing";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
+import SearchPage from "./pages/SearchPage/SearchPage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "/movie/upcoming",
         element: <FilmUpComing />,
+      },
+      {
+        path: "/search",
+        element: <SearchPage />,
       },
       {
         path: "/food",

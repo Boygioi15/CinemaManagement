@@ -2,7 +2,11 @@ import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import FilmCard from "../filmCard";
 
-const FilmListSection = ({ title = "PHIM ĐANG CHIẾU", filmList }) => {
+const FilmListSection = ({
+  title = "PHIM ĐANG CHIẾU",
+  filmList,
+  onCLickSeeMore,
+}) => {
   const [currentPage, setCurrentPage] = useState(0);
   const scrollContainerRef = useRef(null);
 
@@ -92,7 +96,10 @@ const FilmListSection = ({ title = "PHIM ĐANG CHIẾU", filmList }) => {
 
       {/* View More Button */}
       <div className="flex justify-center mt-8">
-        <button className="px-12 py-3 border-2 border-yellow-400 text-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transition-colors text-lg font-bold">
+        <button
+          onClick={onCLickSeeMore}
+          className="px-12 py-3 border-2 border-yellow-400 text-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transition-colors text-lg font-bold"
+        >
           XEM THÊM
         </button>
       </div>

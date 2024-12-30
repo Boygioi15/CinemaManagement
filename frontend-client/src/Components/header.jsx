@@ -5,6 +5,8 @@ import { callSignOut } from "../config/api";
 import { toast } from "react-toastify";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Trạng thái hiển thị menu
+  const [keyWord, setKeyWord] = useState("");
+
   const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -34,6 +36,15 @@ const Header = () => {
     }, 200); // Độ trễ 200ms
   };
 
+  const handleOnKeyDown = (e) => {
+    if (e.key === "Enter") {
+      if (keyWord?.trim() === "") {
+        return;
+      }
+      console.log("🚀 ~ handleOnKeyDown ~ keyword:", keyWord);
+      navigate(`/search?keyword=${keyWord}`);
+    }
+  };
   return (
     <div className="bg-blue-900 p-2.5 flex items-center justify-between">
       <div className="flex items-center space-x-6">
@@ -65,8 +76,14 @@ const Header = () => {
             placeholder="Tìm phim"
             type="text"
             className="flex-grow outline-none text-xs text-gray-800 placeholder-gray-400 px-2"
+            value={keyWord}
+            onChange={(e) => setKeyWord(e.target.value)}
+            onKeyDown={handleOnKeyDown}
           />
-          <button className="bg-transparent border-none flex items-center justify-center p-1">
+          <button
+            className="bg-transparent border-none flex items-center justify-center p-1"
+            onClick={() => handleOnKeyDown({ key: "Enter" })}
+          >
             <img alt="search" src="/Images/search.svg" className="h-4 w-4" />
           </button>
         </div>
