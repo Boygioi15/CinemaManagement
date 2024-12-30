@@ -46,6 +46,70 @@ export default class PermissionImplement {
       data: await PermissionModel.deleteMany(),
     });
   });
+  static updateEmployeePermission = expressAsyncHandler(
+    async (req, res, err) => {
+      const { employeeID } = req.params;
+      const { permissionList } = req.body;
+      console.log(permissionList);
+      if (!permissionList) {
+        throw customError("Sai định dạng request");
+      }
+      const uniquePermissions = new Set(permissionList);
+
+      if (uniquePermissions.size !== permissionList.length) {
+        throw customError("Bị trùng quyền?", 400);
+      }
+
+      try {
+        if (
+          !(await userModel.findOne({
+            role: "employee",
+            _id: employeeID,
+          }))
+        ) {
+          throw customError("Nhân viên không tồn tại!", 400);
+        }
+      } catch (error) {
+        throw customError(
+          "Định dạng mã nhân viên không hợp lệ! Lỗi: " + error,
+          400
+        );
+      }
+      for (const permissionID of permissionList) {
+        if (!(await PermissionModel.findById(permissionID))) {
+          throw customError("Quyền không tồn tại", 400);
+        }
+      }
+      try {
+        const result = await Employee_PermissionModel.deleteMany({
+          employeeID: employeeID,
+        });
+        console.log(result);
+      } catch (error) {
+        console.log(error);
+        throw customError(
+          "Lỗi bất ngờ khi thực hiện cập nhật quyền nhân viên!"
+        );
+      }
+      try {
+        for (const permissionID of permissionList) {
+          await Employee_PermissionModel.create({
+            employeeID: employeeID,
+            permissionID: permissionID,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        throw customError(
+          "Lỗi bất ngờ khi thực hiện cập nhật quyền nhân viên!"
+        );
+      }
+      res.status(200).json({
+        msg: "Update employee permission successfully",
+        success: "true",
+      });
+    }
+  );
   static addPermissionToEmployee = expressAsyncHandler(
     async (req, res, err) => {
       const { employeeID, permissionID } = req.params;

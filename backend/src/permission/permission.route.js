@@ -11,6 +11,10 @@ router.delete(
   PermissionImplement.deleteAllPermission
 );
 router.post(
+  "/update-employee-permission/:employeeID",
+  PermissionImplement.updateEmployeePermission
+);
+router.post(
   "/add-permission-to-employee/:employeeID/:permissionID",
   PermissionImplement.addPermissionToEmployee
 );
