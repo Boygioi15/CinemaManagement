@@ -68,6 +68,21 @@ const Header = () => {
             <span>Lịch chiếu</span>
           </a>
         </div>
+        <div>
+          <a
+            href="/food"
+            className="text-white text-sm flex items-center space-x-1 hover:underline"
+          >
+            <img
+              alt=""
+              loading="lazy"
+              width="20"
+              height="20"
+              src="https://cinestar.com.vn/assets/images/ic-cor.svg"
+            />
+            <span>Đặt bắp nước</span>
+          </a>
+        </div>
       </div>
 
       <div className="flex items-center space-x-6">

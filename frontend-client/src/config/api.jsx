@@ -47,3 +47,16 @@ export const getShowTimeOfDateByFilmId = async (filmId) => {
     },
   });
 };
+
+export const getAvailableShowDate = async (filmId) => {
+  return await axios.get(`film-show/get-available/showDate`);
+};
+
+export const getAvailableFilmByDate = async ({ date, filmId, page, limit }) => {
+  return await axios.post(`film-show/get-film-available-by-date`, {
+    date,
+    filmId,
+    page,
+    limit,
+  });
+};

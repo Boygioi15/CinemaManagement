@@ -24,3 +24,11 @@ export const getDayOfWeekFromISOString = (isoString) => {
   // Trả về tên ngày trong tuần
   return days[dayOfWeek];
 };
+
+export const getDateStringFromISOSring = (isoString) => {
+  return (
+    getDayOfWeekFromISOString(isoString) +
+    " , " +
+    getDayAndMonthFromISOString(isoString)
+  );
+};

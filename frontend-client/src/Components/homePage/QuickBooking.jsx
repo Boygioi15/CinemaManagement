@@ -154,7 +154,7 @@ const QuickBooking = () => {
           >
             {(selectedDate &&
               getDayOfWeekFromISOString(selectedDate) +
-                "," +
+                " , " +
                 getDayAndMonthFromISOString(selectedDate)) ||
               "3. Chọn Ngày"}
           </span>

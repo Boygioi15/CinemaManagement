@@ -204,9 +204,11 @@ export class FilmShowService {
     );
     return (await res).filter((item) => item !== null);
   };
+
   static getFilmShow = expressAsyncHandler(async (filmShowId) => {
     return await filmShowModel.findById(filmShowId);
   });
+
   static getHostRoomOfFilmShow = expressAsyncHandler(async (filmShowId) => {
     const filmShow = await filmShowModel.findById(filmShowId);
     if (!filmShow) throw customError("Film show not found", 400);
@@ -243,6 +245,7 @@ export class FilmShowService {
       throw customError("Ghế không nằm ở trong phòng", 400);
     }
   };
+
   static appendLockedSeats = expressAsyncHandler(
     async (filmShowID, seatIDs) => {
       const filmShow = await filmShowModel.findById(filmShowID);
@@ -268,6 +271,7 @@ export class FilmShowService {
       await filmShow.save();
     }
   );
+
   static releaseLockedSeats = expressAsyncHandler(
     async (filmShowID, seatIDs) => {
       const filmShow = await filmShowModel.findById(filmShowID);
@@ -280,6 +284,7 @@ export class FilmShowService {
       await filmShow.save();
     }
   );
+
   static refreshLockedSeat = expressAsyncHandler(async (id) => {
     const filmShow = await filmShowModel.findByIdAndUpdate(
       id, {
@@ -290,8 +295,114 @@ export class FilmShowService {
     );
     return filmShow;
   });
+
   static getAllFilmShows = async () => {
     const filmShows = await filmShowModel.find({});
     return filmShows;
   };
+
+  static getAvailableShowDate = async () => {
+    const filmShows = await filmShowModel
+      .find({
+        showDate: {
+          $gte: new Date(),
+        },
+      })
+      .select("showDate")
+      .lean();
+
+    const arrayShowDates = filmShows.map((item) => item.showDate);
+    const uniqueShowDates = [
+      ...new Set(arrayShowDates.map((date) => date.toISOString())),
+    ].map((dateStr) => new Date(dateStr));
+
+    return uniqueShowDates
+  };
+
+  static getAvailableFilmByDate = async ({
+    date,
+    filmId = null,
+    page = 1,
+    limit = 2,
+  }) => {
+    const matchConditions = {};
+
+    if (filmId) {
+      matchConditions.film = new mongoose.Types.ObjectId(filmId);
+    }
+
+
+    if (date) {
+      matchConditions.showDate = new Date(date);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const filmShowsV3 = await filmShowModel.aggregate([{
+        $match: matchConditions,
+      },
+      {
+        $group: {
+          _id: {
+            film: "$film",
+            filmType: "$filmType",
+          },
+          showTimes: {
+            $push: "$showTime",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.film",
+          filmTypes: {
+            $push: {
+              filmType: "$_id.filmType",
+              showTimes: "$showTimes",
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "films",
+          localField: "_id",
+          foreignField: "_id",
+          as: "filmDetails",
+        },
+      },
+      {
+        $unwind: "$filmDetails",
+      },
+      {
+        $project: {
+          _id: 0,
+          film: "$filmDetails",
+          filmTypes: 1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    const total = await filmShowModel.countDocuments(matchConditions);
+
+    return {
+      films: filmShowsV3,
+      pagination: {
+        currentPage: page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  };
+
+
+
+
 }

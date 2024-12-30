@@ -1,5 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
-import { FilmShowService } from "./filmShow.service.js";
+import {
+  FilmShowService
+} from "./filmShow.service.js";
 import filmModel from "../film/film.schema.js";
 import filmShowModel from "./filmShow.schema.js";
 
@@ -32,8 +34,12 @@ class FilmShowController {
   });
 
   getAllFilmShowByFilmId = expressAsyncHandler(async (req, res, next) => {
-    const { filmId } = req.query;
+    const {
+      filmId
+    } = req.query;
+
     const response = await FilmShowService.getAllFilmShowByFilmId(filmId);
+
     return res.status(200).json({
       msg: "Get showdate successfully!",
       success: true,
@@ -41,7 +47,9 @@ class FilmShowController {
     });
   });
   getFilmShow = expressAsyncHandler(async (req, res, next) => {
-    const { id } = req.params;
+    const {
+      id
+    } = req.params;
     const response = await FilmShowService.getFilmShow(id);
     return res.status(200).json({
       msg: "Get film show successfully!",
@@ -68,8 +76,11 @@ class FilmShowController {
       data: response,
     });
   });
+
   getHostRoom = expressAsyncHandler(async (req, res, next) => {
-    const { id } = req.params;
+    const {
+      id
+    } = req.params;
     const response = await FilmShowService.getHostRoomOfFilmShow(id);
     return res.status(200).json({
       msg: "Get showdate successfully!",
@@ -77,8 +88,11 @@ class FilmShowController {
       data: response,
     });
   });
+
   refreshLockedSeat = expressAsyncHandler(async (req, res, next) => {
-    const { id } = req.params;
+    const {
+      id
+    } = req.params;
     const response = await FilmShowService.refreshLockedSeat(id);
     return res.status(200).json({
       msg: "Refresh successfully!",
@@ -86,10 +100,31 @@ class FilmShowController {
       data: response,
     });
   });
+
   getAllFilmShow = expressAsyncHandler(async (req, res, next) => {
     const response = await FilmShowService.getAllFilmShows();
     return res.status(200).json({
       msg: "Get all film shows successfully!",
+      success: true,
+      data: response,
+    });
+  });
+
+  getAvailableShowDate = expressAsyncHandler(async (req, res, next) => {
+    const response = await FilmShowService.getAvailableShowDate();
+    return res.status(200).json({
+      msg: "Get showdate successfully!",
+      success: true,
+      data: response,
+    });
+  });
+
+  getAvailableFilmByDate = expressAsyncHandler(async (req, res, next) => {
+    const response = await FilmShowService.getAvailableFilmByDate({
+      ...req.body
+    });
+    return res.status(200).json({
+      msg: "Get showdate successfully!",
       success: true,
       data: response,
     });

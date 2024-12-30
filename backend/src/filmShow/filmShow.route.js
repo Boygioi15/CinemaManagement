@@ -11,5 +11,6 @@ router.get("/getAll", filmShowController.getAllFilmShow);
 router.get("/:id", filmShowController.getFilmShow);
 router.get("/:id/getHostRoom", filmShowController.getHostRoom);
 router.post("/:id/refresh-locked-seat", filmShowController.refreshLockedSeat);
-
+router.get("/get-available/showDate", filmShowController.getAvailableShowDate);
+router.post("/get-film-available-by-date", filmShowController.getAvailableFilmByDate);
 export default router;
