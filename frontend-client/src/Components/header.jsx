@@ -61,7 +61,7 @@ const Header = () => {
         </div>
         <div>
           <a
-            href="#"
+            href="/showtimes"
             className="text-white text-sm flex items-center space-x-1 hover:underline"
           >
             <img alt="search" src="/Images/calendar.svg" className="h-5 w-5" />

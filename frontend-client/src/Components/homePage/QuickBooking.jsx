@@ -103,7 +103,7 @@ const QuickBooking = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 flex items-center gap-3">
-      <div className="font-bold text-xl text-gray-800 whitespace-nowrap">
+      <div className="font-bold text-2xl text-gray-800 whitespace-nowrap">
         ĐẶT VÉ NHANH
       </div>
 
@@ -112,13 +112,13 @@ const QuickBooking = () => {
           className={`w-full px-4 py-3 rounded-lg text-left flex items-center justify-between bg-white border-2 border-purple-600 hover:bg-gray-50 `}
           onClick={handleMovieClick}
         >
-          <span className={"text-purple-600"}>
+          <span className={"text-purple-600 text-xl"}>
             {selectedMovie?.name || "2. Chọn Phim"}
           </span>
           <ChevronDown className={`w-5 h-5 text-purple-600`} />
         </button>
         {isMovieDropdownOpen && (
-          <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+          <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 text-xl">
             {movies.map((movie) => (
               <div
                 key={movie.id}
@@ -145,7 +145,13 @@ const QuickBooking = () => {
           onClick={handleDateClick}
           disabled={!selectedMovie}
         >
-          <span className={selectedMovie ? "text-purple-600" : "text-gray-500"}>
+          <span
+            className={
+              selectedMovie
+                ? "text-purple-600 text-xl"
+                : "text-gray-500 text-xl"
+            }
+          >
             {(selectedDate &&
               getDayOfWeekFromISOString(selectedDate) +
                 "," +
@@ -163,7 +169,7 @@ const QuickBooking = () => {
             {availableDates.map((dateItem, index) => (
               <div
                 key={index}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black text-xl"
                 onClick={() => {
                   setSelectedDate(dateItem.date);
                   setIsDateDropdownOpen(false);
@@ -188,7 +194,11 @@ const QuickBooking = () => {
           onClick={handleShowtimeClick}
           disabled={!selectedDate}
         >
-          <span className={selectedDate ? "text-purple-600" : "text-gray-500"}>
+          <span
+            className={
+              selectedDate ? "text-purple-600 text-xl" : "text-gray-500 text-xl"
+            }
+          >
             {selectedShowtime || "4. Chọn Suất"}
           </span>
           <ChevronDown
@@ -202,7 +212,7 @@ const QuickBooking = () => {
             {availableShowtimes.map((timeItem) => (
               <div
                 key={timeItem.id}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black text-xl"
                 onClick={() => {
                   setSelectedShowtime(timeItem.time);
                   setIsShowtimeDropdownOpen(false);
@@ -216,7 +226,7 @@ const QuickBooking = () => {
       </div>
 
       <button
-        className={`px-6 py-3 rounded-lg font-medium whitespace-nowrap transition-colors ${
+        className={`px-6 py-3 rounded-lg font-medium whitespace-nowrap transition-colors text-xl ${
           selectedShowtime
             ? "bg-purple-700 hover:bg-purple-800 text-white"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"

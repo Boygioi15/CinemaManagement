@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
+import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: "/search",
         element: <SearchPage />,
+      },
+      {
+        path: "/showtimes",
+        element: <ShowTimePage />,
       },
       {
         path: "/food",
