@@ -16,19 +16,65 @@ import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import FoodCard from "../../Components/FoodCard";
 import TicketType from "../../Components/TicketType";
 import { useParams } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
+import { getShowTimeOfDateByFilmId } from "../../config/api";
 const FilmDetailPage = () => {
   const { filmID } = useParams();
-  const [videoOpen, setVideoOpen] = useState(false);
-  const [selectedSchedule, setSSelectedSchedule] = useState("19/12");
-  const [selectedShowtime, setSelectedShowtime] = useState("19/12");
 
-  const handleDateClick = (date) => {
-    setSSelectedSchedule(date);
+  const location = useLocation();
+  const { initShowDate, initShowTime } = location.state || {};
+
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(initShowDate || "");
+  const [selectedShowtime, setSelectedShowtime] = useState(initShowTime || "");
+  console.log("🚀 ~ FilmDetailPage ~ selectedShowtime:", selectedShowtime);
+
+  const [availableDates, setAvailableDates] = useState([]);
+  const [availableShowtimesWithFilmType, setAvailableShowtimesWithFilmType] =
+    useState([]);
+
+  const handleGetDateAndShowTime = async (filmID) => {
+    try {
+      const response = await getShowTimeOfDateByFilmId(filmID);
+      if (response?.success && response.data) {
+        setAvailableDates(response.data);
+        setAvailableShowtimesWithFilmType([]);
+      }
+    } catch (error) {
+      console.error("Error fetching dates and showtimes:", error);
+    }
   };
-  const handleTimeClick = (time) => {
-    setSelectedShowtime(time);
-  };
+
+  useEffect(() => {
+    setSelectedShowtime("");
+    if (selectedDate) {
+      const dateData = availableDates.find((d) => d.date === selectedDate);
+      setAvailableShowtimesWithFilmType(dateData?.show || []);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (availableDates.length > 0) {
+      if (initShowDate && initShowTime) {
+        const initDateData = availableDates.find(
+          (d) => d.date === initShowDate
+        );
+        setSelectedDate(initShowDate);
+        setAvailableShowtimesWithFilmType(initDateData?.show || []);
+
+        // Kiểm tra và set selectedShowtime khi showtimes có dữ liệu
+        const initShowtimeExists = initDateData?.show?.some((group) =>
+          group.showTimes.some((showtime) => showtime.showTime === initShowTime)
+        );
+        if (initShowtimeExists) {
+          setSelectedShowtime(initShowTime);
+        }
+      } else {
+        setSelectedDate(availableDates[0].date);
+        setAvailableShowtimesWithFilmType(availableDates[0].show);
+      }
+    }
+  }, [availableDates]);
 
   const [filmDetail, setFilmDetail] = useState();
   useEffect(() => {
@@ -38,15 +84,16 @@ const FilmDetailPage = () => {
           `http://localhost:8000/api/films/${filmID}/getFilmDetail`
         );
         if (response && response.data) {
-          console.log("🚀 ~ fetchFilmDetail ~ response:", response);
           setFilmDetail(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching film details:", error);
       }
     };
+
     fetchFilmDetail();
-  }, [filmID]);
+    handleGetDateAndShowTime(filmID);
+  }, []);
 
   if (!filmDetail) {
     return <div>Loading...</div>;
@@ -194,67 +241,40 @@ const FilmDetailPage = () => {
         <div className="flex flex-col justify-center items-center space-y-12">
           <h1 className="font-interExtraBold">LỊCH CHIẾU</h1>
           <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
-            <ScheduleChooseBox
-              date="19/12"
-              isSelected={selectedSchedule === "19/12"}
-              onClick={() => handleDateClick("19/12")}
-            />
-            <ScheduleChooseBox
-              date="20/12"
-              isSelected={selectedSchedule === "20/12"}
-              onClick={() => handleDateClick("20/12")}
-            />
-            <ScheduleChooseBox
-              date="21/12"
-              isSelected={selectedSchedule === "21/12"}
-              onClick={() => handleDateClick("21/12")}
-            />
+            {availableDates.map((dateGroup) => {
+              return (
+                <ScheduleChooseBox
+                  date={dateGroup.date}
+                  isSelected={selectedDate === dateGroup.date}
+                  onClick={() => setSelectedDate(dateGroup.date)}
+                />
+              );
+            })}
           </div>
-          <div className="flex flex-col justify-center items-center space-y-2">
-            <h1 className="font-interExtraBold">SUẤT CHIẾU</h1>
-            <h2 className="font-interBold">2D</h2>
-            <hr className="text-white w-full p-1"></hr>
-            <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
-              <ShowtimeChooseBox
-                time="19/12"
-                isSelected={selectedShowtime === "19/12"}
-                onClick={() => handleTimeClick("19/12")}
-              />
-              <ShowtimeChooseBox
-                time="20/12"
-                isSelected={selectedShowtime === "20/12"}
-                onClick={() => handleTimeClick("20/12")}
-              />
-              <ShowtimeChooseBox
-                time="21/12"
-                isSelected={selectedShowtime === "21/12"}
-                onClick={() => handleTimeClick("21/12")}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col justify-center items-center space-y-2">
-            <h2 className="font-interBold">3D</h2>
-            <hr className="text-white w-full p-1"></hr>
-            <div className="flex flex-wrap justify-center items-center mt-4 gap-4">
-              <ShowtimeChooseBox
-                time="19/12"
-                isSelected={selectedShowtime === "19/12"}
-                onClick={() => handleTimeClick("19/12")}
-              />
-              <ShowtimeChooseBox
-                time="20/12"
-                isSelected={selectedShowtime === "20/12"}
-                onClick={() => handleTimeClick("20/12")}
-              />
-              <ShowtimeChooseBox
-                time="21/12"
-                isSelected={selectedShowtime === "21/12"}
-                onClick={() => handleTimeClick("21/12")}
-              />
-            </div>
-          </div>
+
+          {availableShowtimesWithFilmType?.map((dataGroup) => {
+            return (
+              <div className="flex flex-col justify-center items-center space-y-2">
+                <h1 className="font-interExtraBold">SUẤT CHIẾU</h1>
+                <h2 className="font-interBold">{dataGroup.showType}</h2>
+                <hr className="text-white w-full p-1"></hr>
+                <div className="flex flex-wrap justify-center items-center mt-6 gap-4">
+                  {dataGroup?.showTimes?.map((value) => {
+                    return (
+                      <ShowtimeChooseBox
+                        time={value.showTime}
+                        isSelected={selectedShowtime === value.showTime}
+                        onClick={() => setSelectedShowtime(value.showTime)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
+
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
         <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
@@ -263,6 +283,7 @@ const FilmDetailPage = () => {
           <TicketType />
         </div>
       </div>
+
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
         <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">

@@ -39,3 +39,11 @@ export const searchFilm = async ({ keyword, page = 1, limit = 2 }) => {
     limit,
   });
 };
+
+export const getShowTimeOfDateByFilmId = async (filmId) => {
+  return await axios.get(`film-show/getByDate`, {
+    params: {
+      filmId,
+    },
+  });
+};
