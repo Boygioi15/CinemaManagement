@@ -64,3 +64,7 @@ export const getAvailableFilmByDate = async ({ date, filmId, page, limit }) => {
 export const getAllFilms = async () => {
   return await axios.get(`/films`);
 };
+
+export const getAllFoods = async () => {
+  return await axios.get(`/additional-items`);
+};
