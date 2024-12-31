@@ -54,18 +54,14 @@ const UserInfoPage = () => {
 
   return (
     <UserInfoLayout>
-      <div className="flex items-center justify-center">
-        {/* Main Content */}
-        <div className=" text-black">
-          <div className="   ">
-            <UserInforComponent
-              title="Thông tin khách hàng"
-              fields={fields}
-              buttontitle="Lưu thông tin"
-              onSubmit={handleSave}
-            />
-          </div>
-        </div>
+      <div className="flex w-full flex-col ">
+        <div className="py-5 text-2xl">THÔNG TIN KHÁCH HÀNG</div>
+        <UserInforComponent
+          title="Thông tin khách hàng"
+          fields={fields}
+          buttontitle="Lưu thông tin"
+          onSubmit={handleSave}
+        />
       </div>
     </UserInfoLayout>
   );

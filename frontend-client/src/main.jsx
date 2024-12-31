@@ -21,6 +21,7 @@ import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
 import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
 import OffLineTicketBooking from "./Components/RoomDisplay";
+import NotFoundPage from "./pages/NotFound";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -86,8 +87,8 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/room",
-    element: <OffLineTicketBooking />,
+    path: "*", // wildcard cho tất cả đường dẫn không khớp
+    element: <NotFoundPage />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

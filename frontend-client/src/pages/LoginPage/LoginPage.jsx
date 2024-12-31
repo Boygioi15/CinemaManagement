@@ -20,7 +20,7 @@ function ParentForm() {
     );
   }
   return (
-    <div className="authForm">
+    <div className="authForm w-[800px]">
       <div className="authForm-title">
         <button
           onClick={() => {
@@ -61,13 +61,14 @@ function LoginForm() {
 
   const handleLogin = async (formValues) => {
     const response = await callLogin(formValues);
-    console.log("🚀 ~ handleLogin ~ response:", response);
     if (response.success) {
       const { accesssToken } = response.data.tokens;
       setUser(response.data);
       localStorage.setItem("accessToken", accesssToken);
       toast.success("Đăng nhập thành công!");
       navigate("/");
+    } else {
+      toast.error("Đăng nhập thất bại!");
     }
   };
 
@@ -89,7 +90,7 @@ function LoginForm() {
   ];
 
   return (
-    <div className="">
+    <div className="text-xl">
       <LoginComponent
         fields={fields}
         isTickRequired={true}
@@ -164,7 +165,7 @@ function SignUpForm({ switchToLogin, setDisplay }) {
     },
   ];
   return (
-    <div className="">
+    <div className=" w-[600px]">
       <SignUpComponent
         fields={fields}
         layout=""
@@ -183,7 +184,7 @@ function SignUpForm({ switchToLogin, setDisplay }) {
 export default function LoginPage() {
   return (
     <div
-      className="min-h-screen m-0 overflow-y-auto font-sans text-white  bg-gradient-to-b flex-col bg-contain"
+      className="min-h-screen m-0 overflow-y-auto font-sans text-white  bg-gradient-to-b flex-col bg-contain text-xl"
       style={{
         backgroundImage: "url('/Images/image 1.svg')",
         backgroundRepeat: "no-repeat",
@@ -192,8 +193,8 @@ export default function LoginPage() {
       }}
     >
       <div className="">
-        <div className="h-full   min-h-screen ">
-          <div className="w-fit flex items-center ml-40 mt-20 mb-20">
+        <div className="h-3/5">
+          <div className="w-[600px] flex items-center ml-40 mt-20 mb-20">
             <ParentForm />
           </div>
         </div>

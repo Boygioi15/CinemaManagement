@@ -1,48 +1,21 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
     <footer
-      className=" text-white py-8"
-      style={{
-        backgroundColor: "#1e3a8a",
-      }}
+      className="w-full text-white py-8"
+      style={{ background: "linear-gradient(to right, #7c3aed, #3b82f6)" }}
     >
-      <div className="container mx-auto flex justify-center gap-10">
-        {/* Group 1: Tài khoản */}
-        <div className="text-center  border-blue-400 p-4">
-          <h3 className="font-bold text-lg mb-2">Tài khoản</h3>
-          <ul className="space-y-1">
-            <li>
-              <Link to="/auth" className="hover:underline ml-7">
-                Đăng nhập
-              </Link>
-            </li>
-            <li>
-              <Link to="/auth/register" className="hover:underline ml-2">
-                Đăng ký
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Group 2: Xem phim */}
-        <div className="text-center border-blue-400 p-4">
-          <h3 className="font-bold text-lg mb-2">Xem phim</h3>
-          <ul className="space-y-1">
-            <li>
-              <Link to="/now-showing" className="hover:underline ml-16">
-                Phim đang chiếu
-              </Link>
-            </li>
-            <li>
-              <a href="/coming-soon" className="hover:underline ml-[52px]">
-                Phim sắp chiếu
-              </a>
-            </li>
-          </ul>
-        </div>
+      <div className="text-center text-sm">
+        <p>© 2024 UIT Nhóm 22.</p>
+        <p className="mt-4">
+          TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN ĐẠI HỌC QUỐC GIA HCM
+        </p>
+        <p className="mt-2">ĐỊA CHỈ: KHU PHỐ LINH XUÂN THỦ ĐỨC THÀNH PHỐ HCM</p>
+        <p className="mt-2">
+          GIẤY CNĐKKD SỐ: 0313747244, ĐĂNG KÝ LẦN ĐẦU NGÀY 15/04/2014, ĐĂNG KÝ
+          THAY ĐỔI LẦN THỨ 3 NGÀY 15/09/2014, CẤP BỞI SỞ KHĐT TPHCM
+        </p>
       </div>
     </footer>
   );

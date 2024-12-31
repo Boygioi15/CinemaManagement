@@ -42,8 +42,8 @@ const SignUpComponent = ({
   };
 
   return (
-    <div className="flex items-center">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded-b-lg  max-w-[1000px] shadow-lg">
+    <div className="flex items-center w-[600px]">
+      <div className="bg-white bg-opacity-90 text-black p-5 rounded-b-lg   w-[600px] shadow-lg">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
