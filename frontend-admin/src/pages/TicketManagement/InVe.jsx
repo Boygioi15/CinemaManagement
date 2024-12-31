@@ -168,6 +168,8 @@ const InVe = () => {
   if (!orders) {
     return;
   }
+  console.log(orders);
+
   const itemsPerPage = 7;
   const filteredData = orders.filter((order) => {
     const matchesName = cusNameQuery

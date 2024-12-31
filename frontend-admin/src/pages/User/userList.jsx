@@ -18,9 +18,10 @@ const UserList = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reason, setReason] = useState("");
 
+  const [cusEmailQuery, setCusEmailQuery] = useState("");
   const [cusNameQuery, setCusNameQuery] = useState("");
-  const [tableSearchQuery, setTableSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("all");
+  const [cusPhoneQuery, setCusPhoneQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -169,10 +170,19 @@ const UserList = () => {
     return;
   }
 
+  const userss = [
+    { id: 1, name: "North", email: "dat1@gmail.com", phone: 24334530 },
+    { id: 2, name: "South", email: "dat2@gmail.com", phone: 18533334 },
+    { id: 3, name: "East", email: "dat3@gmail.com", phone: 27534534 },
+    { id: 4, name: "West", email: "dat4@gmail.com", phone: 21345340 },
+    { id: 5, name: "Central", email: "dat5@gmail.com", phone: 23434545 },
+    { id: 6, name: "Northwest", email: "dat6@gmail.com", phone: 19433455 },
+  ];
+
   console.log(users);
 
   const itemsPerPage = 7;
-  const filteredData = users.filter((order) => {
+  const filteredData = userss.filter((order) => {
     const matchesName = cusNameQuery
       ? order.customerInfo.name
           .toLowerCase()
@@ -180,12 +190,15 @@ const UserList = () => {
       : true;
 
     // Lọc theo mã code
-    const matchesCode =
-      !tableSearchQuery ||
-      order.verifyCode?.toLowerCase().includes(tableSearchQuery.toLowerCase());
+    const matchesEmail = cusEmailQuery
+      ? order.email.toLowerCase().includes(cusEmailQuery.toLowerCase())
+      : true;
+    const matchesPhone = cusPhoneQuery
+      ? order.phone.toLowerCase().includes(cusPhoneQuery.toLowerCase())
+      : true;
 
     // Kết hợp cả hai điều kiện
-    return matchesCode && matchesStatus && matchesName;
+    return matchesPhone && matchesEmail && matchesName;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -194,13 +207,7 @@ const UserList = () => {
     startIndex,
     startIndex + itemsPerPage
   );
-  const statusOptions = [
-    "Chưa in",
-    "Từ chối in vé",
-    "Đã in",
-    "Từ chối phục vụ",
-    "Đã phục vụ",
-  ];
+  const statusOptions = ["Chặn", "Không chặn"];
 
   const columns = [
     { header: "Tên người dùng", key: "name" },
@@ -220,7 +227,7 @@ const UserList = () => {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
         } else if (!row.printed) {
-          statusText = "Chưa in";
+          statusText = "Không chặn";
           statusClass = "bg-yellow-100 text-yellow-800";
         } else if (row.served) {
           statusText = "Đã phục vụ";
@@ -276,7 +283,7 @@ const UserList = () => {
           <div className="flex items-center w-[300px]">
             <input
               type="text"
-              placeholder="Tên khách hàng...."
+              placeholder="Tên người dùng...."
               value={cusNameQuery}
               onChange={(e) => setCusNameQuery(e.target.value)}
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
@@ -285,9 +292,18 @@ const UserList = () => {
           <div className="flex items-center w-1/4">
             <input
               type="text"
-              placeholder="Nhập code..."
-              value={tableSearchQuery}
-              onChange={(e) => setTableSearchQuery(e.target.value)}
+              placeholder="Nhập email..."
+              value={cusEmailQuery}
+              onChange={(e) => setCusEmailQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+            />
+          </div>
+          <div className="flex items-center w-1/4">
+            <input
+              type="text"
+              placeholder="Nhập SĐT..."
+              value={cusPhoneQuery}
+              onChange={(e) => setCusPhoneQuery(e.target.value)}
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
             />
           </div>

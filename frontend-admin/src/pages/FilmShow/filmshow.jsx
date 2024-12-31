@@ -230,7 +230,7 @@ const FilmShow = () => {
                   className="w-full px-4 py-2 rounded-lg focus:outline-none border"
                 />
               </div>
-              <DatePicker
+              {/* <DatePicker
                 selected={selectedDate}
                 onChange={(date) => {
                   const offset = date.getTimezoneOffset() * 60000; // Lấy chênh lệch múi giờ
@@ -238,6 +238,15 @@ const FilmShow = () => {
                     .toISOString()
                     .split("T")[0]; // yyyy-mm-dd
                   setSelectedDate(localDate);
+                }}
+                className="p-2 border rounded-md"
+              /> */}
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
+                  setSelectedDate(localDate); // Cập nhật state
                 }}
                 className="p-2 border rounded-md"
               />
