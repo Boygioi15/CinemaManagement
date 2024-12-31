@@ -71,7 +71,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{backgroundColor:"rgb(245,245,245)"}}className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      style={{ backgroundColor: "rgb(245,245,245)" }}
+      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
@@ -98,7 +101,7 @@ const LoginPage = () => {
           </div>
 
           {/* Password input */}
-          <div className="relative mt-4">
+          <div className="relative mt-4 ">
             <FaLock className="absolute top-3 left-3 text-gray-400" />
             <input
               type={showPassword ? "text" : "password"}

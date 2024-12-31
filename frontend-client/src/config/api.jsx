@@ -68,3 +68,7 @@ export const getAllFilms = async () => {
 export const getAllFoods = async () => {
   return await axios.get(`/additional-items`);
 };
+
+export const resetPassword = async (email) => {
+  return await axios.post(`/email/send-reset-password`, { userEmail: email });
+};

@@ -5,8 +5,10 @@ import {
   EmailService
 } from "./email.service.js";
 import expressAsyncHandler from "express-async-handler";
-
+import bcrypt from "bcrypt";
+import userModel from "../user/user.schema.js";
 class EmailController {
+
   sendConfirmCode = expressAsyncHandler(async (req, res, next) => {
     const {
       userEmail
@@ -44,6 +46,60 @@ class EmailController {
       success: true,
     });
   });
+
+  sendResetPassword = expressAsyncHandler(async (req, res, next) => {
+    const {
+      userEmail
+    } = req.body;
+
+    // Tìm user theo email
+    const user = await UserService.findUserByEmail(userEmail);
+    if (!user) {
+      return res.status(404).json({
+        msg: "User not found",
+        success: false,
+      });
+    }
+
+    // Hàm tạo mật khẩu ngẫu nhiên
+    const generateRandomPassword = () => {
+      const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let password = "";
+      for (let i = 0; i < 8; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        password += characters[randomIndex];
+      }
+      return password;
+    };
+
+
+    const newPassword = generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu mới
+    const update = await userModel.findOneAndUpdate({
+      _id: user.id
+    }, {
+      password: hashedPassword
+    }, {
+      new: true
+    });
+
+    // Gửi email reset password
+    await EmailService.sendEmail(
+      userEmail,
+      "Reset Password",
+      `Your new password is: ${newPassword}`
+    );
+
+    return res.status(200).json({
+      msg: "Password reset successfully. Please check your email for the new password.",
+      success: true,
+    });
+  });
+
+
 
   checkConfirmCode = expressAsyncHandler(async (req, res, next) => {
     const {

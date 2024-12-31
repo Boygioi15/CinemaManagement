@@ -105,6 +105,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       pauseOnHover={true}
       draggable={true}
       rtl={false}
+      style={{
+        fontSize: "18px", // Điều chỉnh kích thước chữ
+        padding: "16px", // Điều chỉnh padding để làm to thêm
+        minWidth: "300px", // Điều chỉnh chiều rộng tối thiểu
+      }}
     />
   </React.StrictMode>
 );

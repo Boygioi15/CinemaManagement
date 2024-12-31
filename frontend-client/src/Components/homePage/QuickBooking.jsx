@@ -113,7 +113,7 @@ const QuickBooking = () => {
           onClick={handleMovieClick}
         >
           <span className={"text-purple-600 text-xl"}>
-            {selectedMovie?.name || "2. Chọn Phim"}
+            {selectedMovie?.name || "1. Chọn Phim"}
           </span>
           <ChevronDown className={`w-5 h-5 text-purple-600`} />
         </button>
@@ -156,7 +156,7 @@ const QuickBooking = () => {
               getDayOfWeekFromISOString(selectedDate) +
                 " , " +
                 getDayAndMonthFromISOString(selectedDate)) ||
-              "3. Chọn Ngày"}
+              "2. Chọn Ngày"}
           </span>
           <ChevronDown
             className={`w-5 h-5 ${
@@ -199,7 +199,7 @@ const QuickBooking = () => {
               selectedDate ? "text-purple-600 text-xl" : "text-gray-500 text-xl"
             }
           >
-            {selectedShowtime || "4. Chọn Suất"}
+            {selectedShowtime || "3. Chọn Suất"}
           </span>
           <ChevronDown
             className={`w-5 h-5 ${

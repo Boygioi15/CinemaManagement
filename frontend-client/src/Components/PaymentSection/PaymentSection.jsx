@@ -39,7 +39,7 @@ const PaymentSection = ({ selectedFood }) => {
             borderColor="#FFFFFF"
             href="#"
             className="w-full h-[40px] text-lg mt-4"
-            text={isShowing ? "Đặt vé" : "Tìm hiểu thêm"}
+            text={isShowing ? "Đặt ngay" : "Tìm hiểu thêm"}
           />
         </div>
       </div>
