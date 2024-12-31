@@ -20,6 +20,7 @@ import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
 import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
+import OffLineTicketBooking from "./Components/RoomDisplay";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -77,11 +78,16 @@ const router = createBrowserRouter([
         path: "/showtimes",
         element: <ShowTimePage />,
       },
+
       {
         path: "/food",
         element: <FoodPage />,
       },
     ],
+  },
+  {
+    path: "/room",
+    element: <OffLineTicketBooking />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

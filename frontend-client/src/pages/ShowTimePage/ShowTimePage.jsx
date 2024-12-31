@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getAvailableFilmByDate, getAvailableShowDate } from "../../config/api";
+import {
+  getAllFilms,
+  getAvailableFilmByDate,
+  getAvailableShowDate,
+} from "../../config/api";
 import { getDateStringFromISOSring } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 
@@ -10,12 +14,21 @@ const ShowTimePage = () => {
   const [availableFilm, setAvailableFilm] = useState([]);
   const [selectedFilm, setSelectedFilm] = useState("");
 
+  const [optionFilms, setOptionFilms] = useState([]);
+
   const [pagination, setPagination] = useState({
     total: 0,
     currentPage: 1,
     totalPages: 0,
     limit: 2,
   });
+
+  const getAllFilm = async () => {
+    const response = await getAllFilms();
+    if (response.success) {
+      setOptionFilms(response.data);
+    }
+  };
 
   const navigate = useNavigate();
   const handleGetAvailableShowDate = async () => {
@@ -46,7 +59,7 @@ const ShowTimePage = () => {
   const getAllFilmByDate = async () => {
     const response = await getAvailableFilmByDate({
       date: selectedDate,
-      filmId: selectedFilm,
+      filmId: selectedFilm?._id || null,
     });
     if (response.success) {
       setAvailableFilm(response.data.films);
@@ -54,6 +67,7 @@ const ShowTimePage = () => {
     }
   };
   useEffect(() => {
+    getAllFilm();
     handleGetAvailableShowDate();
   }, []);
 
@@ -104,21 +118,26 @@ const ShowTimePage = () => {
           </label>
           <select
             className="w-full p-2 bg-white text-black rounded-lg text-xl font-bold"
-            value={selectedFilm}
-            onChange={(e) => setSelectedFilm(e.target.value)}
+            value={JSON.stringify(selectedFilm)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "") {
+                setSelectedFilm(null); // Bỏ chọn phim
+              } else {
+                setSelectedFilm(JSON.parse(value));
+              }
+            }}
           >
-            <option value="" disabled>
-              Chọn phim
-            </option>
-            {availableFilm?.map((value) => {
+            <option value="">Chọn tất cả </option>
+            {optionFilms?.map((film) => {
               return (
-                <option value={value.film._id}>
-                  {value.film.name +
+                <option value={JSON.stringify(film)}>
+                  {film.name +
                     " (" +
-                    value.film?.ageRestriction +
+                    film?.ageRestriction +
                     ")" +
                     " " +
-                    value.film?.voice}
+                    film?.voice}
                 </option>
               );
             })}
@@ -213,13 +232,71 @@ const ShowTimePage = () => {
                 </div>
               </div>
             </div>
-            ;
+            <hr className="pb-8" />
           </>
         );
       })}
-      {/* Movie Info Section */}
 
-      <hr className="pb-8" />
+      {availableFilm.length === 0 && selectedFilm !== null && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="md:col-span-1">
+              <img
+                src={selectedFilm?.thumbnailURL}
+                alt="Movie Poster"
+                className="w-full rounded-lg shadow-lg"
+              />
+
+              <div className="mt-4">
+                <h3 className="text-2xl font-bold">
+                  {selectedFilm.name +
+                    " (" +
+                    selectedFilm?.ageRestriction +
+                    ")" +
+                    " " +
+                    selectedFilm?.voice}
+                </h3>
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center">
+                    <span className="text-yellow-400 mr-2 text-xl">⌚</span>
+                    <span className="text-xl">
+                      {selectedFilm.filmDuration}p
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-yellow-400 mr-2 text-xl">🌏</span>
+                    <span className="text-xl">
+                      {" "}
+                      {selectedFilm.originatedCountry}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-yellow-400 mr-2 text-xl">🎬</span>
+                    <span className="text-xl"> {selectedFilm.voice}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-yellow-400 mr-2 text-xl">👥</span>
+                    <span className="text-xl">
+                      {selectedFilm.ageRestriction +
+                        " : " +
+                        getAgeDescription(selectedFilm.ageRestriction)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-3 space-y-6">
+              <div className=" rounded-lg p-4 border border-white-400 ">
+                <div className="flex items-center mb-4"></div>
+                <div className="space-y-4 text-xl">Chưa có xuất chiếu</div>
+              </div>
+            </div>
+          </div>
+          <hr className="pb-8" />
+        </>
+      )}
+      {/* Movie Info Section */}
     </div>
   );
 };

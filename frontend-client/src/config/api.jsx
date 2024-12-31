@@ -60,3 +60,7 @@ export const getAvailableFilmByDate = async ({ date, filmId, page, limit }) => {
     limit,
   });
 };
+
+export const getAllFilms = async () => {
+  return await axios.get(`/films`);
+};
