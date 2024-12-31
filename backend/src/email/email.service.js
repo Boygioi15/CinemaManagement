@@ -20,18 +20,14 @@ export class EmailService {
 
   static storeConfirmCode = async (userEmail, verification) => {
     const expirationTime = new Date(Date.now() + 3 * 60 * 1000); // 3 phút từ thời điểm gửi mã
-    return await userModel.findOneAndUpdate(
-      {
-        userEmail,
-      },
-      {
-        userVerificationCode: verification,
-        userVFCodeExpirationTime: expirationTime,
-      },
-      {
-        new: true,
-      }
-    );
+    return await userModel.findOneAndUpdate({
+      userEmail,
+    }, {
+      userVerificationCode: verification,
+      userVFCodeExpirationTime: expirationTime,
+    }, {
+      new: true,
+    });
   };
 
   static sendEmailWithHTMLTemplate = async (to, subject, ticket) => {
@@ -76,15 +72,15 @@ export class EmailService {
           <table class="information">
             <tr>
               <th>PHIM</th>
-              <td>${ticket.filmName}</td>
+              <td>${ticket.filmName|| 'Không'}</td>
             </tr>
             <tr>
               <th>SUẤT CHIẾU</th>
-              <td>${ticket.time}, ${ticket.date}</td>
+               <td>${(ticket.time && ticket.date) ? `${ticket.time}, ${ticket.date}` : 'Không'}</td>
             </tr>
             <tr>
               <th>PHÒNG CHIẾU</th>
-              <td>${ticket.roomName}</td>
+              <td>${ticket.roomName || 'Không'}</td>
             </tr>
             <tr>
               <th>RẠP</th>
@@ -92,7 +88,7 @@ export class EmailService {
             </tr>
             <tr>
               <th>SỐ GHẾ</th>
-              <td>${ticket.seatNames.join(", ")}</td>
+              <td>${ticket.seatNames?.length ? ticket.seatNames.join(", ") : 'Không'}</td>
             </tr>
             ${
               ticket.items.length > 0

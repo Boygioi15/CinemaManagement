@@ -1,11 +1,19 @@
 import config from "./config.js";
 import crypto from "crypto";
 import axios from "axios";
-import { OrderService } from "../order/order.service.js";
+import {
+  OrderService
+} from "../order/order.service.js";
 import mongoose from "mongoose";
-import { Order_1Service } from "./Order_1/Order_1.service.js";
-import { FilmShowService } from "../filmShow/filmShow.service.js";
-import { EmailService } from "../email/email.service.js";
+import {
+  Order_1Service
+} from "./Order_1/Order_1.service.js";
+import {
+  FilmShowService
+} from "../filmShow/filmShow.service.js";
+import {
+  EmailService
+} from "../email/email.service.js";
 import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
 export class PaymentService {
@@ -87,9 +95,17 @@ export class PaymentService {
       });
       await Order_1Service.createNewEntry(orderId, signature);
 
-      const { filmShowId, seats } = req.body;
-      await FilmShowService.appendLockedSeats(filmShowId, seats);
+      const {
+        filmShowId,
+        seats
+      } = req.body;
+      if (filmShowId && seats) {
+
+        await FilmShowService.appendLockedSeats(filmShowId, seats);
+      }
+
       return res.status(200).json(result.data);
+
     } catch (error) {
       console.error(
         "Payment Creation Error:",
@@ -103,9 +119,15 @@ export class PaymentService {
     }
   };
   static momoCallBackService = async (req, res) => {
-    const { resultCode, amount, orderId, extraData } = req.body;
+    const {
+      resultCode,
+      amount,
+      orderId,
+      extraData
+    } = req.body;
 
     const extraDataObj = JSON.parse(extraData);
+    console.log("🚀 ~ PaymentService ~ momoCallBackService= ~ extraDataObj:", extraDataObj)
     //success
     if (resultCode === 0) {
       // create order
@@ -118,7 +140,7 @@ export class PaymentService {
           await EmailService.sendEmailWithHTMLTemplate(
             newOrder.customerInfo.email,
             "Thư xác nhận đơn hàng",
-            newOrder1
+            newOrder
           );
         } else {
           // user da dăng nhap
@@ -126,19 +148,29 @@ export class PaymentService {
           await EmailService.sendEmailWithHTMLTemplate(
             user.userEmail,
             "Thư xác nhận đơn hàng",
-            newOrder1
+            newOrder
           );
         }
         return res.status(204).json(newOrder);
       } catch (error) {
         console.log("🚀 ~ PaymentService ~ callbackService= ~ error:", error);
-        const { filmShowId, seats } = extraDataObj;
-        await FilmShowService.releaseLockedSeats(filmShowId, seats);
+        const {
+          filmShowId,
+          seats
+        } = extraDataObj;
+        if (filmShowId && seats) {
+          await FilmShowService.releaseLockedSeats(filmShowId, seats);
+        }
       }
     } else {
       // fail
-      const { filmShowId, seats } = extraDataObj;
-      await FilmShowService.releaseLockedSeats(filmShowId, seats);
+      const {
+        filmShowId,
+        seats
+      } = extraDataObj;
+      if (filmShowId && seats) {
+        await FilmShowService.releaseLockedSeats(filmShowId, seats);
+      }
     }
 
     return res.status(204).json(req.body);

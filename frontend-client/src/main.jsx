@@ -20,8 +20,9 @@ import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
 import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
-import OffLineTicketBooking from "./Components/RoomDisplay";
 import NotFoundPage from "./pages/NotFound";
+import OrderFailPage from "./pages/OrderFailed";
+import OrderSuccessPage from "./pages/OrderSuccess";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -79,10 +80,17 @@ const router = createBrowserRouter([
         path: "/showtimes",
         element: <ShowTimePage />,
       },
-
       {
         path: "/food",
         element: <FoodPage />,
+      },
+      {
+        path: "/order-success",
+        element: <OrderSuccessPage />,
+      },
+      {
+        path: "/order-failed",
+        element: <OrderFailPage />,
       },
     ],
   },

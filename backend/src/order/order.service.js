@@ -106,36 +106,49 @@ export class OrderService {
   static createOrder = async ({
     customerId,
     customerInfo,
-    tickets,
-    additionalItems,
-    filmShowId,
+    tickets = null,
+    additionalItems = null,
+    filmShowId = null,
     totalPrice,
-    seats,
+    seats = null,
   }) => {
-    const filmShow = await filmShowModel.findById(filmShowId).populate("film");
 
-    if (!filmShow) throw new Error("Film Show not found");
-    const film = await FilmService.findById(filmShow.film);
-    const ageRestriction = film.ageRestriction;
+    let filmShow = {}
+    let film = {}
+    if (filmShowId) {
+      filmShow = await filmShowModel.findById(filmShowId).populate("film");
+
+      if (!filmShow) throw new Error("Film Show not found");
+
+      film = await FilmService.findById(filmShow.film);
+
+    }
+
+    const ageRestriction = film?.ageRestriction || null;
+    const dataFilmShow = {
+      filmName: filmShow?.film?.name || null,
+      date: filmShow?.showDate || null,
+      time: filmShow?.showTime || null,
+    };
+
     const {
       roomName,
       seatNames
-    } = await RoomService.getSeatName(
-      filmShow.roomId,
-      seats
-    );
-
-    const dataFilmShow = {
-      filmName: filmShow.film.name,
-      date: filmShow.showDate,
-      time: filmShow.showTime,
+    } = seats ? await RoomService.getSeatName(filmShow.roomId, seats) : {
+      roomName: null,
+      seatNames: []
     };
 
-    const items = await AdditionalItemService.getAdditionalItemsInfo(
-      additionalItems
-    );
 
-    const ticketDetails = await ParamService.getTicketsInfo(tickets);
+    let items = [];
+    if (additionalItems) {
+      items = await AdditionalItemService.getAdditionalItemsInfo(additionalItems);
+    }
+
+    let ticketDetails = [];
+    if (tickets) {
+      ticketDetails = await ParamService.getTicketsInfo(tickets);
+    }
 
     const newOrder = await orderModel.create({
       roomName,
@@ -153,4 +166,5 @@ export class OrderService {
 
     return await newOrder.save();
   };
+
 }

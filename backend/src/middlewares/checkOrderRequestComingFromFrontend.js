@@ -31,30 +31,36 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
       seats
     } =
     req.body;
-    //console.log("🚀 ~ additionalItems:", additionalItems);
-    const totalTickets = tickets.reduce(
-      (sum, ticket) => sum + ticket.quantity,
-      0
-    );
 
-    if (totalTickets !== seats.length) {
-      throw customError("Số lượng ghế khác số lượng vé?");
-    }
     let totalPriceByServer = 0;
 
-    await Promise.all(
-      tickets.map(async (ticket) => {
-        const {
-          id,
-          quantity
-        } = ticket;
+    if (tickets) {
+      const totalTickets = tickets.reduce(
+        (sum, ticket) => sum + ticket.quantity,
+        0
+      );
 
-        const ticketTypeFound = await TicketTypeModel.findById(id).lean();
-        if (!ticketTypeFound) throw customError("Ticket type not found");
+      if (totalTickets !== seats?.length) {
+        throw customError("Số lượng ghế khác số lượng vé?");
+      }
 
-        totalPriceByServer += ticketTypeFound.price * quantity;
-      })
-    );
+
+      totalPriceByServer = 0;
+
+      await Promise.all(
+        tickets.map(async (ticket) => {
+          const {
+            id,
+            quantity
+          } = ticket;
+
+          const ticketTypeFound = await TicketTypeModel.findById(id).lean();
+          if (!ticketTypeFound) throw customError("Ticket type not found");
+
+          totalPriceByServer += ticketTypeFound.price * quantity;
+        })
+      );
+    }
 
     await Promise.all(
       additionalItems.map(async (additionalItem) => {
@@ -66,13 +72,12 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
         const additionalItemFound = await additionalItemModel
           .findById(id)
           .lean();
+
         if (!additionalItemFound) throw customError("Additionalitem not found");
 
         totalPriceByServer += additionalItemFound.price * quantity;
       })
     );
-
-    console.log("🚀 ~ totalPriceByServer:", totalPriceByServer);
 
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");

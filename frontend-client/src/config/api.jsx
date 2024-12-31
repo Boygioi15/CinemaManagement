@@ -72,3 +72,21 @@ export const getAllFoods = async () => {
 export const resetPassword = async (email) => {
   return await axios.post(`/email/send-reset-password`, { userEmail: email });
 };
+
+export const createPayment = async ({
+  customerInfo,
+  totalPrice,
+  filmShowId = null,
+  seats = null,
+  tickets = null,
+  additionalItems = null,
+}) => {
+  return await axios.post(`/payment`, {
+    customerInfo,
+    totalPrice,
+    filmShowId,
+    seats,
+    tickets,
+    additionalItems,
+  });
+};
