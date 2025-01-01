@@ -1,51 +1,52 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { BiRefresh } from "react-icons/bi";
-import ItemModal from "../../components/AdditionalItem/modal";
-import SuccessDialog from "../../components/SuccessDialog";
-import Dialog from "../../components/ConfirmDialog";
-import FailedDialog from "../../components/FailedDialog";
-import RefreshLoader from "../../components/Loading";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import Dialog from "../../components/ConfirmDialog";
+import SuccessDialog from "../../components/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
+import FailedDialog from "../../components/FailedDialog";
+import EmployeeModal from "../../components/employee/employeedetail";
 
-const AdditionalItem = () => {
-  const [tableSearchQuery, setTableSearchQuery] = useState("");
+const Employee = () => {
+  const [employee, setEmployees] = useState([]);
+  const [mode, setMode] = useState("add");
+  const [actionType, setActionType] = useState("");
+
+  const [NameQuery, setNameQuery] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isFailModalOpen, setIsFailModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const [mode, setMode] = useState("add");
-  const [actionType, setActionType] = useState("");
-  const [items, setItems] = useState([]);
 
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [loading, setLoading] = useState(false);
 
-  const fetchItems = async () => {
+  const fetchemployee = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/additional-items"
+        "http://localhost:8000/api/user/employee"
       );
-      setItems(response.data.data); // Lưu dữ liệu vào state
+      setEmployees(response.data.data); // Lưu dữ liệu vào state
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error("Error fetching films:", error);
     }
   };
 
   // Gọi API khi component được render lần đầu
   useEffect(() => {
-    fetchItems();
+    fetchemployee();
   }, []);
 
-  //set action cho modal
   const openConfirmDialog = (action, item = null) => {
     setActionType(action); // Xác định loại hành động
-    setSelectedItem(item); // Gán item được chọn nếu có
+    setSelectedEmployee(item); // Gán item được chọn nếu có
     setDialogData({
       title: "Xác nhận",
       message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
@@ -57,11 +58,11 @@ const AdditionalItem = () => {
   const getDialogMessage = (action, item) => {
     switch (action) {
       case "delete":
-        return `Bạn chắc chắn muốn xóa sản phẩm này ?`;
+        return `Bạn chắc chắn muốn xóa nhân viên này ?`;
       case "add":
-        return "Bạn chắc chắn muốn thêm sản phẩm này ?";
+        return "Bạn chắc chắn muốn thêm nhân viên này ?";
       case "edit":
-        return `Bạn chắc chắn muốn cập nhật sản phẩm này ?`;
+        return `Bạn chắc chắn muốn cập nhật nhân viên này ?`;
       default:
         return "Xác nhận hành động?";
     }
@@ -71,11 +72,11 @@ const AdditionalItem = () => {
   const getSuccessMessage = (action) => {
     switch (action) {
       case "delete":
-        return "Xóa sản phẩm thành công";
+        return "Xóa nhân viên thành công";
       case "add":
-        return "Thêm sản phẩm thành công";
+        return "Thêm nhân viên thành công";
       case "edit":
-        return "Cập nhật sản phẩm thành công";
+        return "Cập nhật nhân viên thành công";
       default:
         return "Thao tác thành công";
     }
@@ -83,7 +84,7 @@ const AdditionalItem = () => {
 
   //Chọn cập nhật item
   const handleEditClick = (item) => {
-    setSelectedItem(item);
+    setSelectedEmployee(item);
     setMode("edit");
     setIsDetailModalOpen(true);
   };
@@ -91,7 +92,7 @@ const AdditionalItem = () => {
   //thêm mới item
   const handleAddClick = () => {
     setMode("add");
-    setSelectedItem(null);
+    setSelectedEmployee(null);
     setIsDetailModalOpen(true);
   };
 
@@ -100,35 +101,28 @@ const AdditionalItem = () => {
     openConfirmDialog("delete", item);
   };
 
-  const handleRefresh = async () => {
-    setLoading(true);
-    fetchItems();
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  };
-
   const handleConfirmClick = async () => {
     setLoading(true);
+
     try {
       if (actionType === "delete") {
         await axios.delete(
-          `http://localhost:8000/api/additional-items/${selectedItem._id}`
+          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`
         );
       } else if (actionType === "edit") {
         const res = await axios.put(
-          `http://localhost:8000/api/additional-items/${selectedItem._id}`,
-          selectedItem
+          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`,
+          selectedEmployee
         );
       } else if (actionType === "add") {
-        console.log("haha: ", selectedItem);
+        console.log("haha: ", selectedEmployee);
         const formData = new FormData();
         formData.append("name", selectedItem.name);
         formData.append("price", selectedItem.price);
         formData.append("thumbnailFile", selectedItem.file);
         await axios.post(
-          "http://localhost:8000/api/additional-items",
-          formData
+          "http://localhost:8000/api/user/employee",
+          selectedEmployee
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
@@ -154,7 +148,8 @@ const AdditionalItem = () => {
   };
 
   const handleEditConfirm = (item) => {
-    setSelectedItem(item);
+    setSelectedEmployee(item);
+    console.log("item: ", item);
 
     // Xác định loại hành động dựa trên chế độ hiện tại
     const action = mode === "add" ? "add" : "edit";
@@ -164,8 +159,41 @@ const AdditionalItem = () => {
   };
 
   const columns = [
-    { header: "Tên sản phẩm", key: "name" },
-    { header: "Giá", key: "price" },
+    { header: "Tên nhân viên", key: "name" },
+    {
+      header: "Lương",
+      key: "salary",
+      render: (_, row) => row.salary.toLocaleString(), // Hiển thị lương dạng 000,000
+    },
+    { header: "Công việc", key: "jobTitle" },
+    {
+      header: "Giờ bắt đầu",
+      key: "shiftStart",
+      render: (_, row) => {
+        // Lấy giờ và phút
+        const { hour, minute } = row.shiftStart;
+
+        // Định dạng thành HH:mm
+        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
+          minute
+        ).padStart(2, "0")}`;
+        return formattedTime;
+      },
+    },
+    {
+      header: "Giờ kết thúc",
+      key: "shiftEnd",
+      render: (_, row) => {
+        // Lấy giờ và phút
+        const { hour, minute } = row.shiftEnd;
+
+        // Định dạng thành HH:mm
+        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
+          minute
+        ).padStart(2, "0")}`;
+        return formattedTime;
+      },
+    },
     {
       header: "Hành động",
       key: "actions",
@@ -187,11 +215,25 @@ const AdditionalItem = () => {
       ),
     },
   ];
-  const itemsPerPage = 6;
 
-  const filteredData = items.filter((item) =>
-    item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
-  );
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchemployee();
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
+
+  const itemsPerPage = 7;
+
+  const filteredData = employee.filter((item) => {
+    const matchesName = NameQuery
+      ? item.name.toLowerCase().includes(NameQuery.toLowerCase())
+      : true;
+
+    return matchesName;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -205,9 +247,10 @@ const AdditionalItem = () => {
       <div className="mb-6 flex justify-between items-center pr-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Thông tin sản phẩm
+            Thông tin nhân viên
           </h2>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-4 ">
             <button
               onClick={handleRefresh}
               className="r p-4 rounded-full hover:bg-gray-100 transition-all duration-300"
@@ -224,9 +267,9 @@ const AdditionalItem = () => {
             <div className="flex items-center w-[300px]">
               <input
                 type="text"
-                placeholder="Nhập tên sản phẩm..."
-                value={tableSearchQuery}
-                onChange={(e) => setTableSearchQuery(e.target.value)}
+                placeholder="Tên nhân viên...."
+                value={NameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
@@ -236,9 +279,10 @@ const AdditionalItem = () => {
           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddClick()}
         >
-          Thêm sản phẩm +
+          Thêm nhân viên +
         </button>
       </div>
+
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
@@ -262,11 +306,12 @@ const AdditionalItem = () => {
           </button>
         </div>
       </div>
-      <ItemModal
+
+      <EmployeeModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onSave={handleEditConfirm}
-        item={selectedItem}
+        employee={selectedEmployee}
         mode={mode}
       />
       <Dialog
@@ -298,4 +343,5 @@ const AdditionalItem = () => {
   );
 };
 
-export default AdditionalItem;
+export default Employee;
+// ádadasdasdasdasjkdasjlksalkd

@@ -161,13 +161,13 @@ const DailyReport = () => {
             }}
             className="p-2 border rounded-md"
           />
-          <button
+          {/* <button
             onClick={handleExport}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
             <FaFileExport />
             <span>Export CSV</span>
-          </button>
+          </button> */}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">

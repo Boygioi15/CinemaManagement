@@ -20,6 +20,7 @@ import AdditionalItem from "./pages/AdditionalItem/item";
 import UserList from "./pages/User/userList";
 import AnotherRule from "./pages/Rule/AnotherRule";
 import Role from "./pages/Role/role";
+import Employee from "./pages/Employee/employee";
 
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -74,20 +75,24 @@ const router = createBrowserRouter([
         element: <RenevueOverview />,
       },
       {
-        path: "/admin/additional-item",
+        path: "/admin/san-pham-khac",
         element: <AdditionalItem />,
       },
       {
-        path: "/admin/manage-user",
+        path: "/admin/tai-khoan-nguoi-dung",
         element: <UserList />,
       },
       {
-        path: "/admin/another-rule",
+        path: "/admin/quy-dinh-khac",
         element: <AnotherRule />,
       },
       {
-        path: "/admin/role",
+        path: "/admin/phan-quyen",
         element: <Role />,
+      },
+      {
+        path: "/admin/nhan-vien",
+        element: <Employee />,
       },
 
       // {

@@ -93,7 +93,7 @@ const UserList = () => {
 
   const handleRefresh = async () => {
     setLoading(true);
-    fetchOrder();
+    //fetchOrder();
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -227,8 +227,8 @@ const UserList = () => {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
         } else if (!row.printed) {
-          statusText = "Không chặn";
-          statusClass = "bg-yellow-100 text-yellow-800";
+          statusText = "Hoạt động";
+          statusClass = "bg-green-100 text-green-800";
         } else if (row.served) {
           statusText = "Đã phục vụ";
           statusClass = "bg-green-100 text-green-800";

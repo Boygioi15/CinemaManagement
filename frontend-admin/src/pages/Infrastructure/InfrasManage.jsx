@@ -1,10 +1,12 @@
 import React from "react";
 import Table from "../../components/Table";
 import { FiSearch } from "react-icons/fi";
+import { BiRefresh } from "react-icons/bi";
 import SeatModal from "../../components/SeatModal";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import RefreshLoader from "../../components/Loading";
 
 const InfrasManage = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ const InfrasManage = () => {
   const [seatStates, setSeatStates] = useState({});
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchRoom = async () => {
     try {
@@ -38,6 +41,14 @@ const InfrasManage = () => {
   if (!rooms) {
     return;
   }
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchRoom();
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
 
   console.log(rooms);
 
@@ -108,14 +119,29 @@ const InfrasManage = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Thông tin phòng
           </h2>
-          <div className="flex items-center w-[300px]">
-            <input
-              type="text"
-              placeholder="Nhập tên phòng..."
-              value={tableSearchQuery}
-              onChange={(e) => setTableSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg focus:outline-none border"
-            />
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleRefresh}
+              className="r p-4 rounded-full hover:bg-gray-100 transition-all duration-300"
+              disabled={loading}
+            >
+              <BiRefresh
+                className={`text-4xl text-black hover:text-black ${
+                  loading
+                    ? "animate-spin"
+                    : "hover:rotate-180 transition-transform duration-300"
+                }`}
+              />
+            </button>
+            <div className="flex items-center w-[300px]">
+              <input
+                type="text"
+                placeholder="Nhập tên phòng..."
+                value={tableSearchQuery}
+                onChange={(e) => setTableSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+              />
+            </div>
           </div>
         </div>
         <button
@@ -156,6 +182,7 @@ const InfrasManage = () => {
         onSave={handleSaveChanges}
         mode={modalMode}
       />
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };
