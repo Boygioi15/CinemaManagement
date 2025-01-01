@@ -1,14 +1,19 @@
 import FoodCard from "./FoodCard";
 
-const FoodSection = () => {
+const FoodSection = ({ foods, setSelectedFood, selectedFood }) => {
   return (
     <div className="flex flex-col justify-center items-center">
       <h1 className="font-interExtraBold">COMBO</h1>
       <div className="flex flex-wrap justify-center mt-20 items-center gap-4 md:gap-12">
-        <FoodCard />
-        <FoodCard />
-        <FoodCard />
-        <FoodCard />
+        {foods.map((food) => {
+          return (
+            <FoodCard
+              food={food}
+              setSelectedFood={setSelectedFood}
+              selectedFood={selectedFood}
+            />
+          );
+        })}
       </div>
     </div>
   );

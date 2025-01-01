@@ -2,44 +2,43 @@ import "../../style/customButton.css";
 import { useState } from "react";
 
 const CustomButton = ({
-  defaultColor, // Nền mặc định là trong suốt nếu không truyền vào
-  gradientFrom, // Gradient bắt đầu từ trong suốt nếu không truyền vào
-  gradientTo, // Gradient kết thúc cũng trong suốt
-  textColor, // Màu chữ mặc định là đen
-  hoverTextColor, // Màu chữ khi hover là trắng
-  borderColor, // Viền mặc định là không có
-  href, // Liên kết mặc định, có thể truyền vào
+  defaultColor, // Nền mặc định
+  gradientFrom, // Gradient bắt đầu
+  gradientTo, // Gradient kết thúc
+  textColor, // Màu chữ mặc định
+  hoverTextColor, // Màu chữ khi hover
+  borderColor, // Viền
+  href, // Liên kết
   className,
-  text,
+  text, // Văn bản của button
+  handleCreatePayment, // Hàm xử lý thanh toán
+  disabled, // Trạng thái disabled
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <a
       href={href}
-      className={`custom-button hover:text-[${hoverTextColor}]} ${className}`}
+      className={`custom-button ${className} hover:text-[${hoverTextColor}]`}
       style={{
         color: isHovered ? hoverTextColor : textColor,
         border: borderColor ? `2px solid ${borderColor}` : "none",
+        pointerEvents: disabled ? "none" : "auto", // Vô hiệu hóa khi disabled
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCreatePayment} // Gọi sự kiện khi click
     >
-      {/* Div đầu tiên là nền mặc định */}
       <div
         className="button-background-default"
         style={{ backgroundColor: defaultColor }}
       ></div>
-
-      {/* Div thứ hai để tạo hiệu ứng chuyển động khi hover */}
       <div
         className="button-background-hover"
         style={{
           background: `linear-gradient(to right, ${gradientFrom}, ${gradientTo})`,
         }}
       ></div>
-
-      {/* Văn bản "Đặt vé" */}
       <span className="button-text">{text}</span>
     </a>
   );

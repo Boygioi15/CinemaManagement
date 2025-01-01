@@ -41,12 +41,11 @@ const Header = () => {
       if (keyWord?.trim() === "") {
         return;
       }
-      console.log("🚀 ~ handleOnKeyDown ~ keyword:", keyWord);
       navigate(`/search?keyword=${keyWord}`);
     }
   };
   return (
-    <div className="bg-blue-900 p-2.5 flex items-center justify-between">
+    <div className="bg-blue-900 p-2.5 flex items-center justify-between  text-2xl">
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
           <img
@@ -55,27 +54,42 @@ const Header = () => {
             src="/Images/logo.svg"
             className="h-8"
           />
-          <span className="text-white text-lg font-bold">
+          <span className="text-white font-bold">
             <Link to={"/"}>Nhóm 22</Link>
           </span>
         </div>
         <div>
           <a
-            href="#"
-            className="text-white text-sm flex items-center space-x-1 hover:underline"
+            href="/showtimes"
+            className="text-white flex items-center space-x-1 hover:underline"
           >
             <img alt="search" src="/Images/calendar.svg" className="h-5 w-5" />
             <span>Lịch chiếu</span>
           </a>
         </div>
+        <div>
+          <a
+            href="/food"
+            className="text-white flex items-center space-x-1 hover:underline"
+          >
+            <img
+              alt=""
+              loading="lazy"
+              width="20"
+              height="20"
+              src="https://cinestar.com.vn/assets/images/ic-cor.svg"
+            />
+            <span>Đặt bắp nước</span>
+          </a>
+        </div>
       </div>
 
       <div className="flex items-center space-x-6">
-        <div className="search-bar flex items-center bg-white rounded-full px-2 h-10 w-72">
+        <div className="search-bar flex items-center bg-white rounded-full px-2 h-10 ">
           <input
             placeholder="Tìm phim"
             type="text"
-            className="flex-grow outline-none text-xs text-gray-800 placeholder-gray-400 px-2"
+            className="flex-grow outline-none text-gray-800 placeholder-gray-400 px-2"
             value={keyWord}
             onChange={(e) => setKeyWord(e.target.value)}
             onKeyDown={handleOnKeyDown}
@@ -84,7 +98,7 @@ const Header = () => {
             className="bg-transparent border-none flex items-center justify-center p-1"
             onClick={() => handleOnKeyDown({ key: "Enter" })}
           >
-            <img alt="search" src="/Images/search.svg" className="h-4 w-4" />
+            <img alt="search" src="/Images/search.svg" className="h-5 w-5" />
           </button>
         </div>
         <div className="additional-links flex items-center space-x-6">
@@ -96,7 +110,7 @@ const Header = () => {
             >
               <a
                 href="#"
-                className="text-white text-sm flex items-center space-x-1 hover:underline"
+                className="text-white  flex items-center space-x-1 hover:underline"
               >
                 <img
                   alt="user"
@@ -107,7 +121,7 @@ const Header = () => {
               </a>
 
               {isMenuOpen && (
-                <div className="absolute top-10 right-0 bg-white text-black p-2 shadow-lg rounded-md w-40">
+                <div className="absolute top-10 right-0 bg-white text-black p-2 shadow-lg rounded-md w-80">
                   <button
                     className="w-full text-left px-4 py-2 hover:bg-gray-200"
                     onClick={handleProfile}
@@ -126,7 +140,7 @@ const Header = () => {
           ) : (
             <Link
               to="/auth"
-              className="text-white text-sm flex items-center space-x-1 hover:underline"
+              className="text-white flex items-center space-x-1 hover:underline"
             >
               <img
                 alt="user"
@@ -138,7 +152,7 @@ const Header = () => {
           )}
           <a
             href="#"
-            className="text-white text-sm flex items-center space-x-1 hover:underline"
+            className="text-white flex items-center space-x-1 hover:underline"
           >
             <img alt="help" src="/Images/question.png" className="h-6 w-6" />
             <span>Trợ giúp</span>

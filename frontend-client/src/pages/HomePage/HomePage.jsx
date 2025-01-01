@@ -43,11 +43,11 @@ const HomePage = () => {
   };
   return (
     <>
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-6 max-w-8xl">
         <img
           src="https://api-website.cinestar.com.vn/media/MageINIC/bannerslider/bap-nuoc-onl.jpg"
           alt="Movie Banner"
-          className="w-full h-full object-cove py-5"
+          className="w-full h-full object-cove pb-5"
         />
 
         <QuickBooking />
@@ -55,7 +55,7 @@ const HomePage = () => {
         {/* Phim đang chiếu */}
 
         <FilmListSection
-          title="PHIM ĐANG CHIẾU "
+          title="PHIM ĐANG CHIẾU"
           filmList={filmShowing}
           onCLickSeeMore={handleOnClickSeeMoreInShowing}
         />

@@ -19,6 +19,10 @@ import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
+import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
+import NotFoundPage from "./pages/NotFound";
+import OrderFailPage from "./pages/OrderFailed";
+import OrderSuccessPage from "./pages/OrderSuccess";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -73,10 +77,26 @@ const router = createBrowserRouter([
         element: <SearchPage />,
       },
       {
+        path: "/showtimes",
+        element: <ShowTimePage />,
+      },
+      {
         path: "/food",
         element: <FoodPage />,
       },
+      {
+        path: "/order-success",
+        element: <OrderSuccessPage />,
+      },
+      {
+        path: "/order-failed",
+        element: <OrderFailPage />,
+      },
     ],
+  },
+  {
+    path: "*", // wildcard cho tất cả đường dẫn không khớp
+    element: <NotFoundPage />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -93,6 +113,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       pauseOnHover={true}
       draggable={true}
       rtl={false}
+      style={{
+        fontSize: "18px", // Điều chỉnh kích thước chữ
+        padding: "16px", // Điều chỉnh padding để làm to thêm
+        minWidth: "300px", // Điều chỉnh chiều rộng tối thiểu
+      }}
     />
   </React.StrictMode>
 );

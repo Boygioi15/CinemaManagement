@@ -26,18 +26,19 @@ const UserInfoLayout = ({ children }) => {
   ];
 
   return (
-    <div className="h-screen">
-      <div className="flex items-start justify-center ml-40 pt-28">
+    <div className="h-screen w-full max-w-[3000px] mx-auto">
+      <div className="flex flex-col lg:flex-row px-4 sm:px-8 md:px-16 lg:px-32 xl:px-40 py-[100px] gap-8 w-full h-full justify-center items-start">
         {/* Sidebar */}
-        <div className="flex ">
+        <div className="w-full lg:w-[300px] xl:w-[400px] text-xl">
           <Sidebar userName={user.name} menuItems={menuItems} />
         </div>
 
         {/* Main Content */}
-        <div className="w-4/5 ">{children}</div>
+        <div className="flex-1 text-xl overflow-y-auto w-full  rounded-lg shadow-md p-4">
+          {children}
+        </div>
       </div>
     </div>
   );
 };
-
 export default UserInfoLayout;

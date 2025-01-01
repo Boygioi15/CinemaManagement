@@ -1,11 +1,23 @@
 import orderModel from "./order.schema.js";
-import { RoomService } from "../room/room.service.js";
+import {
+  RoomService
+} from "../room/room.service.js";
 import filmShowModel from "../filmShow/filmShow.schema.js";
-import { AdditionalItemService } from "../additionalItem/additionalItem.service.js";
-import { ParamService } from "../param/param.service.js";
-import { generateRandomVerifyCode } from "../ulitilities/ultilitiesFunction.js";
-import { customError } from "../middlewares/errorHandlers.js";
-import { FilmService } from "../film/film.service.js";
+import {
+  AdditionalItemService
+} from "../additionalItem/additionalItem.service.js";
+import {
+  ParamService
+} from "../param/param.service.js";
+import {
+  generateRandomVerifyCode
+} from "../ulitilities/ultilitiesFunction.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
+import {
+  FilmService
+} from "../film/film.service.js";
 export class OrderService {
   static getAllOrders = async () => {
     return await orderModel.find();
@@ -26,12 +38,10 @@ export class OrderService {
   static disapprovePrinted = async (_id, reason) => {
     try {
       const order = await orderModel.findByIdAndUpdate(
-        _id,
-        {
+        _id, {
           served: false,
           invalidReason_Printed: reason,
-        },
-        {
+        }, {
           new: true,
         }
       );
@@ -42,15 +52,14 @@ export class OrderService {
       throw new Error("An error occurred while canceling the ticket.");
     }
   };
+
   static disapproveServed = async (_id, reason) => {
     try {
       const order = await orderModel.findByIdAndUpdate(
-        _id,
-        {
+        _id, {
           served: false,
           invalidReason_Served: reason,
-        },
-        {
+        }, {
           new: true,
         }
       );
@@ -61,6 +70,7 @@ export class OrderService {
       throw new Error("An error occurred while canceling the ticket.");
     }
   };
+
   static markOrderPrinted = async (_id) => {
     const order = await orderModel.findById(_id);
     if (!order) return null;
@@ -69,13 +79,14 @@ export class OrderService {
     }
 
     return await orderModel.findByIdAndUpdate(
-      _id,
-      {
+      _id, {
         printed: true,
-      },
-      { new: true }
+      }, {
+        new: true
+      }
     );
   };
+
   static markOrderServed = async (_id) => {
     const order = await orderModel.findById(_id);
     if (!order) return null;
@@ -84,43 +95,60 @@ export class OrderService {
     }
 
     return await orderModel.findByIdAndUpdate(
-      _id,
-      {
+      _id, {
         served: true,
-      },
-      { new: true }
+      }, {
+        new: true
+      }
     );
   };
+
   static createOrder = async ({
     customerId,
     customerInfo,
-    tickets,
-    additionalItems,
-    filmShowId,
+    tickets = null,
+    additionalItems = null,
+    filmShowId = null,
     totalPrice,
-    seats,
+    seats = null,
   }) => {
-    const filmShow = await filmShowModel.findById(filmShowId).populate("film");
 
-    if (!filmShow) throw new Error("Film Show not found");
-    const film = await FilmService.findById(filmShow.film);
-    const ageRestriction = film.ageRestriction;
-    const { roomName, seatNames } = await RoomService.getSeatName(
-      filmShow.roomId,
-      seats
-    );
+    let filmShow = {}
+    let film = {}
+    if (filmShowId) {
+      filmShow = await filmShowModel.findById(filmShowId).populate("film");
 
+      if (!filmShow) throw new Error("Film Show not found");
+
+      film = await FilmService.findById(filmShow.film);
+
+    }
+
+    const ageRestriction = film?.ageRestriction || null;
     const dataFilmShow = {
-      filmName: filmShow.film.name,
-      date: filmShow.showDate,
-      time: filmShow.showTime,
+      filmName: filmShow?.film?.name || null,
+      date: filmShow?.showDate || null,
+      time: filmShow?.showTime || null,
     };
 
-    const items = await AdditionalItemService.getAdditionalItemsInfo(
-      additionalItems
-    );
+    const {
+      roomName,
+      seatNames
+    } = seats ? await RoomService.getSeatName(filmShow.roomId, seats) : {
+      roomName: null,
+      seatNames: []
+    };
 
-    const ticketDetails = await ParamService.getTicketsInfo(tickets);
+
+    let items = [];
+    if (additionalItems) {
+      items = await AdditionalItemService.getAdditionalItemsInfo(additionalItems);
+    }
+
+    let ticketDetails = [];
+    if (tickets) {
+      ticketDetails = await ParamService.getTicketsInfo(tickets);
+    }
 
     const newOrder = await orderModel.create({
       roomName,
@@ -138,4 +166,5 @@ export class OrderService {
 
     return await newOrder.save();
   };
+
 }

@@ -45,19 +45,16 @@ const UserChangePass = () => {
 
   return (
     <UserInfoLayout>
-      <div className="flex items-center justify-center">
+      <div className="flex w-full flex-col ">
+        <div className="py-5 text-2xl text-white">ĐỔI MẬT KHẨU</div>
         {/* Main Content */}
-        <div className=" text-black">
-          <div className="   ">
-            <UserChangePassComponent
-              title="Thông tin khách hàng"
-              layout="row"
-              fields={fields}
-              buttontitle="Đổi mật khẩu"
-              onSubmit={handleSave}
-            />
-          </div>
-        </div>
+        <UserChangePassComponent
+          title="Thông tin khách hàng"
+          layout="row"
+          fields={fields}
+          buttontitle="Đổi mật khẩu"
+          onSubmit={handleSave}
+        />
       </div>
     </UserInfoLayout>
   );

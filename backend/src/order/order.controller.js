@@ -1,11 +1,13 @@
-import { OrderService } from "./order.service.js";
+import {
+  OrderService
+} from "./order.service.js";
 import expressAsyncHandler from "express-async-handler";
 
 class OrderController {
   createOrder = expressAsyncHandler(async (req, res) => {
     const order = req.body;
     try {
-      const newOrder = await OrderService.createOrder(orderData);
+      const newOrder = await OrderService.createOrder(order);
       res.status(201).json(newOrder);
     } catch (error) {
       res.status(500).json({
@@ -26,7 +28,9 @@ class OrderController {
   });
 
   getOrderById = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     try {
       const order = await OrderService.getOrderBy_id(_id);
       if (!order) {
@@ -43,8 +47,12 @@ class OrderController {
   });
 
   disapprovePrinted = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
-    const { reason } = req.body;
+    const {
+      _id
+    } = req.params;
+    const {
+      reason
+    } = req.body;
 
     if (!reason) {
       return res.status(400).json({
@@ -61,8 +69,12 @@ class OrderController {
     res.status(200).json(order);
   });
   disapproveServed = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
-    const { reason } = req.body;
+    const {
+      _id
+    } = req.params;
+    const {
+      reason
+    } = req.body;
 
     if (!reason) {
       return res.status(400).json({
@@ -79,7 +91,9 @@ class OrderController {
     res.status(200).json(order);
   });
   markOrderPrinted = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     const order = await OrderService.markOrderPrinted(_id);
     if (!order) {
       return res.status(404).json({
@@ -89,7 +103,9 @@ class OrderController {
     res.status(200).json(order);
   });
   markOrderServed = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     const order = await OrderService.markOrderServed(_id);
     if (!order) {
       return res.status(404).json({

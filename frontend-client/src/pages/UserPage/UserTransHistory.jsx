@@ -37,18 +37,12 @@ const UserTransHistory = () => {
     };
     updateFields();
   }, [state]);
-  console.log("fields: ", fields);
 
   return (
     <UserInfoLayout>
-      <div className="flex ml-40">
-        {/* Main Content */}
-        <div className=" text-black">
-          <h1 className="text-3xl font-bold mb-4 text-white">
-            Lịch sử mua hàng
-          </h1>
-          <Table headers={headers} data={data} />
-        </div>
+      <div className="flex w-full flex-col">
+        <div className="py-5 text-2xl text-white">LỊCH SỬ GIAO DỊCH</div>
+        <Table headers={headers} data={data} />
       </div>
     </UserInfoLayout>
   );

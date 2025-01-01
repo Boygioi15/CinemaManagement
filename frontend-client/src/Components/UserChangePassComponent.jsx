@@ -36,12 +36,12 @@ const UserChangePassComponent = ({ title, fields, buttontitle, onSubmit }) => {
   };
 
   return (
-    <div className="flex items-center">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded  max-w-[1000px] shadow-lg">
+    <div className="flex w-full">
+      <div className="bg-white bg-opacity-90 text-black p-5 rounded shadow-lg w-full ">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
-        <div className={"grid gap-4 grid-cols-1"}>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           {fields.map((field, index) => (
             <div key={index} className="flex flex-col">
               <label htmlFor={field.for} className="block mb-1 font-bold">
@@ -56,11 +56,8 @@ const UserChangePassComponent = ({ title, fields, buttontitle, onSubmit }) => {
                 value={formValues[field.for] || ""}
                 onChange={handleChange}
                 required={field.required || false}
-                className="w-full p-2 border border-gray-300 rounded-md min-w-[710px]"
+                className="w-full p-2 border border-gray-300 rounded-md"
               />
-              {/* <p className="text-sm text-red-500">
-                Giá trị đang render: {formValues[field.for]}
-              </p> */}
             </div>
           ))}
         </div>

@@ -39,3 +39,54 @@ export const searchFilm = async ({ keyword, page = 1, limit = 2 }) => {
     limit,
   });
 };
+
+export const getShowTimeOfDateByFilmId = async (filmId) => {
+  return await axios.get(`film-show/getByDate`, {
+    params: {
+      filmId,
+    },
+  });
+};
+
+export const getAvailableShowDate = async (filmId) => {
+  return await axios.get(`film-show/get-available/showDate`);
+};
+
+export const getAvailableFilmByDate = async ({ date, filmId, page, limit }) => {
+  return await axios.post(`film-show/get-film-available-by-date`, {
+    date,
+    filmId,
+    page,
+    limit,
+  });
+};
+
+export const getAllFilms = async () => {
+  return await axios.get(`/films`);
+};
+
+export const getAllFoods = async () => {
+  return await axios.get(`/additional-items`);
+};
+
+export const resetPassword = async (email) => {
+  return await axios.post(`/email/send-reset-password`, { userEmail: email });
+};
+
+export const createPayment = async ({
+  customerInfo,
+  totalPrice,
+  filmShowId = null,
+  seats = null,
+  tickets = null,
+  additionalItems = null,
+}) => {
+  return await axios.post(`/payment`, {
+    customerInfo,
+    totalPrice,
+    filmShowId,
+    seats,
+    tickets,
+    additionalItems,
+  });
+};

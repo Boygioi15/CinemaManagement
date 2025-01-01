@@ -1,5 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
-import { PaymentService } from "./payment.service.js";
+import {
+  PaymentService
+} from "./payment.service.js";
 
 class PaymentController {
   checkOrderRequestComingFromFrontend = expressAsyncHandler(
@@ -26,8 +28,11 @@ class PaymentController {
       });
     }
   });
+
   getTransactionStatus = expressAsyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const {
+      id
+    } = req.params;
     const order = await PaymentService.getTransactionStatus(id);
     if (!order) {
       res.status(404).json({
