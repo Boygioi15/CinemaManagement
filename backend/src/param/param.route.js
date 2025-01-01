@@ -16,5 +16,5 @@ router.post("/ticket-type", ParamController.createTicketType);
 router.get("/ticket-type", ParamController.GetAllTicketTypes);
 
 router.patch("/ticket-type/:id", ParamController.UpdateTicketType);
-router.delete("/ticket-type", ParamController.DeleteTicketType);
+router.delete("/ticket-type/:id", ParamController.DeleteTicketType);
 export default router;

@@ -1,23 +1,49 @@
 import { useState, useEffect } from "react";
 import RuleTable from "../../components/Rule/table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { BiRefresh } from "react-icons/bi";
+import RefreshLoader from "../../components/Loading";
 import axios from "axios";
+import Dialog from "../../components/ConfirmDialog";
+import SuccessDialog from "../../components/SuccessDialog";
+import FailedDialog from "../../components/FailedDialog";
+import TicketTypeModal from "../../components/AnotherRule/TicketTypeModal";
+import EmployeeAccount from "../../components/AnotherRule/EmployeeAcount";
 
 const AnotherRule = () => {
   const [tags, setTags] = useState([]);
+  const [ticketTypes, setTicketTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState("add");
 
-  const ticketTypeData = [
-    { id: 1, title: "Người lớn", isPair: "Không", price: "70,000" },
-    { id: 2, title: "HSSV, Người cao tuổi", isPair: "Không", price: "45,000" },
-    { id: 3, title: "Người lớn", isPair: "Có", price: "145,000" },
-    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
-    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
-    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
-  ];
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isFailModalOpen, setIsFailModalOpen] = useState(false);
+
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Lưu trang hiện tại của bảng
+  const itemsPerPage = 5;
+
+  const fetchTicketTypes = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/param/ticket-type"
+      );
+      setTicketTypes(response.data.data);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
   const ticketTypeColumns = [
     { header: "Tên loại vé", key: "title" },
     { header: "Giá", key: "price" },
-    { header: "Đôi", key: "isPair" },
+    {
+      header: "Ghế Đôi",
+      key: "isPair",
+      render: (value) => (value ? "Có" : "Không"),
+    },
     {
       header: "Hành động",
       key: "actions",
@@ -25,13 +51,13 @@ const AnotherRule = () => {
         <div className="flex space-x-3">
           <button
             className="text-blue-600 hover:text-blue-800"
-            onClick={() => handleEditClick(row)}
+            onClick={() => handleTicketTypeClick(row)}
           >
             <FiEdit2 className="w-4 h-4" />
           </button>
           <button
             className="text-red-600 hover:text-red-800"
-            onClick={() => handleDelete(row)}
+            onClick={() => handleDeleteType(row)}
           >
             <FiTrash2 className="w-4 h-4" />
           </button>
@@ -101,14 +127,33 @@ const AnotherRule = () => {
     },
   ];
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchTags();
+    fetchTicketTypes();
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
+
   useEffect(() => {
     fetchTags();
+    fetchTicketTypes();
   }, []);
   const [activeModal, setActiveModal] = useState(""); // Xác định modal đang mở
+
+  const handleTicketTypeClick = (type) => {
+    setSelectedItem(type);
+    setMode("edit");
+    setActiveModal("Loại vé");
+
+    // Đặt tên modal đang mở
+  };
 
   // Xử lý mở modal cho từng bảng
   const handleAddNew = (tableTitle) => {
     setActiveModal(tableTitle);
+    setMode("add");
     console.log(tableTitle);
     // Đặt tên modal đang mở
   };
@@ -117,10 +162,163 @@ const AnotherRule = () => {
     setActiveModal(""); // Đóng modal
   };
 
+  //xóa loại vé
+  const handleDeleteType = async (data) => {
+    setSelectedItem(data);
+    setActiveModal("Xóa loại vé");
+    setMode("delete"); // Chế độ xóa
+    setDialogData({
+      title: "Xóa loại vé",
+      message: "Bạn có chắc chắn muốn xóa loại vé này?",
+    });
+    setIsConfirmModalOpen(true); // Hiển thị modal xác nhận
+  };
+
   // Xử lý lưu dữ liệu cho từng modal
-  const handleSave = (data) => {
-    console.log("Saved data:", data);
-    handleCloseModal(); // Đóng modal sau khi lưu
+  const handleConfirmClick = async () => {
+    setIsConfirmModalOpen(false);
+    try {
+      if (activeModal === "Loại vé") {
+        if (mode === "edit") {
+          await axios.patch(
+            `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`,
+            selectedItem
+          );
+          console.log("data: ", selectedItem);
+
+          setDialogData({
+            title: "Cập nhật thành công",
+            message: `Loại vé đã được cập nhật thành công.`,
+          });
+        } else {
+          const itemToSend = { ...selectedItem };
+          delete itemToSend._id; // Loại bỏ _id nếu có
+          // Logic cho "add"
+          await axios.post(
+            "http://localhost:8000/api/param/ticket-type",
+            itemToSend
+          );
+          setDialogData({
+            title: "Thêm mới thành công",
+            message: `Loại vé mới đã được thêm thành công.`,
+          });
+        }
+      } else if (activeModal === "Thể loại phim") {
+        if (mode === "edit") {
+          // Logic cho "edit" thể loại phim
+          setDialogData({
+            title: "Cập nhật thành công",
+            message: `Thể loại phim đã được cập nhật thành công.`,
+          });
+        } else {
+          // Logic cho "add" thể loại phim
+          setDialogData({
+            title: "Thêm mới thành công",
+            message: `Thể loại phim mới đã được thêm thành công.`,
+          });
+        }
+      } else if (activeModal === "Tài khoản") {
+        if (mode === "edit") {
+          // Logic cho "edit" tài khoản
+          setDialogData({
+            title: "Cập nhật thành công",
+            message: `Tài khoản đã được cập nhật thành công.`,
+          });
+        } else {
+          // Logic cho "add" tài khoản
+          setDialogData({
+            title: "Thêm mới thành công",
+            message: `Tài khoản mới đã được thêm thành công.`,
+          });
+        }
+      } else if (activeModal === "Xóa loại vé") {
+        await axios.delete(
+          `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`
+        );
+        setDialogData({
+          title: "Thành công",
+          message: "Xóa loại vé thành công",
+        });
+        setTicketTypes((prev) => {
+          const updatedList = prev.filter(
+            (item) => item._id !== selectedItem._id
+          );
+
+          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
+          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+          if (currentPage > totalPages && totalPages > 0) {
+            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+            setCurrentPage(totalPages);
+          } else if (updatedList.length === 0) {
+            // Nếu không còn dữ liệu, quay lại trang 1
+            setCurrentPage(1);
+          }
+
+          return updatedList;
+        });
+      }
+
+      await handleRefresh();
+      handleCloseModal();
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.log(error);
+
+      setDialogData({
+        title: "Thất bại",
+        message: "Đã xảy ra lỗi khi thực hiện hành động. Vui lòng thử lại.",
+      });
+      setIsFailModalOpen(true);
+    }
+  };
+
+  const handleEditConfirm = (item) => {
+    setSelectedItem(item);
+
+    console.log(mode);
+
+    // Xác định loại hành động dựa trên chế độ hiện tại
+    const action = mode === "add" ? "thêm mới" : "cập nhật";
+    // Xác định bảng nào đang thao tác
+    let tableName = activeModal;
+
+    // Cập nhật dữ liệu dialog theo bảng
+    if (tableName === "Loại vé") {
+      setDialogData({
+        title: mode === "edit" ? "Chỉnh sửa loại vé" : "Thêm mới loại vé",
+        message:
+          mode === "edit"
+            ? "Bạn có chắc chắn muốn chỉnh sửa loại vé này?"
+            : "Bạn có muốn thêm loại vé mới?",
+      });
+    } else if (tableName === "Thể loại phim") {
+      setDialogData({
+        title:
+          mode === "edit"
+            ? "Chỉnh sửa thể loại phim"
+            : "Thêm mới thể loại phim",
+        message:
+          mode === "edit"
+            ? "Bạn có chắc chắn muốn chỉnh sửa thể loại phim này?"
+            : "Bạn có muốn thêm thể loại phim mới?",
+      });
+    } else if (tableName === "Tài khoản") {
+      setDialogData({
+        title: mode === "edit" ? "Chỉnh sửa tài khoản" : "Thêm mới tài khoản",
+        message:
+          mode === "edit"
+            ? "Bạn có chắc chắn muốn chỉnh sửa tài khoản này?"
+            : "Bạn có muốn thêm tài khoản mới?",
+      });
+      fetchTicketTypes();
+    }
+
+    // Gọi dialog xác nhận với loại hành động tương ứng
+    setIsConfirmModalOpen(true);
+  };
+
+  const openConfirmDialog = (action, item) => {
+    setIsConfirmModalOpen(true);
   };
 
   //xử lí giá vé chi lưu khi thay đổi giá
@@ -149,30 +347,49 @@ const AnotherRule = () => {
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="mb-6 flex justify-between items-center pr-10">
-        <div>
+        <div className="flex items-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Thay đổi các quy định
           </h2>
+          <button
+            onClick={handleRefresh}
+            className="r p-4 rounded-full hover:bg-gray-100 transition-all duration-300"
+            disabled={loading}
+          >
+            <BiRefresh
+              className={`text-4xl text-black hover:text-black ${
+                loading
+                  ? "animate-spin"
+                  : "hover:rotate-180 transition-transform duration-300"
+              }`}
+            />
+          </button>
         </div>
       </div>
       <div className="flex flex-col gap-6">
         <RuleTable
           title="Loại vé"
-          data={ticketTypeData}
+          data={ticketTypes}
           columns={ticketTypeColumns}
           onAddNew={handleAddNew}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
         />
         <RuleTable
           title="Thể loại phim"
           data={tags}
           columns={typeColumns}
           onAddNew={handleAddNew}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
         />
         <RuleTable
           title="Tài khoản"
           data={AccountData}
           columns={Accountcolumns}
           onAddNew={handleAddNew}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
         />
       </div>
 
@@ -233,27 +450,55 @@ const AnotherRule = () => {
       </div>
 
       {/* Modal cho từng bảng */}
-      {/* {activeModal === "Loại vé" && (
-        <EmployeeModal
+      {activeModal === "Loại vé" && (
+        <TicketTypeModal
           isOpen={true}
           onClose={handleCloseModal}
-          onSave={handleSave}
+          onSave={handleEditConfirm}
+          type={selectedItem}
+          mode={mode}
         />
       )}
-      {activeModal === "Thể loại phim" && (
+      {/* {activeModal === "Thể loại phim" && (
         <ProductModal
           isOpen={true}
           onClose={handleCloseModal}
           onSave={handleSave}
         />
-      )}
+      )} */}
       {activeModal === "Tài khoản" && (
-        <SalesModal
+        <EmployeeAccount
           isOpen={true}
           onClose={handleCloseModal}
-          onSave={handleSave}
+          onSave={handleEditConfirm}
+          type={selectedItem}
+          mode={mode}
         />
-      )} */}
+      )}
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmClick}
+      />
+      <SuccessDialog
+        isOpen={isSuccessModalOpen && !loading}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+        }}
+      />
+      <FailedDialog
+        isOpen={isFailModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsFailModalOpen(false);
+        }}
+      />
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };

@@ -132,6 +132,19 @@ const AdditionalItem = () => {
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
+      const updatedFilteredData = items.filter((item) =>
+        item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
+      );
+      const newTotalPages = Math.ceil(
+        updatedFilteredData.length / itemsPerPage
+      );
+
+      // Kiểm tra nếu trang hiện tại không còn dữ liệu, chuyển về trang trước
+      if (newTotalPages < currentPage && newTotalPages > 0) {
+        setCurrentPage(newTotalPages); // Quay về trang trước nếu trang hiện tại không còn dữ liệu
+      } else {
+        setCurrentPage(currentPage - 1); // Giữ nguyên trang hiện tại nếu còn dữ liệu
+      }
       // Hiển thị thông báo thành công
       setDialogData({
         title: "Thành công",
