@@ -54,9 +54,9 @@ const PaymentSection = ({ selectedFood }) => {
       <div className="flex flex-col items-start max-w-xl w-full">
         <h1 className="text-3xl font-bold">HÓA ĐƠN</h1>
         {selectedFood.map((food) => (
-          <p className="text-lg mt-2 break-words w-full" key={food._id}>
+          <p style={{display:"flex", flexDirection:"row ", gap: "5px",fontSize:"18px"}}className="text-lg mt-2 break-words w-full" key={food._id}>
+            <span style={{color:"#F3EA28"}}className="text-gray-500"> x{food.quantity}</span>
             <span className="block">{food.name}</span>
-            <span className="text-gray-500"> x{food.quantity}</span>
           </p>
         ))}
       </div>

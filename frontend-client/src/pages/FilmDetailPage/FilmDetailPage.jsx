@@ -13,7 +13,6 @@ import TrailerModal from "../../Components/TrailerModal";
 import axios from "axios";
 import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
 import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
-import FoodCard from "../../Components/FoodCard";
 import TicketType from "../../Components/TicketType";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
@@ -287,13 +286,6 @@ const FilmDetailPage = () => {
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
         <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
-          <FoodCard />
-          <FoodCard />
-          <FoodCard />
-          <FoodCard />
-          <FoodCard />
-          <FoodCard />
-          <FoodCard />
         </div>
       </div>
     </div>

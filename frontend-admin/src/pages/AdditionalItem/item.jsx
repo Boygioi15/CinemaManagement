@@ -106,21 +106,28 @@ const AdditionalItem = () => {
   };
 
   const handleConfirmClick = async () => {
-    console.log("haha: ", selectedItem);
+    
     try {
       if (actionType === "delete") {
         await axios.delete(
           `http://localhost:8000/api/additional-items/${selectedItem._id}`
         );
       } else if (actionType === "edit") {
-        await axios.put(
+        
+        const res = await axios.put(
           `http://localhost:8000/api/additional-items/${selectedItem._id}`,
           selectedItem
         );
+        
       } else if (actionType === "add") {
+        console.log("haha: ", selectedItem);
+        const formData = new FormData();
+        formData.append("name", selectedItem.name);
+        formData.append("price", selectedItem.price);
+        formData.append("thumbnailFile", selectedItem.file);
         await axios.post(
           "http://localhost:8000/api/additional-items",
-          selectedItem
+          formData
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công

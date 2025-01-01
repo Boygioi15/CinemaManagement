@@ -1,9 +1,9 @@
-import QuantitySelector from "./QuantitySelector";
-
+import QuantitySelector from "../QuantitySelector";
+import './style.css'
 const FoodCard = ({ food, setSelectedFood, selectedFood }) => {
   return (
     <div>
-      <div className="flex flex-col justify-between md:grid md:grid-cols-2 gap-4 group">
+      <div className="FoodCard flex flex-col justify-between md:grid md:grid-cols-2 gap-4 group">
         <div className="md:col-span-1 w-full">
           <img
             className="w-[240px] h-[240px] object-cover rounded-md"

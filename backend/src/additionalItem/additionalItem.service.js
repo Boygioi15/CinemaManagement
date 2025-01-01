@@ -10,16 +10,18 @@ export class AdditionalItemService {
     return response;
   };
   static updateAdditionalById = async (additionalItemID, updateData) => {
+    const { name, price } = updateData;
+    if (!name || !price) {
+      throw customError("Vui lòng nhập đủ các trường", 400);
+    }
     const oldAdditional = await additionalItemModel.findByIdAndUpdate(
       additionalItemID,
-      {
-        thumbnailURL: updateData.thumbnailURL,
-        public_ID: updateData.public_ID,
-      }
+      updateData
     );
     //destroy old img
     handleDestroyCloudinary(oldAdditional.public_ID);
-    return oldAdditional;
+    console.log(price);
+    return await additionalItemModel.findById(additionalItemID);
   };
 
   static getListAdditonal = async () => {

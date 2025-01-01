@@ -202,14 +202,15 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       data.append("filmContent", formData.filmContent);
       data.append("beginDate", formData.beginDate);
 
+      let response;
       if (mode === "edit") {
-        await axios.put(`http://localhost:8000/api/films/${film._id}`, data);
+        response = await axios.put(`http://localhost:8000/api/films/${film._id}`, data);
         setDialogData({
           title: "Successs",
           message: "Cập nhật phim thành công",
         });
       } else {
-        await axios.post("http://localhost:8000/api/films", data);
+        response = await axios.post("http://localhost:8000/api/films", data);
 
         setDialogData({
           title: "Successs",

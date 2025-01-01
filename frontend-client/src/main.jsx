@@ -23,10 +23,12 @@ import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
 import NotFoundPage from "./pages/NotFound";
 import OrderFailPage from "./pages/OrderFailed";
 import OrderSuccessPage from "./pages/OrderSuccess";
+import ErrorPage from "./pages/ErrorPage";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",

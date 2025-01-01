@@ -1,19 +1,17 @@
 import express from "express";
 import additionalItemController from "./additionalItem.controller.js";
-import {
-  upload
-} from "../middlewares/cloudinary_multer.js";
+import { upload } from "../middlewares/cloudinary_multer.js";
 
 const router = express.Router();
 
 router.post(
   "",
-  upload.single("thumbNailFile"),
+  upload.single("thumbnailFile"),
   additionalItemController.createAditionalItem
 );
 router.put(
   "/:id",
-  upload.single("thumbNailFile"),
+  upload.single("thumbnailFile"),
   additionalItemController.updateAdditionalItem
 );
 

@@ -1,0 +1,9 @@
+
+  .FoodCard img {
+    transition: transform 0.3s;
+  }
+  
+  .FoodCard:hover img {
+    transform: rotate(2deg) scale(1.0001); 
+  }
+  
