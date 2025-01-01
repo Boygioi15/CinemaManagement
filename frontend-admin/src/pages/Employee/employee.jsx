@@ -117,9 +117,15 @@ const Employee = () => {
       } else if (actionType === "add") {
         console.log("haha: ", selectedEmployee);
         const formData = new FormData();
-        formData.append("name", selectedItem.name);
-        formData.append("price", selectedItem.price);
-        formData.append("thumbnailFile", selectedItem.file);
+        formData.append("name", selectedEmployee.name);
+        formData.append("birthDate", selectedEmployee.birthDate);
+        formData.append("email", selectedEmployee.email);
+        formData.append("phone", selectedEmployee.phone);
+        formData.append("jobTitle", selectedEmployee.jobTitle);
+        formData.append("salary", selectedEmployee.salary);
+        formData.append("shiftStart", selectedEmployee.shiftStart);
+        formData.append("shiftEnd", selectedEmployee.shiftEnd);
+
         await axios.post(
           "http://localhost:8000/api/user/employee",
           selectedEmployee

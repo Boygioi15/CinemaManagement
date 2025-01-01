@@ -34,11 +34,11 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode }) => {
   };
 
   const [formData, setFormData] = useState({
+    _id: employee?._id || "",
     name: employee?.name || "",
     birthDate: employee?.birthDate.split("T")[0] || "",
-    email: employee?.email,
-    phone: employee?.phone || [],
-    blocked: employee?.blocked || "",
+    email: employee?.email || "",
+    phone: employee?.phone || "",
     jobTitle: employee?.jobTitle || "",
     salary: employee?.salary || "",
     shiftStart: formatTime(employee?.shiftStart) || "",
