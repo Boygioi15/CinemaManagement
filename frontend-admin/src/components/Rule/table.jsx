@@ -24,7 +24,7 @@ const RuleTable = ({ title, columns, data, onAddNew }) => {
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
         >
           <FaPlus className="text-sm" />
-          <span>Thêm mới +</span>
+          <span>Thêm mới</span>
         </button>
       </div>
       <div className="overflow-x-auto">

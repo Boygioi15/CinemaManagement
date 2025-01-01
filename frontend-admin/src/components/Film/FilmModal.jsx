@@ -546,7 +546,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
               onClick={onClose}
               className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+              Hủy bỏ
             </button>
             <button
               onClick={handleSubmit}
@@ -557,7 +557,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
                   : "bg-gray-400 cursor-not-allowed"
               } text-white`}
             >
-              {isEditMode ? "Save Changes" : "Add Film"}
+              {isEditMode ? "Lưu thay đổi" : "Thêm phim"}
             </button>
           </div>
         </div>

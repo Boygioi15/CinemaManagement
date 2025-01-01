@@ -7,12 +7,12 @@ const AnotherRule = () => {
   const [tags, setTags] = useState([]);
 
   const ticketTypeData = [
-    { id: 1, title: "John Doe", isPair: "Developer", price: "$75,000" },
-    { id: 2, title: "Jane Smith", isPair: "Designer", price: "$65,000" },
-    { id: 3, title: "Mike Johnson", isPair: "Manager", price: "$85,000" },
-    { id: 4, title: "Sarah Wilson", isPair: "Analyst", price: "$70,000" },
-    { id: 5, title: "Tom Brown", isPair: "Developer", price: "$72,000" },
-    { id: 6, title: "Emily Davis", isPair: "Designer", price: "$68,000" },
+    { id: 1, title: "Người lớn", isPair: "Không", price: "70,000" },
+    { id: 2, title: "HSSV, Người cao tuổi", isPair: "Không", price: "45,000" },
+    { id: 3, title: "Người lớn", isPair: "Có", price: "145,000" },
+    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
+    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
+    { id: 4, title: "Trẻ em", isPair: "Không", price: "40,000" },
   ];
   const ticketTypeColumns = [
     { header: "Tên loại vé", key: "title" },
@@ -75,12 +75,12 @@ const AnotherRule = () => {
     },
   ];
   const AccountData = [
-    { id: 1, name: "North", userName: "$45,000", units: 230 },
-    { id: 2, name: "South", userName: "$38,000", units: 185 },
-    { id: 3, name: "East", userName: "$52,000", units: 275 },
-    { id: 4, name: "West", userName: "$41,000", units: 210 },
-    { id: 5, name: "Central", userName: "$48,000", units: 245 },
-    { id: 6, name: "Northwest", userName: "$39,000", units: 195 },
+    { id: 1, name: "Đạt", userName: "irisus", units: 230 },
+    { id: 2, name: "Điền", userName: "irisus", units: 185 },
+    { id: 3, name: "Quyền", userName: "irisus", units: 275 },
+    { id: 4, name: "Phong", userName: "irisus", units: 210 },
+    { id: 5, name: "Thịnh", userName: "irisus", units: 245 },
+    { id: 6, name: "Test", userName: "irisus", units: 195 },
   ];
   const Accountcolumns = [
     { header: "Tên nhân viên", key: "name" },

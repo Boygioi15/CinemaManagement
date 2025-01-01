@@ -61,7 +61,7 @@ const newTabs = [
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
-    name: "Quản lý nhân viên",
+    name: "Quản lý tài khoản",
     path: "/admin/manage-user",
     icon: <RxDashboard className="w-6 h-6" />,
   },
