@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 dotenv.config();
-process.env.PORT || 4000;
 export default {
   accessKey: process.env.MOMO_ACCESS_KEY,
   secretKey: process.env.MOMO_SECRET_KEY,

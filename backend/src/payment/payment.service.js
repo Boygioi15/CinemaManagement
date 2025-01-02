@@ -1,19 +1,11 @@
 import config from "./config.js";
 import crypto from "crypto";
 import axios from "axios";
-import {
-  OrderService
-} from "../order/order.service.js";
+import { OrderService } from "../order/order.service.js";
 import mongoose from "mongoose";
-import {
-  Order_1Service
-} from "./Order_1/Order_1.service.js";
-import {
-  FilmShowService
-} from "../filmShow/filmShow.service.js";
-import {
-  EmailService
-} from "../email/email.service.js";
+import { Order_1Service } from "./Order_1/Order_1.service.js";
+import { FilmShowService } from "../filmShow/filmShow.service.js";
+import { EmailService } from "../email/email.service.js";
 import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
 export class PaymentService {
@@ -32,6 +24,20 @@ export class PaymentService {
       } = config;
 
       const transactionData = req.body || {};
+      if (transactionData.seats) {
+        const filteredSeat = [];
+        for (let i = 0; i < transactionData.seats.length; i++) {
+          for (let j = 0; j < transactionData.seats[0].length; j++) {
+            if (transactionData.seats[i][j].selected) {
+              const newSeat = transactionData.seats[i][j];
+              newSeat.i = i;
+              newSeat.j = j;
+              filteredSeat.push(newSeat);
+            }
+          }
+        }
+        transactionData.seats = filteredSeat;
+      }
       const amount = totalPrice;
 
       // Ensure all required fields are present and valid
@@ -40,6 +46,7 @@ export class PaymentService {
           statusCode: 400,
           message: "Invalid amount",
         });
+        transactionData.seats[i];
       }
 
       const orderId = new mongoose.Types.ObjectId();
@@ -82,7 +89,6 @@ export class PaymentService {
         extraData: JSON.stringify(transactionData), // Ensure it's a string
         signature,
       });
-
       // Axios request with error handling
       const result = await axios({
         method: "POST",
@@ -95,20 +101,16 @@ export class PaymentService {
       });
       await Order_1Service.createNewEntry(orderId, signature);
 
-      const {
-        filmShowId,
-        seats
-      } = req.body;
+      const { filmShowId, seats } = req.body;
       if (filmShowId && seats) {
-
         await FilmShowService.appendLockedSeats(filmShowId, seats);
       }
 
       return res.status(200).json(result.data);
-
     } catch (error) {
       console.error(
         "Payment Creation Error:",
+        error,
         error.response?.data || error.message
       );
 
@@ -119,19 +121,19 @@ export class PaymentService {
     }
   };
   static momoCallBackService = async (req, res) => {
-    const {
-      resultCode,
-      amount,
-      orderId,
-      extraData
-    } = req.body;
+    const { resultCode, amount, orderId, extraData } = req.body;
 
     const extraDataObj = JSON.parse(extraData);
-    console.log("🚀 ~ PaymentService ~ momoCallBackService= ~ extraDataObj:", extraDataObj)
+    console.log(
+      "🚀 ~ PaymentService ~ momoCallBackService= ~ extraDataObj:",
+      extraDataObj
+    );
     //success
     if (resultCode === 0) {
       // create order
       try {
+        console.log("Here is your order:");
+        console.log(extraDataObj);
         const newOrder = await OrderService.createOrder(extraDataObj);
         if (!newOrder) throw customError("Tạo đơn hàng thất bại");
         // cuưa dăng nhap ma mua
@@ -154,20 +156,14 @@ export class PaymentService {
         return res.status(204).json(newOrder);
       } catch (error) {
         console.log("🚀 ~ PaymentService ~ callbackService= ~ error:", error);
-        const {
-          filmShowId,
-          seats
-        } = extraDataObj;
+        const { filmShowId, seats } = extraDataObj;
         if (filmShowId && seats) {
           await FilmShowService.releaseLockedSeats(filmShowId, seats);
         }
       }
     } else {
       // fail
-      const {
-        filmShowId,
-        seats
-      } = extraDataObj;
+      const { filmShowId, seats } = extraDataObj;
       if (filmShowId && seats) {
         await FilmShowService.releaseLockedSeats(filmShowId, seats);
       }

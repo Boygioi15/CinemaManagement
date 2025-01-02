@@ -24,6 +24,10 @@ const PaymentSection = ({ selectedFood }) => {
   const handleCreatePayment = async () => {
     setIsLoading(true); // Bật trạng thái loading khi bắt đầu gửi yêu cầu
     try {
+      if(!localStorage.getItem("accessToken")){
+        alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
+        navigate('/auth');
+      }
       const response = await createPayment({
         customerInfo: {
           name: user.name,

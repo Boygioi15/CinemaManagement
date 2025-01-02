@@ -72,7 +72,7 @@ export default function OffLineTicketBooking(){
     const [roomSeat,setRoomSeat] = useState();
     const fetchRoom = async () => {
         try{
-            const response = await axios.get("http://localhost:8000/api/rooms/676b6c0db2621ba199d649a1");
+            const response = await axios.get("http://localhost:8000/api/rooms/677605950d1ca6ee870a0e18");
             setRoomDetail(response.data.data)
         }catch (error) {
             if (error.response) {

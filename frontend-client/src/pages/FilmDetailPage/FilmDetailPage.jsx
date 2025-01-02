@@ -21,6 +21,18 @@ import formatCurrencyNumber from "../../utils/FormatCurrency";
 import QuantitySelectorV2 from "../../Components/QuantitySelectorV2";
 import { use } from "react";
 import FoodCardV2 from "../../Components/FoodCard/FoodCardV2";
+import "./oStyle.css"
+import "./cStyle.css"
+import whiteScreen from "../../assets/whiteScreen.png"
+import CustomButton from "../../Components/button/index"; // Giả sử bạn đã có CustomButton component
+import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
+import { createPayment } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
+
+const seatWidth = 50;
+const seatHeight = 40;
+const gapX = 5;
+const gapY = 5;
+
 
 const FilmDetailPage = () => {
   const { filmID } = useParams();
@@ -30,9 +42,8 @@ const FilmDetailPage = () => {
 
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
-  console.log("🚀 ~ FilmDetailPage ~ selectedDate:", selectedDate);
+  useEffect(()=>{setSelectedFilmShowID(null)},[selectedDate]) 
   const [selectedShowtime, setSelectedShowtime] = useState(initShowTime || "");
-  console.log("🚀 ~ FilmDetailPage ~ selectedShowtime:", selectedShowtime);
 
   const [availableDates, setAvailableDates] = useState([]);
   const [availableShowtimesWithFilmType, setAvailableShowtimesWithFilmType] =
@@ -138,6 +149,8 @@ const FilmDetailPage = () => {
     }
   };
 
+  const [selectedFilmShowID, setSelectedFilmShowID] = useState(null);
+  const [selectedFilmShow, setSelectedFilmShow] = useState(null);
   const [ticketSelection, setTicketSelection] = useState([]);
   const [additionalItemSelections, setAdditionalItemSelections] = useState([]);
   const [totalTicket_Single, setTotalTicket_Single] = useState(0);
@@ -145,7 +158,11 @@ const FilmDetailPage = () => {
 
   const [usedSingle, setUsedSingle] = useState(0);
   const [usedPair, setUsedPair] = useState(0);
-
+  useEffect(()=>{
+    if(selectedFilmShow) return;
+    setRoomDetail(null);
+  },[selectedFilmShow])
+  //FETCH
   useEffect(() => {
     try {
       const fetchTicketType = async () => {
@@ -199,6 +216,200 @@ const FilmDetailPage = () => {
       }
     }
   }, []);
+  useEffect(() => {
+    const fetchFilmShowDetail = async () => {
+      if(selectedFilmShowID!==null){
+        try{
+          const response = await axios.get(`http://localhost:8000/api/film-show/${selectedFilmShowID}`);
+          setSelectedFilmShow(response.data.data);
+        }
+        catch(error){
+          
+        }
+      }else{
+        setSelectedFilmShow(null);
+      }
+    }
+    fetchFilmShowDetail();
+  },[selectedFilmShowID])
+  useEffect(()=>{console.log(selectedFilmShow)},[selectedFilmShow])
+
+  const [roomDetail, setRoomDetail] = useState();
+  const [roomSeat,setRoomSeat] = useState();
+  const fetchRoom = async () => {
+    if(!selectedFilmShow){return}
+    try{
+      const response = await axios.get(`http://localhost:8000/api/rooms/${selectedFilmShow.roomId}`);
+      setRoomDetail(response.data.data)
+    }catch (error) {
+      if (error.response) {
+          alert(`Lấy thông tin phòng thất bại, lỗi: ` + error.response.data.msg);
+      } else if (error.request) {
+          alert('Không nhận được phản hồi từ server');
+      } else {
+          alert('Lỗi bất ngờ: ' + error.message);
+      }
+    }
+  }          
+  //init room
+  useEffect(()=>{
+    fetchRoom();
+  },[selectedFilmShow])
+  //init room seat
+  useEffect(()=>{
+    if(!roomDetail){
+      return
+    }
+    const appendedSeat = roomDetail.seats.map(row => 
+        row.map(seat => ({
+            ...seat, // Preserve exi    sting properties
+            selected: false,
+            enabled: false,
+            booked: false
+        }))
+    );
+    setRoomSeat(appendedSeat)
+  },[roomDetail])        
+  
+  const handleSelectSeat = (row, col) =>{
+    const updatedRoomSeat = [...roomSeat]; 
+    if(updatedRoomSeat[row][col-1].seatType==="P"){
+        col--;
+    }
+    if(updatedRoomSeat[row][col].seatType===""){
+        return;
+    }
+    if(updatedRoomSeat[row][col].booked){
+        return;
+    }
+    if(updatedRoomSeat[row][col].selected){
+        updatedRoomSeat[row][col].selected=false;
+        setRoomSeat(updatedRoomSeat)
+        return;
+    }
+    if(!updatedRoomSeat[row][col].enabled){
+        return;
+    }
+    updatedRoomSeat[row][col].selected=true;
+    setRoomSeat(updatedRoomSeat)
+}
+  const updateUsedTicket = () => {
+      if(!roomSeat){
+          return;
+      }
+      let usedSingle = 0, usedPair = 0;
+      for(let i = 0;i<roomSeat.length;i++){
+          for(let j = 0;j<roomSeat[0].length;j++){
+              if(roomSeat[i][j].selected){
+                  if(roomSeat[i][j].seatType==="P"){
+                      usedPair++;
+                  }
+                  else{
+                      usedSingle++;
+                  }
+              }
+          }
+      }
+      setUsedSingle(usedSingle);
+      setUsedPair(usedPair)
+  }
+  const setBookedSeat = () => {
+      if(!selectedFilmShow){
+        return;
+      }
+      const bookedSeatPoss = selectedFilmShow.lockedSeats;
+      const updatedSeat = roomSeat;
+      for(const bookedSeatPos of bookedSeatPoss){
+          updatedSeat[bookedSeatPos.i][bookedSeatPos.j].booked = true;
+      }
+      setRoomSeat(updatedSeat)
+  }
+  //update room seat effect
+  useEffect(()=>{
+    if(!roomSeat){
+        return;
+    }
+    setBookedSeat();
+    updateUsedTicket();
+  },[roomSeat])    
+  //update enable seat
+  useEffect(()=>{
+    if(!roomSeat){
+        return;
+    }
+    const updatedRoomSeat = [...roomSeat];
+    //disable all
+    if(usedSingle>=totalTicket_Single){
+        for(let i = 0;i<updatedRoomSeat.length;i++){
+            for(let j = 0;j<updatedRoomSeat[0].length;j++){
+                if(updatedRoomSeat[i][j].seatType!=="P"){
+                    updatedRoomSeat[i][j].enabled = false;
+                }    
+            }
+        }
+    }
+    else{
+        for(let i = 0;i<updatedRoomSeat.length;i++){
+            for(let j = 0;j<updatedRoomSeat[0].length;j++){
+                if(updatedRoomSeat[i][j].seatType!=="P"){
+                    updatedRoomSeat[i][j].enabled = true;
+                    //console.log(`${i},${j} ${updatedRoomSeat[i][j].enabled} `)
+                }    
+            }
+        }
+    }
+    setRoomSeat(updatedRoomSeat)
+  },[usedSingle,totalTicket_Single])  
+  useEffect(()=>{
+    if(!roomSeat){
+        return;
+    }
+    const updatedRoomSeat = [...roomSeat];
+    //disable all
+    if(usedPair>=totalTicket_Pair){
+        for(let i = 0;i<updatedRoomSeat.length;i++){
+            for(let j = 0;j<updatedRoomSeat.length;j++){
+                if(updatedRoomSeat[i][j].seatType==="P"){
+                    updatedRoomSeat[i][j].enabled = false;
+                }    
+            }
+        }
+    }
+    else{
+        for(let i = 0;i<updatedRoomSeat.length;i++){
+            for(let j = 0;j<updatedRoomSeat.length;j++){
+                if(updatedRoomSeat[i][j].seatType==="P"){
+                    updatedRoomSeat[i][j].enabled = true;
+                }    
+            }
+        }
+    }
+    setRoomSeat(updatedRoomSeat)
+  },[usedPair,totalTicket_Pair])   
+  
+  const updateTotalTicket = () => {
+      let single = 0, pair = 0;
+      for(let i = 0; i<ticketSelection.length;i++){
+          if(!ticketSelection[i].isPair){
+              single+=ticketSelection[i].quantity;
+          }
+          else{
+              pair+=ticketSelection[i].quantity;
+          }
+      }
+      setTotalTicket_Single(single);
+      setTotalTicket_Pair(pair);
+  }
+  //ticket
+  useEffect(()=>{
+    updateTotalTicket();
+  },[ticketSelection])
+  //additional item  
+  
+  const handleSubmit = () => {
+    
+  }
+  
   if (!filmDetail) {
     return <div>Loading...</div>;
   }
@@ -335,7 +546,10 @@ const FilmDetailPage = () => {
                       <ShowtimeChooseBox
                         time={value.showTime}
                         isSelected={selectedShowtime === value.showTime}
-                        onClick={() => setSelectedShowtime(value.showTime)}
+                        onClick={() => {
+                          setSelectedShowtime(value.showTime)
+                          setSelectedFilmShowID(value._id)
+                        }}
                       />
                     );
                   })}
@@ -346,7 +560,7 @@ const FilmDetailPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center space-y-12">
+      {selectedFilmShow && <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
         <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
           {ticketSelection.map((ticketType) => {
@@ -398,8 +612,21 @@ const FilmDetailPage = () => {
             );
           })}
         </div>
+      </div>}
+      <div style={{display:"flex",justifyContent:"center",alignItems:"center",flexDirection:"column"}}>
+        {roomDetail && roomSeat &&
+          <RoomDisplay roomSeat={roomSeat} roomName={roomDetail.roomName} 
+              center={{
+                  x1: roomDetail.centerX1,
+                  x2: roomDetail.centerX2,
+                  y1: roomDetail.centerY1,
+                  y2: roomDetail.centerY2
+              }}
+              handleSelectSeat={handleSelectSeat}
+          />              
+        }
       </div>
-
+    
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
         <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
@@ -442,6 +669,13 @@ const FilmDetailPage = () => {
           })}
         </div>
       </div>
+
+      {roomDetail && roomSeat && <BottomBar filmName="Alibaba" date="20-12-2024" time="10:30" roomName={roomDetail.roomName} seatSelections={roomSeat} 
+          ticketSelections={ticketSelection}
+          additionalItemSelections={additionalItemSelections}
+          selectedFilmShowId = {selectedFilmShowID}
+      />}                      
+
     </div>
   );
 };
@@ -451,8 +685,8 @@ function RoomDisplay({ roomSeat, roomName, handleSelectSeat, center }) {
   return (
     <div className="RoomDisplay">
       <h1>{roomName}</h1>
-      <div className="screen">
-        <img src={screen} alt="Screen" />
+      <div style={{zIndex:1}} className="screen">
+        <img src={whiteScreen} alt="Screen" />
         <h1 className="center-text">Màn hình</h1>
       </div>
 
@@ -667,28 +901,74 @@ function SeatLegend() {
   );
 }
 function BottomBar({
-  filmName,
-  date,
-  time,
   roomName,
   seatSelections,
-  center,
   ticketSelections,
   additionalItemSelections,
-  centerX1,
-  centerX2,
-  centerY1,
-  centerY2,
-  currentPage,
-  onPage1Submit,
-  onPage2Submit,
-  onReturnToPage1,
+  selectedFilmShowId
 }) {
-  return (
-    <div className="BottomBar">
-      <div className="TransactionInfo">
-        <h2>{filmName}</h2>
-        {/*ticket*/}
+  const calculateTotalPrice = () => {
+    let total = 0;
+    let vCount = 0;
+    for(let i = 0;i<ticketSelections.length;i++){
+        total+=ticketSelections[i].quantity*ticketSelections[i].price;
+    }
+    for(let i = 0;i<seatSelections.length;i++){
+        for(let j = 0;j<seatSelections[i].length;j++){
+            if(seatSelections[i][j].selected){
+                //console.log(seatSelections[i][j].seatType)
+                if(seatSelections[i][j].seatType==="V"){
+                    vCount++;
+                }
+            }
+        }      
+    }
+    total+=vCount*20000;
+    for(let i = 0;i<additionalItemSelections.length;i++){
+        total+=additionalItemSelections[i].quantity*additionalItemSelections[i].price;
+    }
+    return total;    
+  }
+  const { user } = useAuth(); // Lấy user từ context
+  const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
+  
+  const handleCreatePayment = async () => {
+    if(!localStorage.getItem("accessToken")){
+      alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
+      navigate('/auth');
+    }
+    try {
+      const response = await createPayment({
+        customerInfo: {
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+        },
+        tickets:ticketSelections.filter((element)=>element.quantity!==0),
+        seats:seatSelections,
+        additionalItems: additionalItemSelections.filter((element)=>element.quantity!==0),
+        totalPrice: calculateTotalPrice(),
+        filmShowId: selectedFilmShowId
+      });
+      console.log(response)
+      if (response && response.payUrl) {
+        setPaymentUrl(response.payUrl);
+        window.location.href = response.payUrl;
+      } else {
+        alert("Không có URL thanh toán, vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi tạo thanh toán:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại.");
+    }
+  };
+
+  
+  return(
+    <div style={{zIndex:5,width:"-webkit-fill-available"}}className="flex justify-between items-center px-24 bg-[#0f172a] text-white sticky bottom-0 py-4">
+      {/* Phần Hóa đơn */}
+      <div style={{fontSize:"16px"}}className="flex flex-col items-start max-w-xl w-full">
+        <h1 className="text-3xl font-bold">HÓA ĐƠN</h1>
         {(() => {
           let string = "";
           let exist = false;
@@ -745,10 +1025,8 @@ function BottomBar({
         })()}
         {/*other*/}
         {(() => {
-          let vCount = 0,
-            cCount = 0;
-          let vExist = false,
-            cExist = false;
+          let vCount = 0;
+          let vExist = false;
           for (let i = 0; i < seatSelections.length; i++) {
             for (let j = 0; j < seatSelections[i].length; j++) {
               if (seatSelections[i][j].selected) {
@@ -757,25 +1035,13 @@ function BottomBar({
                   vCount++;
                   vExist = true;
                 }
-                if (
-                  centerX1 <= i &&
-                  i <= centerX2 &&
-                  centerY1 <= j &&
-                  j <= centerY2
-                ) {
-                  cCount++;
-                  cExist = true;
-                }
               }
             }
           }
           let string = "Khác: ";
-          if (vExist || cExist) {
+          if (vExist) {
             if (vExist) {
-              string = string.concat(`${vCount}x ghế VIP, `);
-            }
-            if (cExist) {
-              string = string.concat(`${cCount}x ghế trung tâm, `);
+              string = string.concat(`${vCount}x ghế VIP `);
             }
             return (
               <>
@@ -816,54 +1082,30 @@ function BottomBar({
           }
         })()}
       </div>
-      <div>
-        <div>
-          <h2>Tạm tính</h2>
-          {(() => {
-            let total = 0;
-            let vCount = 0,
-              cCount = 0;
-            for (let i = 0; i < ticketSelections.length; i++) {
-              total += ticketSelections[i].quantity * ticketSelections[i].price;
-            }
-            for (let i = 0; i < seatSelections.length; i++) {
-              for (let j = 0; j < seatSelections[i].length; j++) {
-                if (seatSelections[i][j].selected) {
-                  //console.log(seatSelections[i][j].seatType)
-                  if (seatSelections[i][j].seatType === "V") {
-                    vCount++;
-                  }
-                  if (
-                    centerX1 <= i &&
-                    i <= centerX2 &&
-                    centerY1 <= j &&
-                    j <= centerY2
-                  ) {
-                    cCount++;
-                  }
-                }
-              }
-            }
-            total += vCount * 20000 + cCount * 10000;
-            for (let i = 0; i < additionalItemSelections.length; i++) {
-              total +=
-                additionalItemSelections[i].quantity *
-                additionalItemSelections[i].price;
-            }
-            return total;
-          })()}
+
+      <div style={{width:"100%"}}className="flex flex-col items-end max-w-md w-full border-l-2 pl-6 py-4">
+        <div className="flex justify-between w-full ">
+          <p className="text-lg">Tạm tính</p>
+          <p className="text-xl font-bold">{calculateTotalPrice().toLocaleString()} VNĐ</p>
         </div>
-        {currentPage === 1 ? (
-          <button onClick={onPage1Submit}>Tiếp tục</button>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-            <button onClick={onReturnToPage1}>Trở lại</button>
-            <button onClick={onPage2Submit}>Xác nhận</button>
-          </div>
-        )}
+
+        <div className="w-full mt-2">
+          <CustomButton
+            defaultColor=""
+            gradientFrom="#EE772E"
+            gradientTo="#F6C343"
+            textColor="#FFFFFF"
+            hoverTextColor="#FFFFFF"
+            borderColor="#FFFFFF"
+            handleCreatePayment={handleCreatePayment} // Truyền sự kiện vào button
+            href="#"
+            className="w-full h-[40px] text-lg mt-4"
+            text={"Đặt ngay"} // Hiển thị text thay đổi khi đang xử lý
+          />
+        </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default FilmDetailPage;
