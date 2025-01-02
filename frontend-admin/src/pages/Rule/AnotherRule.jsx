@@ -14,6 +14,8 @@ import TagModal from "../../components/AnotherRule/TagModal";
 const AnotherRule = () => {
   const [tags, setTags] = useState([]);
   const [ticketTypes, setTicketTypes] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState("add");
 
@@ -95,17 +97,21 @@ const AnotherRule = () => {
       ),
     },
   ];
-  const AccountData = [
-    { id: 1, name: "Đạt", userName: "irisus", units: 230 },
-    { id: 2, name: "Điền", userName: "irisus", units: 185 },
-    { id: 3, name: "Quyền", userName: "irisus", units: 275 },
-    { id: 4, name: "Phong", userName: "irisus", units: 210 },
-    { id: 5, name: "Thịnh", userName: "irisus", units: 245 },
-    { id: 6, name: "Test", userName: "irisus", units: 195 },
-  ];
+  const fetchAccount = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/user/employee/all-account"
+      );
+      setAccounts(response.data.data);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
   const Accountcolumns = [
     { header: "Tên nhân viên", key: "name" },
-    { header: "Tên tài khoản", key: "userName" },
+    { header: "Công việc", key: "jobTitle" },
+    { header: "Số điện thoại", key: "phone" },
     {
       header: "Hành động",
       key: "actions",
@@ -113,7 +119,7 @@ const AnotherRule = () => {
         <div className="flex space-x-3">
           <button
             className="text-red-600 hover:text-red-800"
-            onClick={() => handleDelete(row)}
+            onClick={() => handleDeleteAccount(row)}
           >
             <FiTrash2 className="w-4 h-4" />
           </button>
@@ -126,6 +132,7 @@ const AnotherRule = () => {
     setLoading(true);
     fetchTags();
     fetchTicketTypes();
+    fetchAccount();
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -134,6 +141,7 @@ const AnotherRule = () => {
   useEffect(() => {
     fetchTags();
     fetchTicketTypes();
+    fetchAccount();
   }, []);
   const [activeModal, setActiveModal] = useState(""); // Xác định modal đang mở
 
@@ -181,6 +189,18 @@ const AnotherRule = () => {
     setIsConfirmModalOpen(true); // Hiển thị modal xác nhận
   };
 
+  //Xóa tìa khoản
+  const handleDeleteAccount = async (data) => {
+    setSelectedItem(data);
+    setActiveModal("Xóa tài khoản");
+    setMode("delete"); // Chế độ xóa
+    setDialogData({
+      title: "Xóa tài khoản",
+      message: "Bạn có chắc chắn muốn xóa tài khoản này?",
+    });
+    setIsConfirmModalOpen(true); // Hiển thị modal xác nhận
+  };
+
   // Xử lý lưu dữ liệu cho từng modal
   const handleConfirmClick = async () => {
     setIsConfirmModalOpen(false);
@@ -218,13 +238,20 @@ const AnotherRule = () => {
           message: `Thể loại phim mới đã được thêm thành công.`,
         });
       } else if (activeModal === "Tài khoản") {
-        if (mode === "edit") {
-          // Logic cho "edit" tài khoản
-          setDialogData({
-            title: "Cập nhật thành công",
-            message: `Tài khoản đã được cập nhật thành công.`,
-          });
-        } else {
+        {
+          console.log(selectedItem);
+          const id = selectedItem.name;
+          const requestData = {
+            account: selectedItem.username,
+            password: selectedItem.password,
+          };
+
+          // Gửi yêu cầu đến API
+          await axios.post(
+            `http://localhost:8000/api/user/employee/update-account/${id}`, // name được truyền vào param
+            requestData // Dữ liệu body
+          );
+
           // Logic cho "add" tài khoản
           setDialogData({
             title: "Thêm mới thành công",
@@ -263,6 +290,31 @@ const AnotherRule = () => {
         setDialogData({
           title: "Thành công",
           message: "Xóa thể loại phim thành công",
+        });
+        setTags((prev) => {
+          const updatedList = prev.filter(
+            (item) => item._id !== selectedItem._id
+          );
+
+          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
+          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+          if (currentPage > totalPages && totalPages > 0) {
+            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+            setCurrentPage(totalPages);
+          } else if (updatedList.length === 0) {
+            // Nếu không còn dữ liệu, quay lại trang 1
+            setCurrentPage(1);
+          }
+
+          return updatedList;
+        });
+      } else if (activeModal === "Xóa tài khoản") {
+        await axios.delete(
+          `http://localhost:8000/api/user/employee/delete-account/${selectedItem._id}`
+        );
+        setDialogData({
+          title: "Thành công",
+          message: "Xóa tài khoản thành công",
         });
         setTags((prev) => {
           const updatedList = prev.filter(
@@ -409,7 +461,7 @@ const AnotherRule = () => {
         />
         <RuleTable
           title="Tài khoản"
-          data={AccountData}
+          data={accounts}
           columns={Accountcolumns}
           onAddNew={handleAddNew}
           currentPage={currentPage}

@@ -87,23 +87,21 @@ const AdminFilm = () => {
 
   const handleDeleteConfirm = async () => {
     setIsConfirmDialogOpen(false);
-    try{
-      const response = await axios.post(`http://localhost:8000/api/films/mark-deleted/${itemToDelete._id}`);
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/films/mark-deleted/${itemToDelete._id}`
+      );
       await fetchFilms();
       setIsSuccessDialogOpen(true);
       setDialogData({
         title: "Thành công",
         message: "Xóa phim thành công",
       });
-      
-    }
-    catch(err){
-
-    }
-    
+    } catch (err) {}
   };
 
   const handleCloseModal = () => {
+    fetchFilms();
     setIsModalOpen(false);
     setSelectedFilm(null);
   };
@@ -125,7 +123,7 @@ const AdminFilm = () => {
   const handleRestoreClick = async (row) => {
     await axios.post(`http://localhost:8000/api/films/restore/${row._id}`);
     await fetchFilms();
-  }
+  };
   const columns = [
     { header: "Tên phim", key: "name" },
     { header: "Thời lượng", key: "filmDuration" },
@@ -163,7 +161,6 @@ const AdminFilm = () => {
           )}
         </div>
       ),
-      
     },
   ];
 

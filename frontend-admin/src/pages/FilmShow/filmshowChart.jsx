@@ -100,6 +100,12 @@ const FilmShowChart = () => {
       .padStart(2, "0")}`;
   };
 
+  const formatTime2 = (index) => {
+    const hour = Math.floor(index / 2); // Chuyển chỉ số thành giờ
+    const minute = index % 2 === 0 ? "00" : "30"; // Kiểm tra nếu là mốc 0.5 (ví dụ 1:30)
+    return `${hour.toString().padStart(2, "0")}:${minute}`;
+  };
+
   const formatDuration = (duration) => {
     const hours = Math.floor(duration);
     const minutes = Math.round((duration - hours) * 60);
@@ -166,7 +172,7 @@ const FilmShowChart = () => {
                     key={i}
                     className="flex-shrink-0 w-[50px] text-sm text-gray-600 text-center"
                   >
-                    {formatTime(Math.floor(i / 2), (i % 2) * 30)}
+                    {formatTime2(i)}
                   </div>
                 ))}
               </div>
@@ -261,10 +267,6 @@ const FilmShowChart = () => {
               <p>Ngày: {selectedEvent.date}</p>
               <p>
                 Time: {formatTime(selectedEvent.startTime, 0)} -{" "}
-                {/* {formatTime(
-                  selectedEvent.startTime + Math.floor(selectedEvent.duration),
-                  Math.round((selectedEvent.duration % 1) * 60)
-                )} */}
                 {formatTime(selectedEvent.startTime + selectedEvent.duration)}
               </p>
               <p>Thời lượng: {formatDuration(selectedEvent.duration)}</p>

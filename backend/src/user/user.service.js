@@ -407,12 +407,9 @@ export class EmployeeService {
   };
 
   static updateEmployeeAccount = async (id, accountInfo) => {
-    const { account, password, confirmPassword } = accountInfo;
-    if (!account || !password || !confirmPassword) {
+    const { account, password } = accountInfo;
+    if (!account || !password) {
       throw customError("Vui lòng nhập đầy đủ các trường");
-    }
-    if (password !== confirmPassword) {
-      throw customError("Mật khẩu và xác nhận mật khẩu không khớp");
     }
     const employee = await userModel.findById(id);
     if (!employee) {

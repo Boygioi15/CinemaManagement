@@ -4,16 +4,19 @@ import { FiMenu } from "react-icons/fi";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
   const location = useLocation(); // Lấy đường dẫn hiện tại
-  
+
   useEffect(() => {
-    console.log(location.pathname);
-  }, [location.pathname]);
+    const currentTab = tabs.find((tab) => tab.path === location.pathname);
+    if (currentTab) {
+      document.title = currentTab.name; // Đặt title của trang theo tên tab
+    }
+  }, [location.pathname, tabs]);
 
   return (
     <div
       className={`${
         isSidebarOpen ? "w-64" : "w-20"
-      } bg-white shadow-lg transition-all duration-300 ease-in-out`}
+      } bg-white shadow-lg transition-all duration-300 ease-in-out h-screen overflow-y-auto`}
     >
       <div className="flex items-center justify-between p-4 border-b">
         <h1
