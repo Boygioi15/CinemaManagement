@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 export class UserService {
   static findUserByEmail = async (email) => {
     return await userModel.findOne({
-      email,
+      email: email,
       blocked: false,
       role: "user",
     });
@@ -16,13 +16,14 @@ export class UserService {
 
   static findUserByPhone = async (phone) => {
     return await userModel.findOne({
-      phone,
+      phone: phone,
       blocked: false,
       role: "user",
     });
   };
 
   static async findUserByIdentifier(identifier) {
+    console.log(identifier);
     return await userModel
       .findOne({
         $and: [
@@ -54,8 +55,22 @@ export class UserService {
   };
 
   static createUser = async (userdata) => {
-    const { name, birthDate, email, phone, account, password } = userdata;
+    const {
+      name,
+      birthDate,
+      email,
+      phone,
+      account,
+      password,
+      confirmPassword,
+    } = userdata;
 
+    if (password != confirmPassword) {
+      throw customError("Mật khẩu và xác nhận mật khẩu không khớp");
+    }
+    if (password.leghth < 7) {
+      throw customError("Mật khẩu phải có ít nhất 7 kí tự");
+    }
     if (!name || !birthDate || !email || !phone || !account || !password) {
       return {
         error: "Chưa điền đẩy đủ các trường!",
@@ -75,9 +90,10 @@ export class UserService {
         error: "Email đã được đăng ký!",
       };
     }
-    if (await userModel.findOne({ account: account })) {
+    if (await userModel.findOne({ account: account, role: "user" })) {
       throw customError("Tài khoản đã được đăng ký!");
     }
+
     userdata.role = "user";
     return await userModel.create(userdata);
   };
@@ -176,7 +192,12 @@ export class UserService {
     id,
     { oldPassword, newPassword, confirmNewPassword }
   ) => {
-    const user = await userModel.findById(id, { role: "user" }).lean();
+    const user = await userModel
+      .findOne({
+        _id: id,
+        role: "user",
+      })
+      .lean();
     if (!user) throw customError("Không tìm thấy người dùng");
 
     const checkPassword = await User_AuthService.checkPassword(

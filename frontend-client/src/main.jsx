@@ -20,10 +20,10 @@ import { AuthProvider } from "./Context/AuthContext";
 import HomePage from "./pages/HomePage/HomePage";
 import SearchPage from "./pages/SearchPage/SearchPage";
 import ShowTimePage from "./pages/ShowTimePage/ShowTimePage";
-import NotFoundPage from "./pages/NotFound";
+import ErrorPage from "./pages/ErrorPage";
 import OrderFailPage from "./pages/OrderFailed";
 import OrderSuccessPage from "./pages/OrderSuccess";
-import ErrorPage from "./pages/ErrorPage";
+import RulePage from "./pages/RulePage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -33,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <HomePage />,
+      },
+      {
+        path: "rule",
+        element: <RulePage />,
       },
       {
         path: "auth",
@@ -97,9 +101,9 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "*", // wildcard cho tất cả đường dẫn không khớp
-    element: <NotFoundPage />,
-  },
+    path:"*",
+    element: <ErrorPage />,
+  }
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -108,7 +112,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </AuthProvider>
     <ToastContainer
       position="top-right"
-      autoClose={1000}
+      autoClose={3000}
       hideProgressBar={false}
       newestOnTop={false}
       closeButton={true}

@@ -12,6 +12,7 @@ const CustomButton = ({
   className,
   text, // Văn bản của button
   handleCreatePayment, // Hàm xử lý thanh toán
+  onClick,
   disabled, // Trạng thái disabled
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -27,7 +28,10 @@ const CustomButton = ({
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCreatePayment} // Gọi sự kiện khi click
+      onClick={()=>{
+        handleCreatePayment && handleCreatePayment()
+        onClick && onClick()
+      }} // Gọi sự kiện khi click
     >
       <div
         className="button-background-default"

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { NotifyRuleModal } from "./Modal/Modal";
+import CustomButton from "./button";
 
 const SignUpComponent = ({
   title,
@@ -13,6 +15,7 @@ const SignUpComponent = ({
   onSubmit,
   bottomLink,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formValues, setFormValues] = useState({});
   useEffect(() => {
     if (fields && fields.length > 0) {
@@ -42,8 +45,8 @@ const SignUpComponent = ({
   };
 
   return (
-    <div className="flex items-center w-[600px]">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded-b-lg   w-[600px] shadow-lg">
+    <div className="flex items-center w-[500px]">
+      <div className="bg-white text-black p-5 rounded-b-lg   w-[600px] shadow-lg">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
@@ -111,20 +114,25 @@ const SignUpComponent = ({
         )}
 
         {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          className="w-full p-2 bg-yellow-400 rounded-md text-lg font-bold cursor-pointer hover:bg-yellow-500 mt-3"
-        >
-          {buttontitle}
-        </button>
-
+        <CustomButton
+          defaultColor="#F3EA28" /* Default background color */
+          gradientFrom="#663399" /* Gradient start color */
+          gradientTo="#3366CC" /* Gradient end color */
+          textColor="#000000" /* Text color */
+          hoverTextColor="#FFFFFF" /* Text color on hover */
+          
+          text="Đăng kí"
+          
+          onClick={()=>setIsModalOpen(true)}     
+          className={"w-full mt-5"}   
+        />
         {/* bottom link */}
         {bottomLink && (
           <div className="mt-4 text-center">
             <span className="text-base text-gray-700">
               {bottomLink.text}{" "}
               <span
-                onClick={bottomLink.onClick}
+                onClick={()=>console.log(bottomLink.onClick.switchToLogin())}
                 className="text-black underline hover:underline cursor-pointer"
                 onMouseOver={(e) => (e.currentTarget.style.color = "purple")}
                 onMouseOut={(e) => (e.currentTarget.style.color = "black")}
@@ -135,6 +143,10 @@ const SignUpComponent = ({
           </div>
         )}
       </div>
+      {isModalOpen && <NotifyRuleModal isOpen={isModalOpen} onClose={()=>{
+        setIsModalOpen(false)
+        handleSubmit()
+        }}/>}
     </div>
   );
 };

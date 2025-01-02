@@ -38,3 +38,29 @@ body {
   font-weight: normal;
   font-style: normal;
 }
+
+.RulePage{
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+}
+.RulePage .wrapper{
+  max-width: 1000px;
+  align-self: center;
+  text-justify: auto;
+}
+.RulePage h1{
+  text-align: center;
+  font-size: xx-large;
+  font-weight: bold;
+  color: #F3EA28;
+}
+.RulePage h2{
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+  margin: 10px;
+}
+.RulePage br{
+  margin: 10px;
+}

@@ -3,12 +3,12 @@ import { userController, employeeController } from "./user.controller.js";
 
 const router = express.Router();
 
-router.post("/user/", userController.createUser);
-router.put("/user/:_id", userController.updateUser);
-router.delete("/user/:_id", userController.deleteUser);
+router.post("/user", userController.createUser);
+router.put("/user/:id", userController.updateUser);
+router.delete("/user/:id", userController.deleteUser);
 router.get("/user/", userController.getAllUsers);
 // router.post("/user/reset-password", userController.resetPassword);
-// router.post("/user/change-password/:id", userController.changePassword);
+router.post("/user/change-password/:id", userController.changePassword);
 
 router.post("/employee/", employeeController.createEmployee);
 router.put("/employee/:id", employeeController.updateEmployee);

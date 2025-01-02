@@ -48,3 +48,7 @@
   position: relative;
   z-index: 2; /* Ensure text is above the background */
 }
+
+.hoverText:hover{
+  color: #F3EA28;
+}

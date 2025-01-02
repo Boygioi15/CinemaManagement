@@ -29,7 +29,8 @@ export class AdditionalItemService {
       .find({
         deleted: false,
       })
-      .lean();
+      .lean()
+      .sort({ createdAt: -1 });
 
     return items;
   };

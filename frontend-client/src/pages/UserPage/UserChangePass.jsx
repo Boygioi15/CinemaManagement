@@ -46,10 +46,10 @@ const UserChangePass = () => {
   return (
     <UserInfoLayout>
       <div className="flex w-full flex-col ">
-        <div className="py-5 text-2xl text-white">ĐỔI MẬT KHẨU</div>
+        <div className=" text-2xl text-white"></div>
         {/* Main Content */}
         <UserChangePassComponent
-          title="Thông tin khách hàng"
+          title="Đổi mật khẩu"
           layout="row"
           fields={fields}
           buttontitle="Đổi mật khẩu"

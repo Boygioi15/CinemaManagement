@@ -34,7 +34,7 @@ const UserInfoLayout = ({ children }) => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 text-xl overflow-y-auto w-full  rounded-lg shadow-md p-4">
+        <div style={{maxWidth:"800px", display:"flex",flexDirection:"row",gap:"40px"}}className="flex-1 text-xl overflow-y-auto w-full  rounded-lg shadow-md ">
           {children}
         </div>
       </div>

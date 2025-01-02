@@ -22,7 +22,7 @@ export class User_AuthService {
     if (existingUserEmail) {
       throw customError("Email đã được đăng ký!", 400);
     }
-
+    userdata.role = "user";
     return await userModel.create(userdata);
   };
 
@@ -31,7 +31,7 @@ export class User_AuthService {
     if (!user) {
       throw customError("User not found", 400);
     }
-    const isMatch = AuthService.checkPassword(userPass, user.password);
+    const isMatch = User_AuthService.checkPassword(userPass, user.password);
     if (!isMatch) {
       throw customError("Password is incorrect", 400);
     }
@@ -81,6 +81,7 @@ export class User_AuthService {
   };
 
   static checkPassword = (inputPassword, hashPassword) => {
+    console.log(inputPassword, hashPassword);
     return bcrypt.compareSync(inputPassword, hashPassword); // true
   };
 

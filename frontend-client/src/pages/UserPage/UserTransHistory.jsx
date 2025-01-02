@@ -41,7 +41,7 @@ const UserTransHistory = () => {
   return (
     <UserInfoLayout>
       <div className="flex w-full flex-col">
-        <div className="py-5 text-2xl text-white">LỊCH SỬ GIAO DỊCH</div>
+        <div className=" text-2xl text-white"></div>
         <Table headers={headers} data={data} />
       </div>
     </UserInfoLayout>

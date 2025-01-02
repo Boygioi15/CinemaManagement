@@ -1,7 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useRouteError } from "react-router-dom";
 
-const NotFoundPage = (error) => {
+const ErrorPage = () => {
+  const error = useRouteError();
   if(error){
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
@@ -9,10 +10,10 @@ const NotFoundPage = (error) => {
           <h1 className="text-6xl font-bold text-red-500 mb-4">Có lỗi không mong muốn xảy ra!</h1>
           <div className="space-y-4">
             <h2 className="text-3xl font-semibold text-white mb-2">
-              {error}
+              Lỗi: {error.toString()}
             </h2>
             <p className="text-gray-300 text-lg max-w-md mx-auto">
-              Hãy liên hệ với 0373865627 Ta trở lại nhé!
+              Đây là một lỗi ngoài ý muốn. <br /> Mong bạn hãy liên hệ với <b>0373865627</b> để được hỗ trợ.
             </p>
             <Link
               to="/"
@@ -28,6 +29,7 @@ const NotFoundPage = (error) => {
           </div>
         </div>
       </div>
+    )
   }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
@@ -57,4 +59,4 @@ const NotFoundPage = (error) => {
   );
 };
 
-export default NotFoundPage;
+export default ErrorPage;

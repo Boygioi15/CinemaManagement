@@ -6,7 +6,7 @@ const Sidebar = ({ userName, menuItems }) => {
   const location = useLocation();
 
   return (
-    <div className="bg-blue-600 text-white rounded-lg p-6 ">
+    <div style={{fontSize:"18px"}}className="bg-blue-600 text-white rounded-lg p-6 ">
       {/* User Profile Header */}
       <div className="mb-6">
         <div className="flex items-center space-x-3">
@@ -18,7 +18,7 @@ const Sidebar = ({ userName, menuItems }) => {
             />
           </div>
           <div>
-            <p className="font-medium text-lg">{userName}</p>
+            <p  style={{fontSize:"20px"}} className="font-medium text-lg">{userName}</p>
           </div>
         </div>
       </div>

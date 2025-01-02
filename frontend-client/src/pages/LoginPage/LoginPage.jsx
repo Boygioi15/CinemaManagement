@@ -20,7 +20,7 @@ function ParentForm() {
     );
   }
   return (
-    <div className="authForm w-[800px]">
+    <div className="authForm w-[500px]">
       <div className="authForm-title">
         <button
           onClick={() => {
@@ -29,8 +29,9 @@ function ParentForm() {
           className={`w-1/2 py-2 text-center font-bold rounded-t-lg transition-all ${
             display
               ? "bg-white text-black"
-              : "bg-[#2A246D] text-white hover:bg-[#3B337E]"
+              : "bg-[#2A246D] text-white hover:bg-[#  ]"
           }`}
+          style={{padding:"15px"}}
         >
           Đăng nhập
         </button>
@@ -43,6 +44,7 @@ function ParentForm() {
               ? "bg-white text-black"
               : "bg-[#2A246D] text-white hover:bg-[#3B337E]"
           }`}
+          style={{padding:"15px"}}
         >
           Đăng ký
         </button>
@@ -75,16 +77,14 @@ function LoginForm() {
   const fields = [
     {
       for: "identifier",
-      text: "Tài khoản, Email hoặc số điện thoại *",
+      text: "Tài khoản, Email hoặc số điện thoại ",
       type: "text",
-      placeholder: "irsus123",
       required: true,
     },
     {
       for: "userPass",
-      text: "Mật khẩu *",
+      text: "Mật khẩu ",
       type: "password",
-      placeholder: "abc",
       required: true,
     },
   ];
@@ -116,56 +116,49 @@ function SignUpForm({ switchToLogin, setDisplay }) {
   const fields = [
     {
       for: "name",
-      text: "Họ và tên *",
+      text: "Họ và tên ",
       type: "text",
-      placeholder: "Họ và tên",
       required: true,
     },
     {
       for: "birthDate",
-      text: "Ngày sinh *",
+      text: "Ngày sinh ",
       type: "date",
-      placeholder: "abc",
       required: true,
     },
     {
       for: "phone",
-      text: "Số điện thoại *",
+      text: "Số điện thoại ",
       type: "text",
-      placeholder: "012...",
       required: true,
     },
     {
       for: "account",
-      text: "Tên đăng nhập *",
+      text: "Tên đăng nhập ",
       type: "text",
-      placeholder: "abc",
       required: true,
     },
     {
       for: "email",
-      text: "Email *",
+      text: "Email ",
       type: "email",
-      placeholder: "abc",
       required: true,
     },
     {
       for: "password",
-      text: "Mật khẩu *",
+      text: "Mật khẩu ",
       type: "password",
-      placeholder: "abc",
       required: true,
     },
     {
       for: "confirmPassword",
-      text: "Xác thực mật khẩu *",
+      text: "Xác nhận mật khẩu ",
       type: "password",
-      placeholder: "abc",
       required: true,
     },
   ];
   return (
-    <div className=" w-[600px]">
+    <div className=" w-[500px]">
       <SignUpComponent
         fields={fields}
         layout=""
@@ -184,21 +177,20 @@ function SignUpForm({ switchToLogin, setDisplay }) {
 export default function LoginPage() {
   return (
     <div
-      className="min-h-screen m-0 overflow-y-auto font-sans text-white  bg-gradient-to-b flex-col bg-contain text-xl"
+      className=" m-0 overflow-y-auto font-sans text-white  bg-gradient-to-b flex-col bg-contain text-xl"
       style={{
         backgroundImage: "url('/Images/image 1.svg')",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         backgroundColor: "#14102c",
+        backgroundSize: "cover",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "1000px",
       }}
     >
-      <div className="">
-        <div className="h-3/5">
-          <div className="w-[600px] flex items-center ml-40 mt-20 mb-20">
-            <ParentForm />
-          </div>
-        </div>
-      </div>
+      <ParentForm />
     </div>
   );
 }

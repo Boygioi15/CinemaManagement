@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { resetPassword } from "../../config/api";
 import { toast } from "react-toastify";
+import background from "../../assets/fg_background.png";
 
 function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -48,12 +49,15 @@ function ForgotPasswordPage() {
 
   return (
     <div
-      className="min-h-screen m-0 overflow-y-auto font-sans text-white bg-gradient-to-b from-[#0b0d1c] to-[#1a1a2e]"
+      className="font-sans text-white"
       style={{
-        backgroundColor: "#14102c",
+        backgroundImage: `url(${background})`,
+        backgroundSize: "cover",
+        height: "1000px",
+        paddingTop: "200px"
       }}
     >
-      <div className="min-h-screen flex items-center justify-center">
+      <div  className=" flex items-center justify-center">
         <div className="text-white rounded-lg shadow-xl p-10 max-w-xl w-full">
           <h2 className="text-4xl font-bold mb-6 text-center">Quên mật khẩu</h2>
           <p className="text-center text-lg mb-8">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { updateUser } from "../config/api";
 import { useAuth } from "../Context/AuthContext";
 import { toast } from "react-toastify";
-
+import CustomButton from "./button";
 const UserInforComponent = ({ title, fields, buttontitle, onSubmit }) => {
   const [formValues, setFormValues] = useState({});
   const { user, handleAccount } = useAuth();
@@ -35,8 +35,8 @@ const UserInforComponent = ({ title, fields, buttontitle, onSubmit }) => {
   };
 
   return (
-    <div className="flex items-center w-full">
-      <div className="bg-white bg-opacity-90 text-black p-5 rounded w-full shadow-lg">
+    <div className="flex items-center w-full">    
+      <div className="bg-white  text-black p-5 rounded w-full shadow-lg">
         <h1 className="text-center mb-5 text-2xl font-bold">{title}</h1>
 
         {/* Render fields dynamically */}
@@ -62,12 +62,17 @@ const UserInforComponent = ({ title, fields, buttontitle, onSubmit }) => {
         </div>
 
         {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          className="w-full p-2 bg-yellow-400 rounded-md text-lg font-bold cursor-pointer hover:bg-yellow-500 mt-3"
-        >
-          {buttontitle}
-        </button>
+        <CustomButton
+          defaultColor="#F3EA28" /* Default background color */
+          gradientFrom="#663399" /* Gradient start color */
+          gradientTo="#3366CC" /* Gradient end color */
+          textColor="#000000" /* Text color */
+          hoverTextColor="#FFFFFF" /* Text color on hover */
+          
+          text="Cập nhật thông tin"
+          onClick={handleSubmit}          
+          className={"w-full mt-4"}  
+        />
       </div>
     </div>
   );

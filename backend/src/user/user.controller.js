@@ -1,7 +1,7 @@
 import { customError } from "../middlewares/errorHandlers.js";
 import { UserService, EmployeeService } from "./user.service.js";
 import expressAsyncHandler from "express-async-handler";
-
+import validator from "validator";
 class UserController {
   createUser = expressAsyncHandler(async (req, res, next) => {
     const createdUser = await UserService.createUser(req.body);
@@ -19,11 +19,22 @@ class UserController {
   });
 
   updateUser = expressAsyncHandler(async (req, res, next) => {
-    const { _id } = req.params;
+    const { id } = req.params;
+    const { email, phone, name, birthDate } = req.body;
+    console.log(req.body);
+    if (!email || !phone || !name || !birthDate) {
+      throw customError("Vui lòng điền đầy đủ các trường", 400);
+    }
+    if (!validator.isEmail(email)) {
+      throw customError("Email không hợp lệ", 400);
+    }
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      throw customError("Số điện thoại không hợp lệ", 400);
+    }
+    const updatedUser = await UserService.updateUserById(id, req.body);
 
-    const updatedUser = await UserService.updateUserById(_id, req.body);
-
-    if (updatedUser?.error) {
+    if (!updatedUser) {
       return res.status(400).json({
         msg: updatedUser.error,
         success: false,

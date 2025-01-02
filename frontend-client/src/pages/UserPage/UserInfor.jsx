@@ -26,10 +26,10 @@ const UserInfoPage = () => {
           required: true,
         },
         {
-          for: "birth",
+          for: "birthDate",
           text: "Ngày sinh",
           type: "date",
-          value: convertDateToISO(user.birth) || "",
+          value: convertDateToISO(user.birthDate) || "",
           required: true,
         },
         {
@@ -55,7 +55,6 @@ const UserInfoPage = () => {
   return (
     <UserInfoLayout>
       <div className="flex w-full flex-col ">
-        <div className="py-5 text-2xl">THÔNG TIN KHÁCH HÀNG</div>
         <UserInforComponent
           title="Thông tin khách hàng"
           fields={fields}
