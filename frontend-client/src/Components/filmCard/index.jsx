@@ -100,7 +100,7 @@ const FilmCard = ({
           >
             <div className="flex flex-col items-start justify-start px-[38px] space-y-4 text-left w-full">
               <h3 className="mb-3 text-lg">
-                {name} ({ageLimit})
+                {name}
               </h3>
               <p className="flex items-center mt-2">
                 <FaTag className="w-5 h-5 mr-2 align-middle" />

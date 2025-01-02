@@ -105,9 +105,6 @@ const RootLayout = () => {
       if(roleList.includes("additional_item")){
         updatedTab.push(otherProductTab);
       }
-      if(roleList.includes("use_account")){
-        updatedTab.push(accountTab);
-      }
       if(roleList.includes("admin_param")){
         updatedTab.push(otherRuleTab);
       }
@@ -121,6 +118,7 @@ const RootLayout = () => {
     }
   }
   useEffect(()=>{()=>
+    console.log("Hi")
     fetchRole()},[signInNotification]
   )
   useEffect(()=>{

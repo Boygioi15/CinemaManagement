@@ -1,7 +1,6 @@
 import FoodCard from "./FoodCard/FoodCard";
 
 const FoodSection = ({ foods, setSelectedFood, selectedFood }) => {
-  throw new Error("Hello")
   return (
     <div className="flex flex-col justify-center items-center">
       <h1 className="font-interExtraBold">COMBO</h1>

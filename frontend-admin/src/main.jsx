@@ -100,6 +100,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/auth",
     element: <LoginPage />,
+    index: true
   },
   {
     path: "/admin/auth/forgot-pass",

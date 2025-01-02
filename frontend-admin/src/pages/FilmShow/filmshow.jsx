@@ -119,7 +119,6 @@ const FilmShow = () => {
     { header: "Ngày chiếu", key: "showDate" },
     { header: "Suất chiếu", key: "showTime" },
     { header: "Phòng", key: "room" },
-    { header: "Ghế đã đặt", key: "lockedSeats" },
     {
       header: "Trạng thái",
       key: "status",
@@ -264,7 +263,6 @@ const FilmShow = () => {
                   <option value="Đã hủy">Đã hủy</option>
                   <option value="Đã chiếu">Đã chiếu</option>
                   <option value="Chưa chiếu">Chưa chiếu</option>
-                  <option value="Đang chiếu">Đang chiếu</option>
                 </select>
               </div>
             </div>

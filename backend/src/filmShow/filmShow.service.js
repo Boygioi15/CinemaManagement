@@ -110,9 +110,7 @@ export class FilmShowService {
       })
       .populate({
         path: "film",
-      })
-      .lean();
-
+      });
     const uniqueFilms = [];
 
     filmShows.forEach((filmShow) => {
@@ -174,7 +172,8 @@ export class FilmShowService {
         },
       })
       .select("showDate")
-      .lean();
+      .lean()
+      .sort({ showDate: 1 });
 
     const arrayShowDates = filmShows.map((item) => item.showDate);
     const uniqueShowDates = [
@@ -290,7 +289,7 @@ export class FilmShowService {
   });
 
   static getAllFilmShows = async () => {
-    const filmShows = await filmShowModel.find({});
+    const filmShows = await filmShowModel.find({}).sort({ createdAt: -1 });
     return filmShows;
   };
 

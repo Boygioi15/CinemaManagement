@@ -128,16 +128,11 @@ const ShowTimePage = () => {
               }
             }}
           >
-            <option value="">Chọn tất cả </option>
+            <option value=""> Chọn tất cả </option>
             {optionFilms?.map((film) => {
               return (
                 <option value={JSON.stringify(film)}>
-                  {film.name +
-                    " (" +
-                    film?.ageRestriction +
-                    ")" +
-                    " " +
-                    film?.voice}
+                  {film.name}
                 </option>
               );
             })}
@@ -161,12 +156,7 @@ const ShowTimePage = () => {
 
                 <div className="mt-4">
                   <h3 className="text-2xl font-bold">
-                    {filmDetail.name +
-                      " (" +
-                      filmDetail?.ageRestriction +
-                      ")" +
-                      " " +
-                      filmDetail?.voice}
+                    {filmDetail.name}
                   </h3>
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center">
@@ -208,7 +198,7 @@ const ShowTimePage = () => {
                           <>
                             <div className="space-y-4 text-xl">
                               <div className="text-xl text-gray-400 mb-2 ">
-                                Thể loại chiếu: {value.filmType}
+                                Suất chiếu: {value.filmType}
                               </div>
                               <div className="flex flex-wrap gap-4 pb-4">
                                 {value.showTimes.map((time) => (
@@ -249,12 +239,7 @@ const ShowTimePage = () => {
 
               <div className="mt-4">
                 <h3 className="text-2xl font-bold">
-                  {selectedFilm.name +
-                    " (" +
-                    selectedFilm?.ageRestriction +
-                    ")" +
-                    " " +
-                    selectedFilm?.voice}
+                  {selectedFilm.name}
                 </h3>
                 <div className="mt-2 space-y-1">
                   <div className="flex items-center">
@@ -289,7 +274,7 @@ const ShowTimePage = () => {
             <div className="md:col-span-3 space-y-6">
               <div className=" rounded-lg p-4 border border-white-400 ">
                 <div className="flex items-center mb-4"></div>
-                <div className="space-y-4 text-xl">Chưa có xuất chiếu</div>
+                <div className="space-y-4 text-xl">Chưa có suất chiếu</div>
               </div>
             </div>
           </div>
