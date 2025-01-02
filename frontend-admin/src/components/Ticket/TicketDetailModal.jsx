@@ -47,6 +47,26 @@ const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
                   </span>
                 )}
               </div>
+              <div>
+                {order.invalidReason_Printed && (
+                  <>
+                    <p className="text-sm text-gray-500">Lý do từ chối in</p>
+                    <p className="font-semibold">
+                      {order.invalidReason_Printed}
+                    </p>
+                  </>
+                )}
+                {order.invalidReason_Served && (
+                  <>
+                    <p className="text-sm text-gray-500">
+                      Lý do từ chối phục vụ
+                    </p>
+                    <p className="font-semibold">
+                      {order.invalidReason_Served}
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <hr className="border-gray-200" />
