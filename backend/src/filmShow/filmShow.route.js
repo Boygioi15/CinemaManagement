@@ -16,5 +16,5 @@ router.post(
   "/get-film-available-by-date",
   filmShowController.getAvailableFilmByDate
 );
-router.post("/cancel-filmShow", filmShowController.cancelFilmShow);
+router.post("/cancel-filmShow/:id", filmShowController.cancelFilmShow);
 export default router;

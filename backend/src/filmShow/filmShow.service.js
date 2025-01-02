@@ -394,8 +394,7 @@ export class FilmShowService {
     };
   };
   static cancelFilmShow = async (filmShowId) => {
-    return await filmShowModel.findByIdAndUpdate({
-      filmShowId,
+    return await filmShowModel.findByIdAndUpdate(filmShowId, {
       cancelled: true,
     });
   };
