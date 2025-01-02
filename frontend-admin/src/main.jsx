@@ -30,6 +30,35 @@ import RoomCreate from "./pages/CreateRoom/RoomCreate";
 import OffLineTicketBooking from "./pages/OfflineTicketBooking/OfflineTicketBooking";
 import ViewRoompage from "./pages/ViewRoomPage/ViewRoomPage";
 import { AuthProvider } from "./contexts/AuthContext";
+
+import { FiShield } from "react-icons/fi";
+import ReactDOMServer from "react-dom/server";
+
+const generateIconURL = () => {
+  const svgString = ReactDOMServer.renderToString(<FiShield size={64} />);
+  const blob = new Blob([svgString], { type: "image/svg+xml" });
+  return URL.createObjectURL(blob);
+};
+
+// Thiết lập icon cho trang web
+const setDynamicIcon = () => {
+  const iconURL = generateIconURL();
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/svg+xml"; // Dùng SVG làm favicon
+  link.href = iconURL;
+
+  // Xóa icon cũ nếu có
+  const existingLink = document.querySelector("link[rel='icon']");
+  if (existingLink) {
+    document.head.removeChild(existingLink);
+  }
+
+  // Thêm icon mới
+  document.head.appendChild(link);
+};
+
+setDynamicIcon();
 const router = createBrowserRouter([
   {
     path: "/",
@@ -123,6 +152,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
-    </AuthProvider>  
+    </AuthProvider>
   </React.StrictMode>
 );
