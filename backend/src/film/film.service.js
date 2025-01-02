@@ -1,15 +1,9 @@
 import filmModel from "./film.schema.js";
-import {
-  AgeRestrictionModel
-} from "../param/param.schema.js";
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
+import { AgeRestrictionModel } from "../param/param.schema.js";
+import { customError } from "../middlewares/errorHandlers.js";
 import mongoose from "mongoose";
 import tagModel from "../tag/tag.schema.js";
-import {
-  handleDestroyCloudinary
-} from "../ulitilities/cloudinary.js";
+import { handleDestroyCloudinary } from "../ulitilities/cloudinary.js";
 
 export class FilmService {
   // Hàm kiểm tra ageValue và ageSymbol
@@ -51,8 +45,8 @@ export class FilmService {
     const tagsInDB = await tagModel
       .find({
         _id: {
-          $in: tagIDs
-        }
+          $in: tagIDs,
+        },
       })
       .select("_id");
     // Compare the number of matching tags with the input tagIDs
@@ -77,12 +71,7 @@ export class FilmService {
 
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
-    const {
-      tagsRef,
-      ageRestriction,
-      twoDthreeD,
-      ...rest
-    } = filmData;
+    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
     const tagsArray = JSON.parse(tagsRef);
     //console.log(filmData);
     // Kiểm tra tuổi
@@ -107,35 +96,54 @@ export class FilmService {
       .findById(filmId)
       .populate("tagsRef", "name -_id")
       .select("-createdAt -updatedAt -deleted -__v");
-    if (!filmFound) throw customError("Film not found", 400);
+    if (!filmFound) return null;
     return filmFound;
   };
 
   static getAllFilm = async () => {
+    return await filmModel
+      .find()
+      .sort({ deleted: 1, createdAt: -1 }) // Prioritize `deleted: false`, then sort by `createdAt`
+      .lean();
+  };
+  static getAllFilmNotDeleted = async () => {
     return await filmModel.find({
-      deleted: false
+      deleted: false,
     });
   };
-
   // Xóa một bộ phim
   static deleteFilmById = async (filmId) => {
+    const oldFilm = await filmModel.findById(filmId);
+    console.log(oldFilm);
     return await filmModel.findByIdAndUpdate(
-      filmId, {
-        deleted: true
-      }, {
-        new: true
+      filmId,
+      {
+        name: "(Đã xóa)" + oldFilm.name,
+        deleted: true,
+      },
+      {
+        new: true,
+      }
+    );
+  };
+  static restoreFilmById = async (filmId) => {
+    const oldFilm = await filmModel.findById(filmId);
+    console.log(oldFilm);
+    return await filmModel.findByIdAndUpdate(
+      filmId,
+      {
+        name: oldFilm.name.replace(/^\(Đã xóa\)\s*/, ""),
+        deleted: false,
+      },
+      {
+        new: true,
       }
     );
   };
 
   // Tương tự, cập nhật updateFilmById
   static updateFilmById = async (filmId, updateData) => {
-    const {
-      tagsRef,
-      ageRestriction,
-      twoDthreeD,
-      ...rest
-    } = updateData;
+    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = updateData;
     const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);
@@ -151,45 +159,47 @@ export class FilmService {
     handleDestroyCloudinary(oldFilm.public_ID);
   };
 
-  static async searchFilms(keyword = '', page = 1, limit = 3) {
+  static async searchFilms(keyword = "", page = 1, limit = 3) {
     try {
       if (!keyword.trim()) {
-        throw new Error('Search keyword is required');
+        throw new Error("Search keyword is required");
       }
 
       const skip = (page - 1) * limit;
 
-      const pipeline = [{
+      const pipeline = [
+        {
           $lookup: {
-            from: 'tags',
-            localField: 'tagsRef',
-            foreignField: '_id',
-            as: 'tags'
-          }
+            from: "tags",
+            localField: "tagsRef",
+            foreignField: "_id",
+            as: "tags",
+          },
         },
         {
           $match: {
             deleted: false,
-            $or: [{
+            $or: [
+              {
                 name: {
                   $regex: keyword,
-                  $options: 'i'
-                }
+                  $options: "i",
+                },
               },
               {
                 filmContent: {
                   $regex: keyword,
-                  $options: 'i'
-                }
+                  $options: "i",
+                },
               },
               {
-                'tags.name': {
+                "tags.name": {
                   $regex: keyword,
-                  $options: 'i'
-                }
-              }
-            ]
-          }
+                  $options: "i",
+                },
+              },
+            ],
+          },
         },
         {
           $project: {
@@ -206,35 +216,37 @@ export class FilmService {
             voice: 1,
             tags: {
               _id: 1,
-              name: 1
-            }
-          }
+              name: 1,
+            },
+          },
         },
         {
           $facet: {
-            metadata: [{
-                $count: 'total'
+            metadata: [
+              {
+                $count: "total",
               },
               {
                 $addFields: {
                   currentPage: page,
                   totalPages: {
                     $ceil: {
-                      $divide: ['$total', limit]
-                    }
-                  }
-                }
-              }
+                      $divide: ["$total", limit],
+                    },
+                  },
+                },
+              },
             ],
-            films: [{
-                $skip: skip
+            films: [
+              {
+                $skip: skip,
               },
               {
-                $limit: limit
-              }
-            ]
-          }
-        }
+                $limit: limit,
+              },
+            ],
+          },
+        },
       ];
 
       const [result] = await filmModel.aggregate(pipeline);
@@ -244,13 +256,11 @@ export class FilmService {
         metadata: result.metadata[0] || {
           total: 0,
           currentPage: page,
-          totalPages: 0
-        }
+          totalPages: 0,
+        },
       };
-
     } catch (error) {
       throw new Error(`Error searching films: ${error.message}`);
     }
   }
-
 }

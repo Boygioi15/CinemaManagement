@@ -3,6 +3,7 @@ import {
   Employee_AuthService,
 } from "../auth/auth.service.js";
 import { customError } from "../middlewares/errorHandlers.js";
+import PermissionImplement from "../permission/permission.implementation.js";
 import userModel from "./user.schema.js";
 import bcrypt from "bcrypt";
 export class UserService {
@@ -282,12 +283,6 @@ export class EmployeeService {
       })
       .lean();
   }
-
-  static checkExitAndBlockedEmployee = async (identifier) => {
-    const user = await this.findEmployeeByIdentifier(identifier);
-    return user;
-  };
-
   static createEmployee = async (userdata) => {
     const {
       jobTitle,
@@ -299,7 +294,7 @@ export class EmployeeService {
       email,
       phone,
     } = userdata;
-
+    userdata._id = null;
     if (
       !jobTitle ||
       !salary ||
@@ -387,19 +382,23 @@ export class EmployeeService {
       role: "employee",
     });
   };
-
   static getEmployeeById = async (_id) => {
     try {
-      const user = await userModel.findOne({
-        _id,
-        deleted: false,
-        role: "employee",
-      });
+      const user = await userModel
+        .findOne({
+          _id,
+          deleted: false,
+          role: "employee",
+        })
+        .lean();
       if (!user) {
         return {
           error: "Employee not found or has been deleted!",
         };
       }
+      const roles =
+        await PermissionImplement.getAllPermissionOfEmployeeFunction(user._id);
+      user.roles = roles;
       return user;
     } catch (error) {
       console.error("Error fetching user by ID:", error);
@@ -415,34 +414,32 @@ export class EmployeeService {
     if (password !== confirmPassword) {
       throw customError("Mật khẩu và xác nhận mật khẩu không khớp");
     }
-    const employee = userModel.findOne({
-      _id: id,
-      role: "employee",
-    });
+    const employee = await userModel.findById(id);
     if (!employee) {
       throw customError("Không tìm thấy nhân viên!");
     }
-    const accountExist = userModel.findOne({
+    const accountExist = await userModel.findOne({
       account: account,
       role: "employee",
     });
-    if (accountExist) {
+    if (accountExist && accountExist._id.toString() !== id) {
       throw customError("Tài khoản đã tồn tại!");
     }
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    return await userModel.findByIdAndUpdate(_id, {
-      account: account,
-      password: hashedPassword,
-    });
+    return await userModel.findByIdAndUpdate(
+      id,
+      {
+        account: account,
+        password: hashedPassword,
+      },
+      { new: true }
+    );
   };
   static getAllEmployeeAccount = async () => {
     return await userModel.find({
       role: "employee",
-      $or: [
-        { account: { $exists: false } }, // Field does not exist
-        { account: null }, // Field exists but is null
-      ],
+      $or: [{ account: { $exists: true } }],
     });
   };
 }

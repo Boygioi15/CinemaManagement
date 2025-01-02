@@ -6,11 +6,13 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -18,36 +20,39 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Validate form
+  
   const validateForm = () => {
     const newErrors = {};
 
-    // Kiểm tra email
-    if (!formData.email.trim()) {
-      newErrors.email = "Email không được để trống";
-    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
-      newErrors.email = "Email không đúng định dạng";
+    // Kiểm tra identifier
+    if (!formData.identifier && !formData.password) {
+      alert("Không được để trống các trường!")
+      return false;
     }
-
-    // Kiểm tra mật khẩu
-    if (!formData.password) {
-      newErrors.password = "Mật khẩu không được để trống";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
-
+  const {signIn} = useAuth();
+  const navigate = useNavigate();
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        alert("Login successful!");
-      }, 2000);
+      const response = await axios.post('http://localhost:8000/api/auth/employee/log-in', formData, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.status===200) {
+        signIn(response.data.data.tokens.accesssToken);
+        alert("Đăng nhập thành công!");
+        navigate('/admin');
+        
+      } else {
+        alert("Đăng nhập thất bại, identifier hoặc mật khẩu không đúng!");
+      }
+
+
     }
   };
 
@@ -87,16 +92,16 @@ const LoginPage = () => {
             <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
             <input
               type="text"
-              name="email"
-              value={formData.email}
+              name="identifier"
+              value={formData.identifier}
               onChange={handleChange}
               className={`w-full px-10 py-2 border rounded-md ${
-                errors.email ? "border-red-500" : "border-gray-300"
+                errors.identifier ? "border-red-500" : "border-gray-300"
               }`}
-              placeholder="Nhập email..."
+              placeholder="Nhập tài khoản, identifier hoặc SĐT"
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            {errors.identifier && (
+              <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>
             )}
           </div>
 
@@ -123,16 +128,6 @@ const LoginPage = () => {
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
-          </div>
-
-          {/* Forgot password */}
-          <div className="flex justify-between">
-            <Link
-              to="/admin/auth/forgot-pass"
-              className="text-sm text-indigo-600 hover:text-indigo-500"
-            >
-              Quên mật khẩu?
-            </Link>
           </div>
 
           {/* Submit button */}

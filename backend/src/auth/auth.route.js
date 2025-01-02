@@ -14,7 +14,6 @@ router.post("/user/refresh-token", user_AuthController.handleRefreshToken);
 router.get("/user/account", validateToken, user_AuthController.fetchAccount);
 
 router.post("/employee/log-in", employee_AuthController.signIn);
-router.post("/employee/create-new-account", employee_AuthController.signUp);
 router.get("/employee/sign-out", employee_AuthController.signOut);
 
 export default router;

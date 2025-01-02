@@ -52,9 +52,8 @@ const InfrasManage = () => {
 
   console.log(rooms);
 
-  const handleEditClick = () => {
-    setModalMode("edit");
-    setIsModalOpen(true);
+  const handleViewRoom = (row) => {
+    navigate(`/view-room/${row._id}`);
   };
 
   const handleAddRoom = () => {
@@ -87,7 +86,7 @@ const InfrasManage = () => {
         <div className="flex space-x-3">
           <button
             className="text-blue-600 hover:text-blue-800"
-            onClick={() => handleEditClick(row)}
+            onClick={() => handleViewRoom(row)}
           >
             <FiSearch className="w-4 h-4" />
           </button>

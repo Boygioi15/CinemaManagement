@@ -1,10 +1,6 @@
 import expressAsyncHandler from "express-async-handler";
-import {
-  FilmService
-} from "./film.service.js";
-import {
-  handleUploadCloudinary
-} from "../ulitilities/cloudinary.js";
+import { FilmService } from "./film.service.js";
+import { handleUploadCloudinary } from "../ulitilities/cloudinary.js";
 class FilmController {
   createFilm = expressAsyncHandler(async (req, res, next) => {
     const b64 = Buffer.from(req.file.buffer).toString("base64");
@@ -24,9 +20,7 @@ class FilmController {
   });
 
   updateFilm = expressAsyncHandler(async (req, res, next) => {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
     if (req.file) {
       const b64 = Buffer.from(req.file.buffer).toString("base64");
       let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
@@ -52,11 +46,16 @@ class FilmController {
       data: response,
     });
   });
-
+  getAllFilmsNotDeleted = expressAsyncHandler(async (req, res, next) => {
+    const response = await FilmService.getAllFilm();
+    return res.status(200).json({
+      msg: "Get all film successfully!",
+      success: true,
+      data: response,
+    });
+  });
   getFilmDetail = expressAsyncHandler(async (req, res, next) => {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
     const response = await FilmService.getFilmDetail(id);
     return res.status(200).json({
       msg: "Get film successfully!",
@@ -66,11 +65,7 @@ class FilmController {
   });
 
   searchFilm = expressAsyncHandler(async (req, res, next) => {
-    const {
-      keyword,
-      page,
-      limit
-    } = req.body
+    const { keyword, page, limit } = req.body;
 
     return res.status(200).json({
       msg: "Get film successfully!",
@@ -78,7 +73,24 @@ class FilmController {
       data: await FilmService.searchFilms(keyword, page, limit),
     });
   });
-
+  markFilmDeleted = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const response = await FilmService.deleteFilmById(id);
+    return res.status(200).json({
+      msg: "Delete film successfully!",
+      success: true,
+      data: response,
+    });
+  });
+  restoreFilm = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const response = await FilmService.restoreFilmById(id);
+    return res.status(200).json({
+      msg: "Restore film successfully!",
+      success: true,
+      data: response,
+    });
+  });
 }
 
 export default new FilmController();

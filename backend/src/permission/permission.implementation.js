@@ -213,4 +213,29 @@ export default class PermissionImplement {
       });
     }
   );
+  static getAllPermissionOfEmployeeFunction = async (id) => {
+    try {
+      if (
+        !(await userModel.findOne({
+          role: "employee",
+          _id: id,
+        }))
+      ) {
+        throw customError("Nhân viên không tồn tại!", 400);
+      }
+    } catch (error) {
+      throw customError(
+        "Định dạng mã nhân viên không hợp lệ! Lỗi: " + error,
+        400
+      );
+    }
+    const result = await Employee_PermissionModel.find({
+      employeeID: id,
+    }).populate({
+      path: "permissionID",
+      select: "name symbol",
+      model: "permissions",
+    });
+    return result;
+  };
 }

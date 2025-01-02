@@ -57,6 +57,9 @@
     gap: 10px;
     align-items: center;
   }
+  .Create_RoomSeats .row-label{
+    width: 20px;
+  }
 .Create_RoomSeats .seatRow{
     display: flex;
     flex-direction: row;

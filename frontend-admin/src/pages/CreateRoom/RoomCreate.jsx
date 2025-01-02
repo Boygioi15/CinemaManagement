@@ -5,12 +5,14 @@ import { Tooltip } from 'react-tooltip'
 
 import { ImCheckboxChecked,ImCheckboxUnchecked } from "react-icons/im";
 import { IoSettingsSharp } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import axios from "axios"
 const seatWidth = 50;
 const seatHeight = 40;
 const gapX = 15;
 const gapY = 10;
 export default function RoomCreate(){
+    const navigate = useNavigate();
     const [roomName, setRoomName] = useState("");
     const [roomRow, setRoomRow] = useState();
     const [roomCol, setRoomCol] = useState();
@@ -232,7 +234,7 @@ export default function RoomCreate(){
             </div>
             
             <div className="confirmBar">
-                <button className="return-button">Trở về</button>
+                <button onClick={()=>navigate("/admin/co-so-vat-chat")} className="return-button">Trở về</button>
                 <button onClick={handleSubmit}className="confirm-button">Xác nhận</button>
             </div>
         </div>

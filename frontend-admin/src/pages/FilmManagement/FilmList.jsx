@@ -1,6 +1,8 @@
 import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { IoIosRefresh } from "react-icons/io";
+
 import { BiRefresh } from "react-icons/bi";
 import FilmModal from "../../components/Film/FilmModal";
 import { useState, useEffect } from "react";
@@ -83,13 +85,22 @@ const AdminFilm = () => {
     });
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     setIsConfirmDialogOpen(false);
-    setIsSuccessDialogOpen(true);
-    setDialogData({
-      title: "Thành công",
-      message: "Xóa phim thành công",
-    });
+    try{
+      const response = await axios.post(`http://localhost:8000/api/films/mark-deleted/${itemToDelete._id}`);
+      await fetchFilms();
+      setIsSuccessDialogOpen(true);
+      setDialogData({
+        title: "Thành công",
+        message: "Xóa phim thành công",
+      });
+      
+    }
+    catch(err){
+
+    }
+    
   };
 
   const handleCloseModal = () => {
@@ -111,7 +122,10 @@ const AdminFilm = () => {
     }
     handleCloseModal();
   };
-
+  const handleRestoreClick = async (row) => {
+    await axios.post(`http://localhost:8000/api/films/restore/${row._id}`);
+    await fetchFilms();
+  }
   const columns = [
     { header: "Tên phim", key: "name" },
     { header: "Thời lượng", key: "filmDuration" },
@@ -122,20 +136,34 @@ const AdminFilm = () => {
       key: "actions",
       render: (_, row) => (
         <div className="flex space-x-3">
-          <button
-            className="text-blue-600 hover:text-blue-800"
-            onClick={() => handleEditClick(row)}
-          >
-            <FiEdit2 className="w-4 h-4" />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={() => handleDeleteClick(row)}
-          >
-            <FiTrash2 className="w-4 h-4" />
-          </button>
+          {row.deleted ? (
+            // Render Restore Button if `deleted` is true
+            <button
+              className="text-green-600 hover:text-green-800"
+              onClick={() => handleRestoreClick(row)}
+            >
+              <IoIosRefresh className="w-4 h-4" /> {/* Restore icon */}
+            </button>
+          ) : (
+            // Render Edit and Delete Buttons if `deleted` is false
+            <>
+              <button
+                className="text-blue-600 hover:text-blue-800"
+                onClick={() => handleEditClick(row)}
+              >
+                <FiEdit2 className="w-4 h-4" /> {/* Edit icon */}
+              </button>
+              <button
+                className="text-red-600 hover:text-red-800"
+                onClick={() => handleDeleteClick(row)}
+              >
+                <FiTrash2 className="w-4 h-4" /> {/* Delete icon */}
+              </button>
+            </>
+          )}
         </div>
       ),
+      
     },
   ];
 

@@ -1,5 +1,6 @@
 import express from "express";
 import { userController, employeeController } from "./user.controller.js";
+import { validateToken } from "../middlewares/verifyToken.js";
 
 const router = express.Router();
 
@@ -14,4 +15,12 @@ router.post("/employee/", employeeController.createEmployee);
 router.put("/employee/:id", employeeController.updateEmployee);
 router.delete("/employee/:id", employeeController.deleteEmployee);
 router.get("/employee/", employeeController.getAllEmployees);
+router.get(
+  "/employee/get-employee-detail/",
+  validateToken,
+  employeeController.getEmployeeByID
+);
+router.get("/employee/all-account", employeeController.getAllAccounts);
+
+router.post("/employee/update-account/:id", employeeController.updateAccount);
 export default router;

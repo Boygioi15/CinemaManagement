@@ -191,8 +191,8 @@ const Role = () => {
             <span className="text-gray-700 font-medium">Nhân viên:</span>
             {/* Nhãn */}
             {/* Ô tìm kiếm */}
-            <div className="relative w-80 ">
-              <div className="flex items-center border-2 border-gray-300 rounded-lg focus-within:border-blue-500">
+            <div className="relative w-200 ">
+              <div style={{width:"400px"}}className="flex w-200 items-center border-2 border-gray-300 rounded-lg focus-within:border-blue-500">
                 <FaSearch className="ml-3 text-gray-400" />
                 <input
                   type="text"
@@ -253,7 +253,7 @@ const Role = () => {
           {/* Danh sách checkbox roles */}
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Các vai trò</h3>
-            <div className="space-y-2">
+            <div style={{paddingLeft:"20px"}} className="space-y-2">
               {allRoles.map((role) => (
                 <label
                   key={role.id}
@@ -274,7 +274,7 @@ const Role = () => {
             </div>
           </div>
         </div>
-        <button
+        <button style={{marginLeft:"40px"}}
           className="ml-5 px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddClick()}
         >

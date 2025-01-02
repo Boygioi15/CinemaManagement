@@ -114,7 +114,7 @@ class EmployeeController {
 
   updateEmployee = expressAsyncHandler(async (req, res, next) => {
     const { id } = req.params;
-
+    console.log(req.body);
     const updatedEmployee = await EmployeeService.updateEmployeeById(
       { _id: id },
       req.body
@@ -161,6 +161,36 @@ class EmployeeController {
       msg: "Get all employees successfully",
       data: users,
       success: true,
+    });
+  });
+  getEmployeeByID = expressAsyncHandler(async (req, res, next) => {
+    console.log(req.user);
+    const users = await EmployeeService.getEmployeeById(req.user._id);
+    res.status(200).json({
+      msg: "Get all employees successfully",
+      data: users,
+      success: true,
+    });
+  });
+  getAllAccounts = expressAsyncHandler(async (req, res, next) => {
+    const users = await EmployeeService.getAllEmployeeAccount();
+    res.status(200).json({
+      msg: "Get all employees account successfully",
+      data: users,
+      success: true,
+    });
+  });
+  updateAccount = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+
+    const updatedEmployee = await EmployeeService.updateEmployeeAccount(
+      id,
+      req.body
+    );
+    return res.status(200).json({
+      msg: "Cập nhật tài khoản thành công!",
+      success: true,
+      user: updatedEmployee,
     });
   });
 }

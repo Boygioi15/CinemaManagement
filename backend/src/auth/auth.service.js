@@ -1,6 +1,7 @@
 import { customError } from "../middlewares/errorHandlers.js";
+import PermissionImplement from "../permission/permission.implementation.js";
 import userModel from "../user/user.schema.js";
-import { UserService } from "../user/user.service.js";
+import { EmployeeService, UserService } from "../user/user.service.js";
 import { JwtService } from "./jwt/jwt.service.js";
 import bcrypt from "bcrypt";
 
@@ -121,38 +122,15 @@ export class User_AuthService {
   }
 }
 export class Employee_AuthService {
-  static createNewAccount = async (userdata) => {
-    const { confirmPassword, phone, email } = userdata;
-    const { jobTitle, salary, shiftStart, shiftEnd, beginWorkingDate } =
-      req.body;
-    if (!jobTitle || !salary || !shiftEnd || !shiftStart || !beginWorkingDate) {
-      throw customError("Chưa điền đầy đủ các trường. Vui lòng nhập lại!");
-    }
-    if (password !== confirmPassword) {
-      throw customError("Mật khẩu không khớp ", 400);
-    }
-
-    const existingUserPhone = await UserService.findUserByPhone(phone);
-    if (existingUserPhone) {
-      throw customError("Số điện thoại đã được đăng ký!", 400);
-    }
-
-    const existingUserEmail = await UserService.findUserByEmail(email);
-    if (existingUserEmail) {
-      throw customError("Email đã được đăng ký!", 400);
-    }
-
-    return await userModel.create(userdata);
-  };
-
-  static signIn = async ({ identifier, userPass }) => {
-    const user = await UserService.checkExitAndBlockedUser(identifier);
+  static signIn = async (loginData) => {
+    const { identifier, password } = loginData;
+    const user = await EmployeeService.findEmployeeByIdentifier(identifier);
     if (!user) {
-      throw customError("User not found", 400);
+      throw customError("Không tìm thấy người dùng", 400);
     }
-    const isMatch = AuthService.checkPassword(userPass, user.password);
+    const isMatch = Employee_AuthService.checkPassword(password, user.password);
     if (!isMatch) {
-      throw customError("Password is incorrect", 400);
+      throw customError("Mật khẩu không đúng", 400);
     }
     let payload = {
       id: user._id,
@@ -162,13 +140,16 @@ export class Employee_AuthService {
       birth: user.birth,
     };
     let tokens = JwtService.createJWT(payload);
-
+    const roles = await PermissionImplement.getAllPermissionOfEmployeeFunction(
+      user._id
+    );
     return {
       id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       birth: user.birth,
+      roles,
       tokens,
     };
   };

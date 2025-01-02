@@ -4,6 +4,7 @@ import { FiMenu } from "react-icons/fi";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
   const location = useLocation(); // Lấy đường dẫn hiện tại
+  
   useEffect(() => {
     console.log(location.pathname);
   }, [location.pathname]);

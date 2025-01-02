@@ -1,25 +1,14 @@
 import mongoose from "mongoose";
-import {
-  FilmService
-} from "../film/film.service.js";
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
+import { FilmService } from "../film/film.service.js";
+import { customError } from "../middlewares/errorHandlers.js";
 import roomModel from "../room/room.schema.js";
 import filmShowModel from "./filmShow.schema.js";
 import expressAsyncHandler from "express-async-handler";
-import {
-  RoomService
-} from "../room/room.service.js";
+import { RoomService } from "../room/room.service.js";
 
 export class FilmShowService {
   //Cho phép tạo suất chiếu cùng 1 phim nếu khác phòng
-  static createFilmShow = async ({
-    roomId,
-    showTime,
-    showDate,
-    film
-  }) => {
+  static createFilmShow = async ({ roomId, showTime, showDate, film }) => {
     const [hour, minute] = showTime.split(":").map(Number);
     const showStart = new Date(showDate);
     showStart.setHours(0, 0, 0, 0);
@@ -35,7 +24,8 @@ export class FilmShowService {
     const overlappingShows = await filmShowModel.find({
       roomId,
       showDate,
-      $or: [{
+      $or: [
+        {
           showTime: {
             $gte: new Date(showStart.getTime() - 30 * 60000).toISOString(),
           },
@@ -145,7 +135,8 @@ export class FilmShowService {
   static getShowtimesByDate = async (filmId, date) => {
     const selectedDate = new Date(date);
 
-    const res = await filmShowModel.aggregate([{
+    const res = await filmShowModel.aggregate([
+      {
         $match: {
           film: new mongoose.Types.ObjectId(filmId),
           showDate: date,
@@ -287,9 +278,11 @@ export class FilmShowService {
 
   static refreshLockedSeat = expressAsyncHandler(async (id) => {
     const filmShow = await filmShowModel.findByIdAndUpdate(
-      id, {
+      id,
+      {
         lockedSeatIds: [],
-      }, {
+      },
+      {
         new: true,
       }
     );
@@ -316,7 +309,7 @@ export class FilmShowService {
       ...new Set(arrayShowDates.map((date) => date.toISOString())),
     ].map((dateStr) => new Date(dateStr));
 
-    return uniqueShowDates
+    return uniqueShowDates;
   };
 
   static getAvailableFilmByDate = async ({
@@ -331,14 +324,14 @@ export class FilmShowService {
       matchConditions.film = new mongoose.Types.ObjectId(filmId);
     }
 
-
     if (date) {
       matchConditions.showDate = new Date(date);
     }
 
     const skip = (page - 1) * limit;
 
-    const filmShowsV3 = await filmShowModel.aggregate([{
+    const filmShowsV3 = await filmShowModel.aggregate([
+      {
         $match: matchConditions,
       },
       {
@@ -401,8 +394,10 @@ export class FilmShowService {
       },
     };
   };
-
-
-
-
+  static cancelFilmShow = async (filmShowId) => {
+    return await filmShowModel.findByIdAndUpdate({
+      filmShowId,
+      cancelled: true,
+    });
+  };
 }

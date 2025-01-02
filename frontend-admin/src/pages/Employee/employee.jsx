@@ -125,7 +125,6 @@ const Employee = () => {
         formData.append("salary", selectedEmployee.salary);
         formData.append("shiftStart", selectedEmployee.shiftStart);
         formData.append("shiftEnd", selectedEmployee.shiftEnd);
-
         await axios.post(
           "http://localhost:8000/api/user/employee",
           selectedEmployee
