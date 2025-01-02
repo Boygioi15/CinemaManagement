@@ -5,6 +5,9 @@ import { toast } from "react-toastify";
 import background from "../../assets/fg_background.png";
 
 function ForgotPasswordPage() {
+   useEffect(() => {
+      document.title = "Quên mật khẩu";
+    });
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [error, setError] = useState(""); // Thêm state để lưu lỗi

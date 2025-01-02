@@ -17,6 +17,7 @@ import TicketType from "../../Components/TicketType";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { getShowTimeOfDateByFilmId } from "../../config/api";
+import { use } from "react";
 const FilmDetailPage = () => {
   const { filmID } = useParams();
 
@@ -93,7 +94,9 @@ const FilmDetailPage = () => {
     fetchFilmDetail();
     handleGetDateAndShowTime(filmID);
   }, []);
-
+  useEffect(() => {
+    document.title = filmDetail?.name || "Loading...";
+  }, [filmDetail]);
   if (!filmDetail) {
     return <div>Loading...</div>;
   }
@@ -285,8 +288,7 @@ const FilmDetailPage = () => {
 
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
-        <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
-        </div>
+        <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8"></div>
       </div>
     </div>
   );

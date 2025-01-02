@@ -15,6 +15,7 @@ const FoodPage = () => {
     }
   };
   useEffect(() => {
+    document.title = "Đặt bắp nước";
     fetchAllFood();
   }, []);
   return (

@@ -14,6 +14,7 @@ const SearchPage = () => {
   });
 
   useEffect(() => {
+    document.title = "Tìm kiếm";
     const keyword = searchParams.get("keyword");
     const page = parseInt(searchParams.get("page")) || 1;
     handleSearch(keyword, page);
