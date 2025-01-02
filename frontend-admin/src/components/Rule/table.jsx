@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 
-const RuleTable = ({ title, columns, data, onAddNew }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const RuleTable = ({
+  title,
+  columns,
+  data,
+  onAddNew,
+  currentPage,
+  setCurrentPage,
+}) => {
+  // const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const totalPages = Math.ceil(data.length / itemsPerPage);

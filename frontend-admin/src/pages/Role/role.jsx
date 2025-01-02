@@ -266,6 +266,7 @@ const Role = () => {
                       (selectedRole) => selectedRole.id === role.id
                     )}
                     onChange={() => handleRoleChange(role)}
+                    disabled={!selectedEmployee}
                   />
                   <span className="text-gray-700">{role.name}</span>
                 </label>

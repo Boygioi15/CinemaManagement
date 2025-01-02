@@ -5,10 +5,11 @@ import axios from "axios";
 import { debounce } from "lodash";
 import { Combobox, ComboboxOption } from "@headlessui/react";
 import { FiSearch } from "react-icons/fi";
-import Dialog from "./ConfirmDialog";
-import SuccessDialog from "./SuccessDialog";
+import SuccessDialog from "../../components/SuccessDialog";
+import Dialog from "../../components/ConfirmDialog";
 import slugify from "slugify";
 import slugifyOption from "../../ulitilities/slugifyOption";
+import RefreshLoader from "../Loading";
 const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
   if (!isOpen) return null;
   const isEditMode = mode === "edit";
@@ -134,7 +135,7 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
     filmDescription: film?.filmDescription || "",
     filmContent: film?.filmContent || "",
 
-    beginDate: film?.beginDate || "",
+    beginDate: film?.beginDate.split("T")[0] || "",
   });
   useEffect(() => {
     if (!isEditMode) {
@@ -158,7 +159,6 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       "filmContent",
       "beginDate",
     ];
-    console.log("Form data : " + JSON.stringify(formData));
 
     return (
       requiredFields.every((field) => !!formData[field]) &&
@@ -203,17 +203,23 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       data.append("beginDate", formData.beginDate);
 
       let response;
+
       if (mode === "edit") {
-        response = await axios.put(`http://localhost:8000/api/films/${film._id}`, data);
+        setIsLoading(true);
+        response = await axios.put(
+          `http://localhost:8000/api/films/${film._id}`,
+          data
+        );
         setDialogData({
-          title: "Successs",
+          title: "Thành công",
           message: "Cập nhật phim thành công",
         });
       } else {
+        setIsLoading(true);
         response = await axios.post("http://localhost:8000/api/films", data);
 
         setDialogData({
-          title: "Successs",
+          title: "Thành công",
           message: "Thêm phim thành công",
         });
       }
@@ -575,10 +581,14 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
       />
       <SuccessDialog
         isOpen={isSuccessDialogOpen}
-        onClose={() => setIsSuccessDialogOpen(false)}
+        onClose={() => {
+          setIsSuccessDialogOpen(false);
+          onClose();
+        }}
         title={dialogData.title}
         message={dialogData.message}
       />
+      <RefreshLoader isOpen={isLoading} />
     </div>
   );
 };

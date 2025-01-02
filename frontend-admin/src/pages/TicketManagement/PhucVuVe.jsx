@@ -9,6 +9,7 @@ import OrderDetailModal from "../../components/Ticket/OrderDetailModal";
 import TicketCancelModal from "../../components/Ticket/TicketCancelModal";
 import Dialog from "../../components/ConfirmDialog";
 import SuccessDialog from "../../components/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
 
 export default function PhucVuVe() {
   const [orders, setOrders] = useState([]);
@@ -90,7 +91,6 @@ export default function PhucVuVe() {
     fetchOrder();
     setTimeout(() => {
       setLoading(false);
-      setIsSuccessModalOpen(true);
     }, 2000);
   };
 
@@ -386,6 +386,7 @@ export default function PhucVuVe() {
         message={dialogData.message}
         onClose={handleCloseModal}
       />
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 }

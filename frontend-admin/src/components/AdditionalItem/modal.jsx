@@ -1,22 +1,12 @@
 import React from "react";
 import { FiX } from "react-icons/fi";
 import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
-import Dialog from "../Film/ConfirmDialog";
-import SuccessDialog from "../Film/SuccessDialog";
 
 const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
   if (!isOpen) return null;
 
   const isEditMode = mode === "edit";
   const title = isEditMode ? "Cập nhật sản phẩm" : "Thêm mới sản phẩm";
-
-  const [query, setQuery] = useState("");
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-  const [dialogData, setDialogData] = useState({ title: "", message: "" });
-  const [data, setData] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   // Initialize state with existing film data or empty values
   const [formData, setFormData] = useState({
@@ -36,18 +26,6 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
 
   const handleSubmit = () => {
     onSave(formData);
-    setIsConfirmDialogOpen(true);
-    if (mode === "edit") {
-      setDialogData({
-        title: "Confirm update",
-        message: "Bạn có chắc chắn là cập nhật phim này không ?",
-      });
-    } else {
-      setDialogData({
-        title: "Confirm add",
-        message: "Bạn có chắc chắn là thêm phim này không ?",
-      });
-    }
   };
 
   return (
@@ -148,22 +126,6 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
           </div>
         </div>
       </div>
-
-      {/* <Dialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        onConfirm={handleFilm}
-        title={dialogData.title}
-        message={dialogData.message}
-        data={data}
-        mode={mode}
-      />
-      <SuccessDialog
-        isOpen={isSuccessDialogOpen}
-        onClose={() => setIsSuccessDialogOpen(false)}
-        title={dialogData.title}
-        message={dialogData.message}
-      /> */}
     </div>
   );
 };

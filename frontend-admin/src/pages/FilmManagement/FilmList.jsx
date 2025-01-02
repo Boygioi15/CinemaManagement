@@ -73,8 +73,13 @@ const AdminFilm = () => {
     setIsConfirmDialogOpen(true);
     setDialogData({
       title: "Xác nhận xóa",
-      message:
-        "Bạn có chắc chắn muốn xóa phim này không? Việc này không thể trở lại.",
+      message: (
+        <>
+          Bạn có chắc chắn muốn xóa phim này không?
+          <br />
+          Việc này không thể trở lại.
+        </>
+      ),
     });
   };
 
@@ -82,8 +87,8 @@ const AdminFilm = () => {
     setIsConfirmDialogOpen(false);
     setIsSuccessDialogOpen(true);
     setDialogData({
-      title: "Success",
-      message: "Item deleted successfully",
+      title: "Thành công",
+      message: "Xóa phim thành công",
     });
   };
 

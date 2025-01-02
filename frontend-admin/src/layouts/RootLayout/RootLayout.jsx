@@ -57,22 +57,27 @@ const newTabs = [
   },
   {
     name: "Sản phẩm khác",
-    path: "/admin/additional-item",
+    path: "/admin/san-pham-khac",
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
     name: "Quản lý tài khoản",
-    path: "/admin/manage-user",
+    path: "/admin/tai-khoan-nguoi-dung",
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
     name: "Các quy định khác",
-    path: "/admin/another-rule",
+    path: "/admin/quy-dinh-khac",
     icon: <RxDashboard className="w-6 h-6" />,
   },
   {
     name: "Phân quyền",
-    path: "/admin/role",
+    path: "/admin/phan-quyen",
+    icon: <RxDashboard className="w-6 h-6" />,
+  },
+  {
+    name: "Quản lý nhân viên",
+    path: "/admin/nhan-vien",
     icon: <RxDashboard className="w-6 h-6" />,
   },
 ];
