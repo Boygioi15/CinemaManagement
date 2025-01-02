@@ -7,6 +7,9 @@ import ViewModal from "../../components/Filmshow/Detail";
 import RefreshLoader from "../../components/Loading";
 import { BiRefresh } from "react-icons/bi";
 import DatePicker from "react-datepicker";
+import Dialog from "../../components/ConfirmDialog";
+import SuccessDialog from "../../components/SuccessDialog";
+import FailedDialog from "../../components/FailedDialog";
 import axios from "axios";
 
 const FilmShow = () => {
@@ -21,6 +24,11 @@ const FilmShow = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [mode, setMode] = useState("add");
   const [filmshows, setFilmShows] = useState([]);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +46,16 @@ const FilmShow = () => {
           const filmRes = await axios.get(
             `http://localhost:8000/api/films/${show.film}/getFilmDetail`
           );
-          const filmName = filmRes.data.data.name;
+          let filmName = filmRes.data.data.name;
+
+          const twoDthreeD = filmRes.data.data.twoDthreeD; // Giả sử mảng là ['2D', '3D']
+          const result = twoDthreeD.join(", ");
+          if (show.cancelled === true) {
+            console.log("true");
+
+            filmName += " (Đã hủy)"; // Thêm chữ "Đã hủy" vào tên phim
+          }
+
           const duration = filmRes.data.data.filmDuration;
           // Lấy tên phòng
           const roomRes = await axios.get(
@@ -79,6 +96,7 @@ const FilmShow = () => {
             showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
             room: roomName,
             status: status,
+            showType: result,
             //  seatList: seatList.join(", "),
           };
         })
@@ -99,6 +117,46 @@ const FilmShow = () => {
   const handleViewClick = (item) => {
     setSelectedItem(item);
     setIsDetailModalOpen(true);
+  };
+
+  const handleDelete = (item) => {
+    setSelectedItem(item);
+    setDialogData({
+      title: "Xác nhận xóa",
+      message: "Bạn chắc chắn muốn xóa suất phim này chứ?",
+    });
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmClick = async () => {
+    setLoading(true);
+    console.log(selectedItem);
+
+    try {
+      await axios.post(
+        `http://localhost:8000/api/film-show/cancel-filmShow/${selectedItem._id}`
+      );
+
+      await handleRefresh(); // Làm mới dữ liệu sau khi thành công
+      // Hiển thị thông báo thành công
+      setDialogData({
+        title: "Thành công",
+        message: "Xóa suất phim thành công!",
+      });
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("Error:", error);
+      setDialogData({
+        title: "Thất bại",
+        message: "Có lỗi xảy ra. Vui lòng thử lại!",
+      });
+      setIsFailModalOpen(true);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+      setIsConfirmModalOpen(false);
+    }
   };
 
   const handleAddClick = () => {
@@ -165,9 +223,14 @@ const FilmShow = () => {
           >
             <FiSearch className="w-4 h-4" />
           </button>
-          <button className="text-red-600 hover:text-red-800">
-            <TbCancel className="w-4 h-4" />
-          </button>
+          {!row.cancelled && (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={() => handleDelete(row)}
+            >
+              <TbCancel className="w-4 h-4" />
+            </button>
+          )}
         </div>
       ),
     },
@@ -310,6 +373,34 @@ const FilmShow = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         filmShowDetail={selectedItem}
+      />
+
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+        }}
+        onConfirm={handleConfirmClick}
+      />
+
+      <SuccessDialog
+        isOpen={!loading && isSuccessModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+        }}
+      />
+
+      <FailedDialog
+        isOpen={!loading && isFailModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsFailModalOpen(false);
+        }}
       />
 
       <RefreshLoader isOpen={loading} />
