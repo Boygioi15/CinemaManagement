@@ -436,10 +436,17 @@ export class EmployeeService {
       { new: true }
     );
   };
+  static deleteEmployeeAccount = async (id) => {
+    return await userModel.findByIdAndUpdate(
+      id,
+      { account: null }, // Set account to null
+      { new: true } // Return the updated document
+    );
+  };
   static getAllEmployeeAccount = async () => {
     return await userModel.find({
       role: "employee",
-      $or: [{ account: { $exists: true } }],
+      account: { $ne: null, $exists: true }, // Ensures account is not null and exists
     });
   };
 }

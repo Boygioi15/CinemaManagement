@@ -23,4 +23,6 @@ router.get(
 router.get("/employee/all-account", employeeController.getAllAccounts);
 
 router.post("/employee/update-account/:id", employeeController.updateAccount);
+router.delete("/employee/delete-account/:id", employeeController.deleteAccount);
+
 export default router;

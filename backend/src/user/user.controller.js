@@ -193,6 +193,18 @@ class EmployeeController {
       user: updatedEmployee,
     });
   });
+  deleteAccount = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const updatedEmployee = await EmployeeService.deleteEmployeeAccount(
+      id,
+      req.body
+    );
+    return res.status(200).json({
+      msg: "Cập nhật tài khoản thành công!",
+      success: true,
+      user: updatedEmployee,
+    });
+  });
 }
 const userController = new UserController(),
   employeeController = new EmployeeController();
