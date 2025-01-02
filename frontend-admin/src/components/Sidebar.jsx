@@ -13,7 +13,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
     <div
       className={`${
         isSidebarOpen ? "w-64" : "w-20"
-      } bg-white shadow-lg transition-all duration-300 ease-in-out`}
+      } bg-white shadow-lg transition-all duration-300 ease-in-out h-screen overflow-y-auto`}
     >
       <div className="flex items-center justify-between p-4 border-b">
         <h1
