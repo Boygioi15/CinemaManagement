@@ -67,6 +67,7 @@ const ShowTimePage = () => {
     }
   };
   useEffect(() => {
+    document.title = "Lịch chiếu";
     getAllFilm();
     handleGetAvailableShowDate();
   }, []);

@@ -24,6 +24,7 @@ import ErrorPage from "./pages/ErrorPage";
 import OrderFailPage from "./pages/OrderFailed";
 import OrderSuccessPage from "./pages/OrderSuccess";
 import RulePage from "./pages/RulePage";
+import UpdateDocumentTitle from "./utils/UpdataDocumentTittle";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -101,14 +102,17 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path:"*",
+    path: "*",
     element: <ErrorPage />,
-  }
+  },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <RouterProvider router={router}>
+        {/* Đặt UpdateDocumentTitle bên trong RouterProvider */}
+        <UpdateDocumentTitle />
+      </RouterProvider>
     </AuthProvider>
     <ToastContainer
       position="top-right"
@@ -120,9 +124,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       draggable={true}
       rtl={false}
       style={{
-        fontSize: "18px", // Điều chỉnh kích thước chữ
-        padding: "16px", // Điều chỉnh padding để làm to thêm
-        minWidth: "300px", // Điều chỉnh chiều rộng tối thiểu
+        fontSize: "18px",
+        padding: "16px",
+        minWidth: "300px",
       }}
     />
   </React.StrictMode>

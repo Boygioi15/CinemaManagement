@@ -11,6 +11,7 @@ const HomePage = () => {
   const [upcomingFilm, setUpcomingFilm] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
+    document.title = "Trang chủ";
     const fetchFilmShowing = async () => {
       try {
         const response = await getShowingFilms();

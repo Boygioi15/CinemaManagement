@@ -13,6 +13,7 @@ const UserChangePass = () => {
   // };
 
   useEffect(() => {
+    document.title = "Đổi mật khẩu";
     const updateFields = () => {
       const userInfo = state?.userInfo || {};
       console.log(userInfo);

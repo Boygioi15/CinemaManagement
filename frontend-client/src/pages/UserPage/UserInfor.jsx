@@ -16,6 +16,7 @@ const UserInfoPage = () => {
   const { user, setUser, loading } = useAuth();
 
   useEffect(() => {
+    document.title = "Thông tin cá nhân";
     const updateFields = () => {
       const updatedFields = [
         {

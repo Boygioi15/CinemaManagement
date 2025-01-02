@@ -7,6 +7,7 @@ const FilmShowingPage = () => {
   const [filmShowing, setFilmShowing] = useState([]);
 
   useEffect(() => {
+    document.title = "Phim đang chiếu";
     const fetchFilmShowing = async () => {
       try {
         const response = await getShowingFilms();

@@ -26,6 +26,7 @@ const UserTransHistory = () => {
   ];
 
   useEffect(() => {
+    document.title = "Lịch sử giao dịch";
     const updateFields = () => {
       const userInfo = state?.userInfo || {};
       console.log(userInfo);

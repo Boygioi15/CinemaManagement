@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginComponent from "../../Components/LoginComponent";
 import SignUpComponent from "../../Components/SignUpComponent";
@@ -7,6 +7,9 @@ import { callLogin, callSignUp } from "../../config/api";
 import { toast } from "react-toastify";
 
 function ParentForm() {
+  useEffect(() => {
+    document.title = "Đăng nhập";
+  });
   const [display, setDisplay] = useState(true);
   const switchToLogin = () => {
     setDisplay(true); // Chuyển sang form Đăng nhập
@@ -31,7 +34,7 @@ function ParentForm() {
               ? "bg-white text-black"
               : "bg-[#2A246D] text-white hover:bg-[#  ]"
           }`}
-          style={{padding:"15px"}}
+          style={{ padding: "15px" }}
         >
           Đăng nhập
         </button>
@@ -44,7 +47,7 @@ function ParentForm() {
               ? "bg-white text-black"
               : "bg-[#2A246D] text-white hover:bg-[#3B337E]"
           }`}
-          style={{padding:"15px"}}
+          style={{ padding: "15px" }}
         >
           Đăng ký
         </button>
