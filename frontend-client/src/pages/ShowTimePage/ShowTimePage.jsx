@@ -20,7 +20,7 @@ const ShowTimePage = () => {
     total: 0,
     currentPage: 1,
     totalPages: 0,
-    limit: 2,
+    limit: 100,
   });
 
   const getAllFilm = async () => {
@@ -61,6 +61,8 @@ const ShowTimePage = () => {
       date: selectedDate,
       filmId: selectedFilm?._id || null,
     });
+    console.log("🚀 ~ getAllFilmByDate ~ response:", response);
+
     if (response.success) {
       setAvailableFilm(response.data.films);
       setPagination(response.data.pagination);
@@ -131,11 +133,7 @@ const ShowTimePage = () => {
           >
             <option value=""> Chọn tất cả </option>
             {optionFilms?.map((film) => {
-              return (
-                <option value={JSON.stringify(film)}>
-                  {film.name}
-                </option>
-              );
+              return <option value={JSON.stringify(film)}>{film.name}</option>;
             })}
           </select>
         </div>
@@ -156,9 +154,7 @@ const ShowTimePage = () => {
                 />
 
                 <div className="mt-4">
-                  <h3 className="text-2xl font-bold">
-                    {filmDetail.name}
-                  </h3>
+                  <h3 className="text-2xl font-bold">{filmDetail.name}</h3>
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center">
                       <span className="text-yellow-400 mr-2 text-xl">⌚</span>
@@ -239,9 +235,7 @@ const ShowTimePage = () => {
               />
 
               <div className="mt-4">
-                <h3 className="text-2xl font-bold">
-                  {selectedFilm.name}
-                </h3>
+                <h3 className="text-2xl font-bold">{selectedFilm.name}</h3>
                 <div className="mt-2 space-y-1">
                   <div className="flex items-center">
                     <span className="text-yellow-400 mr-2 text-xl">⌚</span>
