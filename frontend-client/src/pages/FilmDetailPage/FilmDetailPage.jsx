@@ -17,7 +17,10 @@ import TicketType from "../../Components/TicketType";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { getShowTimeOfDateByFilmId } from "../../config/api";
+import formatCurrencyNumber from "../../utils/FormatCurrency";
+import QuantitySelectorV2 from "../../Components/QuantitySelectorV2";
 const FilmDetailPage = () => {
+
   const { filmID } = useParams();
 
   const location = useLocation();
@@ -29,8 +32,7 @@ const FilmDetailPage = () => {
   console.log("🚀 ~ FilmDetailPage ~ selectedShowtime:", selectedShowtime);
 
   const [availableDates, setAvailableDates] = useState([]);
-  const [availableShowtimesWithFilmType, setAvailableShowtimesWithFilmType] =
-    useState([]);
+  const [availableShowtimesWithFilmType, setAvailableShowtimesWithFilmType] = useState([]);
 
   const handleGetDateAndShowTime = async (filmID) => {
     try {
@@ -94,9 +96,7 @@ const FilmDetailPage = () => {
     handleGetDateAndShowTime(filmID);
   }, []);
 
-  if (!filmDetail) {
-    return <div>Loading...</div>;
-  }
+ 
 
   // Mapping ageLimit to appropriate category
   const getAgeCategory = (ageLimit) => {
@@ -130,6 +130,68 @@ const FilmDetailPage = () => {
         return ""; // Return an empty string or fallback message
     }
   };
+
+
+  const [ticketSelection, setTicketSelection] = useState([]);
+  const [additionalItemSelections, setAdditionalItemSelections] = useState([]);
+  const [totalTicket_Single, setTotalTicket_Single] = useState(0);
+  const [totalTicket_Pair, setTotalTicket_Pair] = useState(0);
+
+  const [usedSingle, setUsedSingle] = useState(0);
+  const [usedPair, setUsedPair] = useState(0);
+
+  useEffect(()=>{
+    try{
+        const fetchTicketType = async () => {
+            const response = await axios.get("http://localhost:8000/api/param/ticket-type");
+            setTicketSelection(
+                response.data.data.map((ticketType) => ({
+                    ...ticketType,
+                    quantity: 0
+                }))
+            )
+        } 
+        fetchTicketType();
+    }catch (error) {
+        if (error.response) {
+            alert(`Lấy thông tin loại vé thất bại, lỗi: ` + error.response.data.msg);
+        } else if (error.request) {
+            alert('Không nhận được phản hồi từ server');
+        } else {
+            alert('Lỗi bất ngờ: ' + error.message);
+        }
+    }
+  },[])
+  useEffect(()=>{
+  try{
+      const fetchAdditionalItem = async () => {
+          const response = await axios.get("http://localhost:8000/api/additional-items");
+          setAdditionalItemSelections(
+              response.data.data.map((additional) => ({
+                  ...additional,
+                  quantity: 0
+              }))
+          )
+      } 
+      fetchAdditionalItem();
+  }catch (error) {
+      if (error.response) {
+          alert(`Lấy thông tin sản phẩm ngoài thất bại, lỗi: ` + error.response.data.msg);
+      } else if (error.request) {
+          alert('Không nhận được phản hồi từ server');
+      } else {
+          alert('Lỗi bất ngờ: ' + error.message);
+      }
+  }
+  },[])
+  useEffect(() => {console.log(ticketSelection)},[ticketSelection])
+
+
+
+
+  if (!filmDetail) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="p-6 space-y-12 md:space-y-40">
       <div className="grid items-start grid-cols-5 gap-6 md:gap-12 rounded-lg">
@@ -277,9 +339,45 @@ const FilmDetailPage = () => {
       <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
         <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
-          <TicketType />
-          <TicketType />
-          <TicketType />
+          {ticketSelection.map((ticketType) => {
+              return(
+                <div className="ticketBox">
+                    <span>{ticketType.title}</span>
+                    <span>{formatCurrencyNumber(ticketType.price)+"VNĐ"}</span>
+                    <QuantitySelectorV2 value={ticketType.quantity}
+                      onIncrement={(e) => {
+                        let updatedQuantity = ticketType.quantity + 1;
+                        if(updatedQuantity<8){
+                          updatedQuantity=8// Parse the new quantity
+                          setTicketSelection((prev) =>
+                            prev.map((item) =>
+                                item._id === ticketType._id // Match by id
+                                ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                                : item // Keep other items unchanged
+                            )
+                          );
+                        }
+                        else{
+                          alert("Bạn chỉ có thể mua tối đa 8 vé loại này");
+                        }
+                      }}
+                      onDecrement={(e) => {
+                        let updatedQuantity = ticketType.quantity - 1;
+                        if(updatedQuantity<0){
+                          updatedQuantity=0// Parse the new quantity
+                          setTicketSelection((prev) =>
+                            prev.map((item) =>
+                                item._id === ticketType._id // Match by id
+                                ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                                : item // Keep other items unchanged
+                            )
+                          );
+                        }
+                      }}
+                  />
+                </div>
+              )
+          })}
         </div>
       </div>
 

@@ -78,3 +78,9 @@ h2 {
     margin-right: 0.5rem;
   }
 }
+.ticketBox{
+  display:flex;
+  flex-direction: column;
+  gap:5px;
+  justify-content: center;
+}
