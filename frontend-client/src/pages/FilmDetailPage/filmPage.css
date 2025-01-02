@@ -81,6 +81,14 @@ h2 {
 .ticketBox{
   display:flex;
   flex-direction: column;
-  gap:5px;
+  gap:15px;
   justify-content: center;
+  border-radius: 5px;
+  border-color: white;
+  border-style: solid;
+  border-width: 1px;
+  padding: 20px 40px;
+}
+.ticketBox:hover{
+  color:#f3ea28
 }

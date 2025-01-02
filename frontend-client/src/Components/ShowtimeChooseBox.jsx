@@ -1,6 +1,6 @@
 import React from "react";
 
-const ShowtimeChooseBox = ({ time, isSelected, onClick }) => {
+const ShowtimeChooseBox = ({ time, isSelected, onClick, }) => {
   return (
     <div
       className={`

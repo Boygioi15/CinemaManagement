@@ -12,7 +12,7 @@ const QuantitySelectorV2 = ({
       <button
         type="button"
         className="h-6 w-6 ml-2 rounded-full hover:bg-[#663399] hover:text-[#f2ea28]"
-        onClick={onIncrement}
+        onClick={onDecrement}
       >
         <GrFormSubtract />
       </button>
@@ -24,7 +24,7 @@ const QuantitySelectorV2 = ({
       <button
         type="button"
         className="h-6 w-6 mr-2 rounded-full hover:bg-[#663399] hover:text-[#f2ea28]"
-        onClick={onDecrement}
+        onClick={onIncrement}
       >
         <IoIosAdd />
       </button>

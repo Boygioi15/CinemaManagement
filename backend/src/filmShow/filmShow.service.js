@@ -301,6 +301,7 @@ export class FilmShowService {
         },
       })
       .select("showDate")
+      .sort({ showDate: 1 })
       .lean();
 
     const arrayShowDates = filmShows.map((item) => item.showDate);
@@ -394,8 +395,7 @@ export class FilmShowService {
     };
   };
   static cancelFilmShow = async (filmShowId) => {
-    return await filmShowModel.findByIdAndUpdate({
-      filmShowId,
+    return await filmShowModel.findByIdAndUpdate(filmShowId, {
       cancelled: true,
     });
   };
