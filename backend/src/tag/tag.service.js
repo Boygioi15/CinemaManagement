@@ -19,5 +19,5 @@ export class TagService {
       throw new Error("Tag not found.");
     }
     return deletedTag;
-  };  
+  };
 }

@@ -9,6 +9,7 @@ import SuccessDialog from "../../components/SuccessDialog";
 import FailedDialog from "../../components/FailedDialog";
 import TicketTypeModal from "../../components/AnotherRule/TicketTypeModal";
 import EmployeeAccount from "../../components/AnotherRule/EmployeeAcount";
+import TagModal from "../../components/AnotherRule/TagModal";
 
 const AnotherRule = () => {
   const [tags, setTags] = useState([]);
@@ -85,14 +86,8 @@ const AnotherRule = () => {
       render: (_, row) => (
         <div className="flex space-x-3">
           <button
-            className="text-blue-600 hover:text-blue-800"
-            onClick={() => handleEditClick(row)}
-          >
-            <FiEdit2 className="w-4 h-4" />
-          </button>
-          <button
             className="text-red-600 hover:text-red-800"
-            onClick={() => handleDelete(row)}
+            onClick={() => handleDeleteTag(row)}
           >
             <FiTrash2 className="w-4 h-4" />
           </button>
@@ -174,6 +169,18 @@ const AnotherRule = () => {
     setIsConfirmModalOpen(true); // Hiển thị modal xác nhận
   };
 
+  //Xóa thể loại phim
+  const handleDeleteTag = async (data) => {
+    setSelectedItem(data);
+    setActiveModal("Xóa thể loại phim");
+    setMode("delete"); // Chế độ xóa
+    setDialogData({
+      title: "Xóa thể loại phim",
+      message: "Bạn có chắc chắn muốn xóa thể loại phim này?",
+    });
+    setIsConfirmModalOpen(true); // Hiển thị modal xác nhận
+  };
+
   // Xử lý lưu dữ liệu cho từng modal
   const handleConfirmClick = async () => {
     setIsConfirmModalOpen(false);
@@ -204,19 +211,12 @@ const AnotherRule = () => {
           });
         }
       } else if (activeModal === "Thể loại phim") {
-        if (mode === "edit") {
-          // Logic cho "edit" thể loại phim
-          setDialogData({
-            title: "Cập nhật thành công",
-            message: `Thể loại phim đã được cập nhật thành công.`,
-          });
-        } else {
-          // Logic cho "add" thể loại phim
-          setDialogData({
-            title: "Thêm mới thành công",
-            message: `Thể loại phim mới đã được thêm thành công.`,
-          });
-        }
+        await axios.post("http://localhost:8000/api/tags", selectedItem);
+        // Logic cho "add" thể loại phim
+        setDialogData({
+          title: "Thêm mới thành công",
+          message: `Thể loại phim mới đã được thêm thành công.`,
+        });
       } else if (activeModal === "Tài khoản") {
         if (mode === "edit") {
           // Logic cho "edit" tài khoản
@@ -240,6 +240,31 @@ const AnotherRule = () => {
           message: "Xóa loại vé thành công",
         });
         setTicketTypes((prev) => {
+          const updatedList = prev.filter(
+            (item) => item._id !== selectedItem._id
+          );
+
+          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
+          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+          if (currentPage > totalPages && totalPages > 0) {
+            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+            setCurrentPage(totalPages);
+          } else if (updatedList.length === 0) {
+            // Nếu không còn dữ liệu, quay lại trang 1
+            setCurrentPage(1);
+          }
+
+          return updatedList;
+        });
+      } else if (activeModal === "Xóa thể loại phim") {
+        await axios.delete(
+          `http://localhost:8000/api/tags/${selectedItem._id}`
+        );
+        setDialogData({
+          title: "Thành công",
+          message: "Xóa thể loại phim thành công",
+        });
+        setTags((prev) => {
           const updatedList = prev.filter(
             (item) => item._id !== selectedItem._id
           );
@@ -310,7 +335,6 @@ const AnotherRule = () => {
             ? "Bạn có chắc chắn muốn chỉnh sửa tài khoản này?"
             : "Bạn có muốn thêm tài khoản mới?",
       });
-      fetchTicketTypes();
     }
 
     // Gọi dialog xác nhận với loại hành động tương ứng
@@ -459,13 +483,13 @@ const AnotherRule = () => {
           mode={mode}
         />
       )}
-      {/* {activeModal === "Thể loại phim" && (
-        <ProductModal
+      {activeModal === "Thể loại phim" && (
+        <TagModal
           isOpen={true}
           onClose={handleCloseModal}
-          onSave={handleSave}
+          onSave={handleEditConfirm}
         />
-      )} */}
+      )}
       {activeModal === "Tài khoản" && (
         <EmployeeAccount
           isOpen={true}
