@@ -42,11 +42,9 @@ const ViewModal = ({ isOpen, onClose, filmShowDetail }) => {
           <div className="flex justify-between gap-4">
             <div className="w-1/2">
               <label className="block text-gray-700 font-semibold mb-1">
-                Số ghế đã đặt
+                Dạng phim
               </label>
-              <p className="text-gray-600">
-                {filmShowDetail.lockedSeats.length}
-              </p>
+              <p className="text-gray-600">{filmShowDetail.showType}</p>
             </div>
             <div className="w-1/2">
               <label className="block text-gray-700 font-semibold mb-1">

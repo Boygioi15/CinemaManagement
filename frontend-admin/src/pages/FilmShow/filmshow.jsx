@@ -47,6 +47,9 @@ const FilmShow = () => {
             `http://localhost:8000/api/films/${show.film}/getFilmDetail`
           );
           let filmName = filmRes.data.data.name;
+
+          const twoDthreeD = filmRes.data.data.twoDthreeD; // Giả sử mảng là ['2D', '3D']
+          const result = twoDthreeD.join(", ");
           if (show.cancelled === true) {
             console.log("true");
 
@@ -93,6 +96,7 @@ const FilmShow = () => {
             showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
             room: roomName,
             status: status,
+            showType: result,
             //  seatList: seatList.join(", "),
           };
         })
