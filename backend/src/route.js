@@ -30,6 +30,7 @@ router.use("/api/payment", paymentRouter);
 router.use("/api/param", paramRouter);
 router.use("/api/debug", debugRouter);
 router.use("/api/statistics", statisticRouter);
+router.use("/api/promotion", );
 router.use("/api/permission", permissionRouter);
 router.use((req, res) => {
   res.status(404).send("Not found route");
