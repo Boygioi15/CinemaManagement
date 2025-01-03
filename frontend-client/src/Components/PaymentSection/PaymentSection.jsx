@@ -7,7 +7,7 @@ const PaymentSection = ({ selectedFood }) => {
   const [isLoading, setIsLoading] = useState(false); // State quản lý trạng thái loading
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const { user } = useAuth(); // Lấy user từ context
-  const [pro, setPro] = useState;
+  const [pro, setPro] = useState(null);
   const totalPrice = selectedFood.reduce(
     (sum, food) => sum + food.quantity * food.price,
     0
@@ -43,7 +43,7 @@ const PaymentSection = ({ selectedFood }) => {
         },
         additionalItems,
         totalPrice,
-        promotionId: pro._id,
+        promotionId: pro?._id,
       });
 
       if (response && response.payUrl) {
@@ -86,13 +86,19 @@ const PaymentSection = ({ selectedFood }) => {
       </div>
 
       <div className="flex flex-col items-end max-w-md w-full border-l-2 pl-6 py-4">
-        <div className="flex justify-between w-full ">
+        <div className="flex flex-col  w-full ">
           <p className="text-lg">Tạm tính</p>
           <p className="text-xl font-bold">{totalPrice.toLocaleString()} VNĐ</p>
-          <p className="text-lg">Khuyễ mãi</p>
-          <p className="text-xl font-bold">{pro.discountRate}</p>
+          <p className="text-lg">Khuyến mãi</p>
+          <p className="text-xl font-bold">{+pro?.discountRate} %</p>
           <p className="text-lg">Tổng tiền</p>
-          <p className="text-xl font-bold">{totalPrice.toLocaleString()} VNĐ</p>
+          <p className="text-xl font-bold">
+            {(
+              totalPrice -
+              (totalPrice * +pro?.discountRate) / 100
+            ).toLocaleString()}
+            VNĐ
+          </p>
         </div>
 
         <div className="w-full mt-2">
