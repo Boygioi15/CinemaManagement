@@ -31,6 +31,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  totalMoneyAfterDisscount: {
+    type: Number,
+    required: true,
+  },
   tickets: [{
     name: {
       type: String,
@@ -96,6 +100,10 @@ const orderSchema = new mongoose.Schema({
   invalidReason_Served: {
     type: String,
     default: "",
+  },
+  promotionID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "promotions",
   },
 }, {
   timestamps: true,
