@@ -22,6 +22,10 @@ const additionalItemSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    loyalPointRate: {
+      type: Number,
+      default: 1,
+    },
   },
   {
     timestamps: true,

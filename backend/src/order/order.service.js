@@ -11,6 +11,7 @@ import roomModel from "../room/room.schema.js";
 import { TicketTypeModel } from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
+import userModel from "../user/user.schema.js";
 export class OrderService {
   static getAllOrders = async () => {
     return await orderModel.find().sort({ createdAt: -1 });
@@ -166,8 +167,14 @@ export class OrderService {
         discountRate = promotion.discountRate || 0;
       }
     }
+
+    let totalLoyalPoint = 0;
+    const loyalPointUser = await userModel.findById(customerId);
+      if (loyalPointUser) {
+        totalLoyalPoint = loyalPointUser.loyalPoint || 0;
+      }
   
-    const totalMoneyAfterDiscount = totalPrice - (totalPrice * discountRate) / 100;
+    const totalMoneyAfterDiscount = totalPrice - (totalPrice * discountRate) / 100 - totalLoyalPoint;
   
     const newOrder = await orderModel.create({
       roomName,

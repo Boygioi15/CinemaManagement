@@ -19,6 +19,10 @@ const TicketTypeSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  loyalPointRate: {
+    type: Number,
+    default: 1,
+  },
 });
 const ParamSchema = new mongoose.Schema({});
 const AgeRestrictionModel = mongoose.model(
