@@ -10,6 +10,7 @@ import filmModel from "../film/film.schema.js";
 import roomModel from "../room/room.schema.js";
 import { TicketTypeModel } from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
+import promotionModel from "../promotion/promotion.schema.js";
 export class OrderService {
   static getAllOrders = async () => {
     return await orderModel.find().sort({ createdAt: -1 });
@@ -111,26 +112,28 @@ export class OrderService {
     filmShowId = null,
     totalPrice,
     seats = null,
+    promotionId = null,
   }) => {
     console.log(additionalItems);
     let filmShow = {};
     let film = {};
     let roomName = null;
+  
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
-      roomName = await roomModel.findById(filmShow.roomId).roomName;
+      roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       if (!filmShow) throw new Error("Film Show not found");
-
+  
       film = await filmModel.findById(filmShow.film);
     }
-
+  
     const ageRestriction = film?.ageRestriction || null;
     const dataFilmShow = {
       filmName: filmShow?.film?.name || null,
       date: filmShow?.showDate || null,
       time: filmShow?.showTime || null,
     };
-
+  
     const seatNames = seats.map((seat) => seat.seatName);
     const nItems = await Promise.all(
       additionalItems.map(async (items) => {
@@ -142,7 +145,7 @@ export class OrderService {
         };
       })
     );
-
+  
     const nTickets = await Promise.all(
       tickets.map(async (ticket) => {
         const ticketData = await TicketTypeModel.findById(ticket._id);
@@ -153,22 +156,35 @@ export class OrderService {
         };
       })
     );
-
+  
     console.log(nItems, nTickets);
+  
+    let discountRate = 0;
+    if (promotionId) {
+      const promotion = await promotionModel.findById(promotionId);
+      if (promotion) {
+        discountRate = promotion.discountRate || 0;
+      }
+    }
+  
+    const totalMoneyAfterDiscount = totalPrice - (totalPrice * discountRate) / 100;
+  
     const newOrder = await orderModel.create({
       roomName,
       seatNames,
       ageRestriction,
       ...dataFilmShow,
       totalMoney: totalPrice,
+      totalMoneyAfterDiscount,
       items: nItems,
       tickets: nTickets,
       customerID: customerId,
+      promotionID: promotionId,
       customerInfo,
     });
-
+  
     newOrder.verifyCode = generateRandomVerifyCode();
     console.log(newOrder);
     return await newOrder.save();
-  };
+  };  
 }

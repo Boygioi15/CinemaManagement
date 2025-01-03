@@ -17,7 +17,7 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       throw new Error("Thông tin người dùng bị thiếu!");
     }
-    const { tickets, additionalItems, filmShowId, totalPrice, seats } =
+    const { tickets, additionalItems, filmShowId, totalPrice, seats,promotionId } =
       req.body;
 
     let totalPriceByServer = 0;
