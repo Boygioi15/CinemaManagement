@@ -49,6 +49,7 @@ const DailyReport = () => {
       const response = await axios.get(
         `http://localhost:8000/api/statistics/ticket-rate-by-film?selectedDate=${day}`
       );
+      console.log(response.data);
 
       const data = response.data;
       const transformedData = data.map((item) => ({
