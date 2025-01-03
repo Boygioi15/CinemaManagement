@@ -11,6 +11,7 @@ import roomModel from "../room/room.schema.js";
 import { TicketTypeModel } from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
+import userModel from "../user/user.schema.js";
 export class OrderService {
   static getAllOrders = async () => {
     return await orderModel.find().sort({ createdAt: -1 });
@@ -118,22 +119,22 @@ export class OrderService {
     let filmShow = {};
     let film = {};
     let roomName = null;
-  
+
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
       roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       if (!filmShow) throw new Error("Film Show not found");
-  
+
       film = await filmModel.findById(filmShow.film);
     }
-  
+
     const ageRestriction = film?.ageRestriction || null;
     const dataFilmShow = {
       filmName: filmShow?.film?.name || null,
       date: filmShow?.showDate || null,
       time: filmShow?.showTime || null,
     };
-  
+
     const seatNames = seats.map((seat) => seat.seatName);
     const nItems = await Promise.all(
       additionalItems.map(async (items) => {
@@ -142,10 +143,11 @@ export class OrderService {
           name: item.name,
           unitPrice: item.price,
           quantity: items.quantity,
+          loyalPointRate: item.loyalPointRate,
         };
       })
     );
-  
+
     const nTickets = await Promise.all(
       tickets.map(async (ticket) => {
         const ticketData = await TicketTypeModel.findById(ticket._id);
@@ -153,12 +155,13 @@ export class OrderService {
           name: ticketData.title,
           unitPrice: ticketData.price,
           quantity: ticket.quantity,
+          loyalPointRate: ticketData.loyalPointRate,
         };
       })
     );
-  
+
     console.log(nItems, nTickets);
-  
+
     let discountRate = 0;
     if (promotionId) {
       const promotion = await promotionModel.findById(promotionId);
@@ -166,9 +169,25 @@ export class OrderService {
         discountRate = promotion.discountRate || 0;
       }
     }
-  
-    const totalMoneyAfterDiscount = totalPrice - (totalPrice * discountRate) / 100;
-  
+
+    let totalLoyalPoint = 0;
+    const loyalPointUser = await userModel.findById(customerId);
+    if (loyalPointUser) {
+      totalLoyalPoint = loyalPointUser.loyalPoint || 0;
+    }
+
+    const totalMoneyAfterDiscount =
+      totalPrice - (totalPrice * discountRate) / 100 - totalLoyalPoint;
+
+    const earnedLoyalPoints = [
+      ...nTickets.map(
+        (ticket) => ticket.unitPrice * ticket.quantity * ticket.loyalPointRate
+      ),
+      ...nItems.map(
+        (item) => item.unitPrice * item.quantity * item.loyalPointRate
+      ),
+    ].reduce((sum, points) => sum + points, 0);
+
     const newOrder = await orderModel.create({
       roomName,
       seatNames,
@@ -182,9 +201,15 @@ export class OrderService {
       promotionID: promotionId,
       customerInfo,
     });
-  
+
     newOrder.verifyCode = generateRandomVerifyCode();
     console.log(newOrder);
+
+    if (customerId) {
+      await userModel.findByIdAndUpdate(customerId, {
+        $inc: { loyalPoint: earnedLoyalPoints },
+      });
+    }
     return await newOrder.save();
-  };  
+  };
 }

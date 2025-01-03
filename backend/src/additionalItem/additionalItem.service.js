@@ -78,6 +78,7 @@ export class AdditionalItemService {
             name: additionalItem.name,
             quantity: item.quantity,
             unitPrice: additionalItem.price.toString(),
+            loyalPointRate: additionalItem.loyalPointRate,
           };
         })
       );

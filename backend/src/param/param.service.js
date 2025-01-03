@@ -47,6 +47,7 @@ export class ParamService {
             name: ticketDetail.title,
             quantity: ticket.quantity,
             unitPrice: ticketDetail.price.toString(),
+            loyalPointRate: ticketDetail.loyalPointRate,
           };
         })
       );
