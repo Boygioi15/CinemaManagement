@@ -14,7 +14,7 @@ import axios from "axios";
 import ScheduleChooseBox from "../../Components/ScheduleChooseBox";
 import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import TicketType from "../../Components/TicketType";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { getShowTimeOfDateByFilmId } from "../../config/api";
 import formatCurrencyNumber from "../../utils/FormatCurrency";
@@ -627,7 +627,7 @@ const FilmDetailPage = () => {
         }
       </div>
     
-      <div className="flex flex-col justify-center items-center space-y-12">
+      {selectedFilmShow && <div className="flex flex-col justify-center items-center space-y-12">
         <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
         <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
           {additionalItemSelections.map((food) => {
@@ -668,7 +668,7 @@ const FilmDetailPage = () => {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {roomDetail && roomSeat && <BottomBar filmName="Alibaba" date="20-12-2024" time="10:30" roomName={roomDetail.roomName} seatSelections={roomSeat} 
           ticketSelections={ticketSelection}
@@ -931,7 +931,7 @@ function BottomBar({
   }
   const { user } = useAuth(); // Lấy user từ context
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
-  
+  const navigate = useNavigate();
   const handleCreatePayment = async () => {
     if(!localStorage.getItem("accessToken")){
       alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");

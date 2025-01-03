@@ -118,7 +118,7 @@ export class OrderService {
     let roomName = null;
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
-      roomName = await roomModel.findById(filmShow.roomId).roomName;
+      roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       if (!filmShow) throw new Error("Film Show not found");
 
       film = await filmModel.findById(filmShow.film);
