@@ -99,8 +99,8 @@ export const createPayment = async ({
 export const createPromotion = async (formData) => {
   return await axios.post(`/promotion`, { ...formData });
 };
-export const getCurrentPro = async () => {
-  return await axios.get(`/promotion`);
+export const getCurrentPro = async (date) => {
+  return await axios.get(`/promotion`, { params: { date } });
 };
 export const updatePro = async (id) => {
   return await axios.patch(`/promotion/${id}`);

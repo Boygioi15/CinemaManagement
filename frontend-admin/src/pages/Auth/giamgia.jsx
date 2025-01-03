@@ -38,14 +38,30 @@ const KhuyenMai = () => {
     discountRate: "",
   });
   const handleSubmit = async () => {
-    const formattedStart = new Date(formData.beginDate).toISOString(); // ISO 8601
+    // Hàm chuyển đổi sang múi giờ Việt Nam (GMT+7)
+    const toVietnamTime = (date) => {
+      const vnOffset = 7 * 60; // 7 giờ x 60 phút
+      const localDate = new Date(date);
+      localDate.setMinutes(localDate.getMinutes() + vnOffset); // Cộng thêm offset
+      return localDate.toISOString(); // Trả về ISO string
+    };
+
+    // Định dạng ngày về múi giờ Việt Nam
+    const formattedStart = toVietnamTime(formData.beginDate);
     formData.beginDate = formattedStart;
-    const formattedEnd = new Date(formData.endDate).toISOString(); // ISO 8601
+    const formattedEnd = toVietnamTime(formData.endDate);
     formData.endDate = formattedEnd;
+
     console.log(formData);
-    const response = await createPromotion(formData);
+
+    // Gửi dữ liệu lên server
+    const response = await axios.post(
+      "http://localhost:8000/api/promotion",
+      formData
+    );
     console.log(response);
   };
+
   const handleStartTimeChange = (value) => {
     // Chuyển đổi thời gian sang định dạng ISO với múi giờ địa phương và lưu vào flashSaleData
     const isoStartTime = convertToISOWithLocalTime(value);
