@@ -19,8 +19,11 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 
 const filmTab = {
-  name: "Danh sách phim",
-  path: "/admin/phim",
+  // name: "Danh sách phim",
+  // path: "/admin/phim",
+  // icon: <FiFilm className="w-6 h-6" />,
+  name: "Khuyến mãi",
+  path: "/admin/tab/khuyen-mai",
   icon: <FiFilm className="w-6 h-6" />,
 };
 const filmShowListTab = {
@@ -124,7 +127,7 @@ const RootLayout = () => {
       if (roleList.includes("additional_item")) {
         updatedTab.push(otherProductTab);
       }
-      if(roleList.includes("admin_param")){
+      if (roleList.includes("admin_param")) {
         updatedTab.push(otherRuleTab);
       }
       if (roleList.includes("employee")) {
@@ -135,13 +138,13 @@ const RootLayout = () => {
       }
       setTabs(updatedTab);
     }
-  }
-  useEffect(()=>{()=>
-    console.log("Hi")
-    fetchRole()},[signInNotification]
-  )
-  useEffect(()=>{
-    if (!localStorage.getItem('access_token')) {
+  };
+  useEffect(() => {
+    () => console.log("Hi");
+    fetchRole();
+  }, [signInNotification]);
+  useEffect(() => {
+    if (!localStorage.getItem("access_token")) {
       alert("Có lỗi khi xác thực người dùng, vui lòng đăng nhập lại");
       signOut();
       navigate("/admin/auth");

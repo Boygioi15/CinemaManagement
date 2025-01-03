@@ -21,6 +21,7 @@ import UserList from "./pages/User/userList";
 import AnotherRule from "./pages/Rule/AnotherRule";
 import Role from "./pages/Role/role";
 import Employee from "./pages/Employee/employee";
+import KhuyenMai from "./pages/Auth/giamgia";
 
 import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
     path: "/admin",
     element: <RootLayout />,
     children: [
+      {
+        path: "/admin/tab/khuyen-mai",
+        element: <KhuyenMai />,
+      },
       {
         path: "/admin/tab/tao-ve",
         element: <TaoVe />,
@@ -129,7 +134,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/auth",
     element: <LoginPage />,
-    index: true
+    index: true,
   },
   {
     path: "/admin/auth/forgot-pass",
