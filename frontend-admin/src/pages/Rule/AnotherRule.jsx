@@ -42,6 +42,7 @@ const AnotherRule = () => {
   const ticketTypeColumns = [
     { header: "Tên loại vé", key: "title" },
     { header: "Giá", key: "price" },
+    { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Ghế Đôi",
       key: "isPair",

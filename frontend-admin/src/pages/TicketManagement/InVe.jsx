@@ -234,6 +234,11 @@ const InVe = () => {
       key: "totalMoney",
       render: (value) => formatCurrencyNumber(value),
     },
+    // {
+    //   header: "Tổng tiền sau KM(VNĐ)",
+    //   key: "priceAfterDiscount",
+    //   render: (value) => formatCurrencyNumber(value),
+    // },
     {
       header: "Trạng thái",
       key: "status",

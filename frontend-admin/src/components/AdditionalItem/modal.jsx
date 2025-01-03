@@ -13,12 +13,13 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
     _id: item?._id || "",
     name: item?.name || "",
     price: item?.price || "",
+    loyalPointRate: item?.loyalPointRate || "",
     thumbnailURL: item?.thumbnailURL || "",
     file: null,
   });
 
   const isFormValid = useMemo(() => {
-    const requiredFields = ["name", "price", "thumbnailURL"];
+    const requiredFields = ["name", "price", "thumbnailURL", "loyalPointRate"];
     console.log(formData);
 
     return requiredFields.every((field) => !!formData[field]); // Chuyển đổi giá trị thành Boolean
@@ -65,10 +66,27 @@ const ItemModal = ({ isOpen, onClose, item, onSave, mode }) => {
                 </label>
                 <input
                   type="text"
-                  name="voice"
+                  name="price"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, price: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Điểm tích lũy (%)
+                </label>
+                <input
+                  type="number"
+                  name="loyalPointRate"
+                  value={formData.loyalPointRate}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      loyalPointRate: e.target.value,
+                    }))
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
