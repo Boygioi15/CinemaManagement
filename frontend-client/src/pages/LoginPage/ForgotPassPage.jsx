@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { resetPassword } from "../../config/api";
 import { toast } from "react-toastify";
 import background from "../../assets/fg_background.png";
-
+import { useEffect } from "react";
 function ForgotPasswordPage() {
    useEffect(() => {
       document.title = "Quên mật khẩu";

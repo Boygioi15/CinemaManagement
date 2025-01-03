@@ -113,7 +113,7 @@ const RootLayout = () => {
         updatedTab.push(filmShowListTab, filmShowChartTab);
       }
       if (roleList.includes("ticket")) {
-        updatedTab.push(offlineTicketTab, printTicketTab, serveTicketTab);
+        updatedTab.push(printTicketTab, serveTicketTab);
       }
       if (roleList.includes("room")) {
         updatedTab.push(roomTab);
