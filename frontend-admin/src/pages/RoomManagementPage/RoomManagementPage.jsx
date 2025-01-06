@@ -173,13 +173,6 @@ const RoomManagementPage = () => {
           </button>
         </div>
       </div>
-
-      <SeatModal
-        isOpen={isAddRoomModalOpen}
-        onClose={handleCloseAddRoomModal}
-        onSave={handleSaveChanges}
-        mode={modalMode}
-      />
       <RefreshLoader isOpen={loading} />
     </div>
   );

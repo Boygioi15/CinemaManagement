@@ -275,7 +275,7 @@ const AdditionalItemManagementPage = () => {
           </button>
         </div>
       </div>
-      <ItemModal
+      <AdditionalItemModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onSave={handleEditConfirm}
