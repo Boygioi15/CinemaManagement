@@ -25,21 +25,7 @@ import OrderFailPage from "./pages/OrderFailed";
 import OrderSuccessPage from "./pages/OrderSuccess";
 import RulePage from "./pages/RulePage";
 import UpdateDocumentTitle from "./utils/UpdataDocumentTittle";
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
 import RedirectToRoot from "../../frontend-admin/src/components/RedirectToRoot";
->>>>>>> Stashed changes
-=======
-
-import RedirectToRoot from "../../frontend-admin/src/components/RedirectToRoot";
->>>>>>> Stashed changes
-=======
-
-import RedirectToRoot from "../../frontend-admin/src/components/RedirectToRoot";
->>>>>>> Stashed changes
 const router = createBrowserRouter([
   {
     path: "/",

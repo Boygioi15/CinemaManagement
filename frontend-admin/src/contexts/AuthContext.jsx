@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = () => {
     localStorage.removeItem('access_token');
-    setSignInNotification(false);    
   };
   const fetchEmployeeDetail = async () => {
     const token = localStorage.getItem('access_token');
