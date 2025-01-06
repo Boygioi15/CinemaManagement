@@ -1,39 +1,36 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import RootLayout from "./layouts/RootLayout/RootLayout";
-import AdminFilm from "./pages/FilmManagement/FilmList";
 
-import InVe from "./pages/TicketManagement/InVe";
-import TaoVe from "./pages/TicketManagement/TaoVe";
-import PhucVuVe from "./pages/TicketManagement/PhucVuVe";
+import ReactDOMServer from "react-dom/server";
 
-import InfrasManage from "./pages/Infrastructure/InfrasManage";
-import FilmShow from "./pages/FilmShow/filmshow";
-import FilmShowChart from "./pages/FilmShow/filmshowChart";
-
-import DailyReport from "./pages/Statistic/DailyReport";
-import RenevueOverview from "./pages/Statistic/RenevueOverview";
-import LoginPage from "./pages/Auth/login";
-import ForgotPasswordPage from "./pages/Auth/fotgotpass";
-
-import AdditionalItem from "./pages/AdditionalItem/item";
-import UserList from "./pages/User/userList";
-import AnotherRule from "./pages/Rule/AnotherRule";
-import Role from "./pages/Role/role";
-import Employee from "./pages/Employee/employee";
-import KhuyenMai from "./pages/Auth/giamgia";
-
-import RedirectToRoot from "./components/RedirectToRoot";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./index.css";
-import "./App.css";
-import RoomCreate from "./pages/CreateRoom/RoomCreate";
-import OffLineTicketBooking from "./pages/OfflineTicketBooking/OfflineTicketBooking";
-import ViewRoompage from "./pages/ViewRoomPage/ViewRoomPage";
 import { AuthProvider } from "./contexts/AuthContext";
+import RootLayout from "./layouts/RootLayout/RootLayout";
+
+import "./index.css";
 
 import { FiShield } from "react-icons/fi";
-import ReactDOMServer from "react-dom/server";
+import FilmManagementPage from "./pages/FilmManagementPage/FilmManagementPage";
+import FilmShowListPage from "./pages/FilmShowManagement/FilmShowListPage";
+import FilmShowChartPage from "./pages/FilmShowManagement/FilmShowChartPage";
+import TicketPrintListPage from "./pages/TicketManagement/TicketPrintListPage";
+import TicketServeListPage from "./pages/TicketManagement/TicketServeListPage";
+import RoomManagementPage from "./pages/RoomManagementPage/RoomManagementPage";
+import UserAccountManagementPage from "./pages/UserAccountManagementPage/UserAccountManagementPage";
+import EmployeeManagementPage from "./pages/EmployeeManagementPage/EmployeeManagementPage";
+import RoleDivisionPage from "./pages/RoleDivisionPage/RoleDivisionPage";
+import AdminParamPage from "./pages/AdminParam/AdminParamPage";
+
+import AuthPage from "./pages/AuthPage/AuthPage";
+import CreateOfflineTicketPage from "./pages/TicketManagement/CreateOfflineTicketPage/OfflineTicketBookingPage";
+import CreateRoomPage from "./pages/RoomManagementPage/CreateRoomPage/CreateRoomPage";
+import ViewRoompage from "./pages/RoomManagementPage/ViewRoomPage/ViewRoomPage";
+
+import RedirectToRoot from "./components/RedirectToRoot";
+import StatisticPage from "./pages/StatisticPage/StatisticPage";
+import PromotionManagementPage from "./pages/PromotionManagementPage/PromotionManagementPage";
+import AdditionalItemManagementPage from "./pages/AdditionalItemManagementPage/AdditionalItemManagementPage";
+
 
 const generateIconURL = () => {
   const svgString = ReactDOMServer.renderToString(<FiShield size={64} />);
@@ -70,87 +67,75 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/admin/tab/khuyen-mai",
-        element: <KhuyenMai />,
+        path: "film-management",
+        element: <FilmManagementPage />
       },
       {
-        path: "/admin/tab/tao-ve",
-        element: <TaoVe />,
+        path: "film-show-management/chart",
+        element: <FilmShowChartPage />
       },
       {
-        path: "/admin/tab/duyet-ve",
-        element: <InVe />,
+        path: "film-show-management/list",
+        element: <FilmShowListPage />
       },
       {
-        path: "/admin/tab/phuc-vu-ve",
-        element: <PhucVuVe />,
+        path: "ticket-management/print-list",
+        element: <TicketPrintListPage />
       },
       {
-        path: "/admin/phim",
-        element: <AdminFilm />,
+        path: "ticket-management/serve-list",
+        element: <TicketServeListPage />
       },
       {
-        path: "/admin/suat-phim",
-        element: <FilmShow />,
+        path: "room-management",
+        element: <RoomManagementPage />
       },
       {
-        path: "/admin/suat-phim/bieu-do",
-        element: <FilmShowChart />,
+        path: "user-account",
+        element: <UserAccountManagementPage />
       },
       {
-        path: "/admin/co-so-vat-chat",
-        element: <InfrasManage />,
+        path: "employee-management",
+        element: <EmployeeManagementPage />
       },
       {
-        path: "/admin/thong-ke/ngay",
-        element: <DailyReport />,
+        path: "role-division",
+        element: <RoleDivisionPage />
       },
       {
-        path: "/admin/thong-ke/nam",
-        element: <RenevueOverview />,
+        path: "admin-param",
+        element: <AdminParamPage />
       },
       {
-        path: "/admin/san-pham-khac",
-        element: <AdditionalItem />,
+        path: "statistic",
+        element: <StatisticPage />
       },
       {
-        path: "/admin/tai-khoan-nguoi-dung",
-        element: <UserList />,
+        path: "promotion-management",
+        element: <PromotionManagementPage />
       },
       {
-        path: "/admin/quy-dinh-khac",
-        element: <AnotherRule />,
-      },
-      {
-        path: "/admin/phan-quyen",
-        element: <Role />,
-      },
-      {
-        path: "/admin/nhan-vien",
-        element: <Employee />,
-      },
+        path: "additionalItem",
+        element: <AdditionalItemManagementPage />
+      }
     ],
   },
   {
     path: "/admin/auth",
-    element: <LoginPage />,
+    element: <AuthPage />,
     index: true,
   },
   {
-    path: "/admin/auth/forgot-pass",
-    element: <ForgotPasswordPage />,
-  },
-  {
     path: "/create-room",
-    element: <RoomCreate />,
+    element: <CreateRoomPage />,
   },
   {
     path: "/view-room/:id",
     element: <ViewRoompage />,
   },
   {
-    path: "/offline-ticket",
-    element: <OffLineTicketBooking />,
+    path: "/create-offline-ticket",
+    element: <CreateOfflineTicketPage />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

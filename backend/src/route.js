@@ -33,7 +33,7 @@ router.use("/api/statistics", statisticRouter);
 router.use("/api/promotion", promotionRouter);
 router.use("/api/permission", permissionRouter);
 router.use((req, res) => {
-  res.status(404).send("Not found route");
+  res.status(404).json({ success: false, message: "Not found route" });
 });
 
 export default router;

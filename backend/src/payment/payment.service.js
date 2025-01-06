@@ -8,10 +8,19 @@ import { FilmShowService } from "../filmShow/filmShow.service.js";
 import { EmailService } from "../email/email.service.js";
 import expressAsyncHandler from "express-async-handler";
 import orderModel from "../order/order.schema.js";
+import promotionModel from "../promotion/promotion.schema.js";
 export class PaymentService {
   static createPayment = async (req, res) => {
     try {
       const totalPrice = req.body.totalPrice || 0;
+      let priceAfterDiscount = totalPrice;
+      if (req.body.promotionId) {
+        console.log("P1");
+        const promotion = await promotionModel.findById(req.body.promotionId);
+        priceAfterDiscount =
+          (totalPrice * (100 - +promotion.discountRate)) / 100.0;
+        console.log(priceAfterDiscount);
+      }
       const {
         accessKey,
         secretKey,
@@ -38,15 +47,12 @@ export class PaymentService {
         }
         transactionData.seats = filteredSeat;
       }
-      const amount = totalPrice;
-
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
         return res.status(400).json({
           statusCode: 400,
           message: "Invalid amount",
         });
-        transactionData.seats[i];
       }
 
       const orderId = new mongoose.Types.ObjectId();
@@ -90,6 +96,7 @@ export class PaymentService {
         signature,
       });
       // Axios request with error handling
+      console.log(priceAfterDiscount);
       const result = await axios({
         method: "POST",
         url: "https://test-payment.momo.vn/v2/gateway/api/create",

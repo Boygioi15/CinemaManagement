@@ -1,113 +1,122 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  verifyCode: {
-    type: String,
-  },
-  filmName: {
-    type: String,
-    required: false,
-  },
-  ageRestriction: {
-    type: String,
-    required: false,
-  },
-  date: {
-    type: String,
-    required: false,
-  },
-  time: {
-    type: String,
-    required: false,
-  },
-  roomName: {
-    type: String,
-    required: false,
-  },
-  seatNames: [{
-    type: String,
-  }, ],
-  totalMoney: {
-    type: Number,
-    required: true,
-  },
-  totalMoneyAfterDisscount: {
-    type: Number,
-    required: true,
-  },
-  tickets: [{
-    name: {
+const orderSchema = new mongoose.Schema(
+  {
+    verifyCode: {
+      type: String,
+    },
+    filmName: {
       type: String,
       required: false,
     },
-    quantity: {
+    ageRestriction: {
       type: String,
       required: false,
     },
-    unitPrice: {
+    date: {
       type: String,
       required: false,
     },
-  }, ],
-  items: [{
-    name: {
+    time: {
       type: String,
       required: false,
     },
-    quantity: {
+    roomName: {
       type: String,
       required: false,
     },
-    unitPrice: {
-      type: String,
-      required: false,
-    },
-  }, ],
-  customerID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-  },
-  customerInfo: {
-    name: {
-      type: String,
+    seatNames: [
+      {
+        type: String,
+      },
+    ],
+    totalMoney: {
+      type: Number,
       required: true,
     },
-    email: {
-      type: String,
+    totalMoneyAfterDiscount: {
+      type: Number,
       required: true,
     },
-    phone: {
+    tickets: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        unitPrice: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
+    items: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        unitPrice: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
+    customerID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
+    customerInfo: {
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
+    online: {
+      type: Boolean,
+      default: true,
+    },
+    printed: {
+      type: Boolean,
+      default: false,
+    },
+    served: {
+      type: Boolean,
+      default: false,
+    },
+    invalidReason_Printed: {
       type: String,
-      required: true,
+      default: "",
+    },
+    invalidReason_Served: {
+      type: String,
+      default: "",
+    },
+    promotionID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "promotions",
     },
   },
-  online: {
-    type: Boolean,
-    default: true,
-  },
-  printed: {
-    type: Boolean,
-    default: false,
-  },
-  served: {
-    type: Boolean,
-    default: false,
-  },
-  invalidReason_Printed: {
-    type: String,
-    default: "",
-  },
-  invalidReason_Served: {
-    type: String,
-    default: "",
-  },
-  promotionID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "promotions",
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
 const orderModel = mongoose.model("orders", orderSchema);
 export default orderModel;

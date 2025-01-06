@@ -114,6 +114,13 @@ class Employee_AuthController {
       data: await Employee_AuthService.fetchAccount(req),
     });
   });
+
+  validateJWT = expressAsyncHandler(async (req, res, next) => {
+    return res.status(200).json({
+      msg: "Legit JWT",
+      success: true,
+    });
+  });
 }
 const user_AuthController = new User_AuthController(),
   employee_AuthController = new Employee_AuthController();

@@ -83,14 +83,17 @@ export const createPayment = async ({
   totalPrice,
   filmShowId = null,
   seats = null,
+  promotionId=null,
   tickets = null,
   additionalItems = null,
 }) => {
+  console.log(promotionId)
   return await axios.post(`/payment`, {
     customerInfo,
     totalPrice,
     filmShowId,
     seats,
+    promotionId,
     tickets,
     additionalItems,
   });

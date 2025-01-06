@@ -13,6 +13,11 @@ router.get("/user/sign-out", user_AuthController.signOut);
 router.post("/user/refresh-token", user_AuthController.handleRefreshToken);
 router.get("/user/account", validateToken, user_AuthController.fetchAccount);
 
+router.post(
+  "/employee/validateJWT",
+  validateToken,
+  employee_AuthController.validateJWT
+);
 router.post("/employee/log-in", employee_AuthController.signIn);
 router.get("/employee/sign-out", employee_AuthController.signOut);
 
