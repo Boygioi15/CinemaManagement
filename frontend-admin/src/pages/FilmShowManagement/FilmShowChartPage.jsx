@@ -155,7 +155,7 @@ const FilmShowChartPage = () => {
       </div>
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">
-          {new Date(startDate).toLocaleDateString("vi-VN", {
+          {new Date(startDate).toLocaleDateString( {
             weekday: "long",
             year: "numeric",
             month: "long",

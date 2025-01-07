@@ -7,7 +7,6 @@ import FilmShowModal from "../../components/Modal/FilmShowModal";
 import ViewModal from "../../components/Modal/FilmShow_FilmDetailModal";
 import RefreshLoader from "../../components/Loading";
 import { BiRefresh } from "react-icons/bi";
-import DatePicker from "react-datepicker";
 import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
 import FailedDialog from "../../components/Dialog/FailedDialog";
@@ -98,7 +97,7 @@ const FilmShowListPage = () => {
           return {
             ...show,
             film: filmName,
-            showDate: new Date(show.showDate).toLocaleDateString("vi-VN"),
+            showDate: new Date(show.showDate).toLocaleDateString(),
             room: roomName,
             status: status,
             showType: result,
@@ -339,7 +338,7 @@ const FilmShowListPage = () => {
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => {
+                onChange={(e) => {  
                   const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
                   setSelectedDate(localDate); // Cập nhật state
                 }}

@@ -204,7 +204,7 @@ const TicketPrintListPage = () => {
       setOrders(
         response.data.map((item) => ({
           ...item,
-          date: new Date(item.date).toLocaleDateString("vi-VN"), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
+          date: new Date(item.date).toLocaleDateString(), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
         }))
       );
     } catch (error) {
