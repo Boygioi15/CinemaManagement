@@ -1,20 +1,37 @@
 import orderModel from "./order.schema.js";
-import { RoomService } from "../room/room.service.js";
+import {
+  RoomService
+} from "../room/room.service.js";
 import filmShowModel from "../filmShow/filmShow.schema.js";
-import { AdditionalItemService } from "../additionalItem/additionalItem.service.js";
-import { ParamService } from "../param/param.service.js";
-import { generateRandomVerifyCode } from "../ulitilities/ultilitiesFunction.js";
-import { customError } from "../middlewares/errorHandlers.js";
-import { FilmService } from "../film/film.service.js";
+import {
+  AdditionalItemService
+} from "../additionalItem/additionalItem.service.js";
+import {
+  ParamService
+} from "../param/param.service.js";
+import {
+  generateRandomVerifyCode
+} from "../ulitilities/ultilitiesFunction.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
+import {
+  FilmService
+} from "../film/film.service.js";
 import filmModel from "../film/film.schema.js";
 import roomModel from "../room/room.schema.js";
-import { TicketTypeModel } from "../param/param.schema.js";
+import {
+  TicketTypeModel
+} from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
 export class OrderService {
   static getAllOrders = async () => {
-    return await orderModel.find().sort({ createdAt: -1 });
+    return await orderModel.find().sort({
+      createdAt: -1
+    });
   };
+
   static getOrderBy_id = async (_id) => {
     try {
       const ticket = await orderModel
@@ -30,12 +47,10 @@ export class OrderService {
   static disapprovePrinted = async (_id, reason) => {
     try {
       const order = await orderModel.findByIdAndUpdate(
-        _id,
-        {
+        _id, {
           served: false,
           invalidReason_Printed: reason,
-        },
-        {
+        }, {
           new: true,
         }
       );
@@ -50,12 +65,10 @@ export class OrderService {
   static disapproveServed = async (_id, reason) => {
     try {
       const order = await orderModel.findByIdAndUpdate(
-        _id,
-        {
+        _id, {
           served: false,
           invalidReason_Served: reason,
-        },
-        {
+        }, {
           new: true,
         }
       );
@@ -75,11 +88,9 @@ export class OrderService {
     }
 
     return await orderModel.findByIdAndUpdate(
-      _id,
-      {
+      _id, {
         printed: true,
-      },
-      {
+      }, {
         new: true,
       }
     );
@@ -93,11 +104,9 @@ export class OrderService {
     }
 
     return await orderModel.findByIdAndUpdate(
-      _id,
-      {
+      _id, {
         served: true,
-      },
-      {
+      }, {
         new: true,
       }
     );
@@ -185,4 +194,11 @@ export class OrderService {
     console.log(newOrder);
     return await newOrder.save();
   };
+
+
+
+}
+
+export class OrderHelper {
+
 }
