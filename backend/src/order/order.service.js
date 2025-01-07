@@ -251,9 +251,15 @@ export class OrderService {
   };
 
   // Function to get all orders with details
-  static getAllOrders = async (query = {}) => {
+  static getAllOrders = async (query = {}, userId = null) => {
     try {
-      const orders = await orderModel.find(query);
+
+      const searchQuery = userId ? {
+        ...query,
+        'customerInfo.customerRef': new mongoose.Types.ObjectId(userId)
+      } : query;
+
+      const orders = await orderModel.find(searchQuery);
 
       const ordersWithDetails = await Promise.all(
         orders.map(async (order) => {

@@ -19,7 +19,10 @@ class OrderController {
 
   getAllOrders = expressAsyncHandler(async (req, res) => {
     try {
-      const orders = await OrderService.getAllOrders();
+      const {
+        userId
+      } = req.query
+      const orders = await OrderService.getAllOrders({}, userId);
       res.status(200).json(orders);
     } catch (error) {
       res.status(500).json({
