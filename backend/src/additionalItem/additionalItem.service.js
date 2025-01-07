@@ -5,7 +5,10 @@ export class AdditionalItemService {
   // Tạo mới một additional item
   static createAdditionalItem = async (data) => {
     const newItem = new additionalItemModel(data);
-
+    const {price} = data;
+    if (price <= 0 ) {
+      throw customError("Giá của sản phẩm phải là một số nguyên không âm", 400);
+    }
     const response = await newItem.save();
     return response;
   };
@@ -13,6 +16,9 @@ export class AdditionalItemService {
     const { name, price } = updateData;
     if (!name || !price) {
       throw customError("Vui lòng nhập đủ các trường", 400);
+    }
+    if (price <= 0 ) {
+      throw customError("Giá của sản phẩm phải là một số nguyên không âm", 400);
     }
     const oldAdditional = await additionalItemModel.findByIdAndUpdate(
       additionalItemID,
