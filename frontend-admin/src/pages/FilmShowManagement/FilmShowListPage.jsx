@@ -325,7 +325,7 @@ const FilmShowListPage = () => {
                   }`}
                 />
               </button>
-              <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
+              <h1 className="text-xl font-bold text-gray-800 ">Lọc:</h1>
               <div className="flex items-center w-[250px]">
                 <input
                   type="text"
@@ -387,11 +387,9 @@ const FilmShowListPage = () => {
               Suất phim mới +
             </button>
           </div>
-          <div className="flex items-center justify-between ml-10 w-full">
+          <div className="flex items-center justify-between ml-20 w-full">
             <div className="flex items-center gap-4 justify-between">
-              <span className="text-xl font-bold text-gray-800 mb-4">
-                Sắp xếp:
-              </span>
+              <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
               <div className=" flex items-center w-[200px] ">
                 <select
                   value={sortOption}

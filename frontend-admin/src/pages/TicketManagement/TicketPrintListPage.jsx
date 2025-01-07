@@ -448,7 +448,7 @@ const TicketPrintListPage = () => {
               }`}
             />
           </button>
-          <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
+          <h1 className="text-xl font-bold text-gray-800">Lọc:</h1>
           <div className="flex items-center w-[200px]">
             <input
               type="text"
@@ -504,8 +504,8 @@ const TicketPrintListPage = () => {
             </select>
           </div>
         </div>
-        <div className="ml-10 flex items-center gap-4">
-          <span className="text-xl font-bold text-gray-800 mb-4">Sắp xếp:</span>
+        <div className="ml-20 flex items-center gap-4">
+          <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
           <div className="relative inline-block w-64 ">
             <select
               value={sortOption}

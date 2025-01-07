@@ -292,7 +292,7 @@ const EmployeeManagementPage = () => {
                 }`}
               />
             </button>
-            <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
+            <h1 className="text-xl font-bold text-gray-800 ">Lọc:</h1>
             <div className="flex items-center w-[300px]">
               <input
                 type="text"
@@ -312,10 +312,8 @@ const EmployeeManagementPage = () => {
               />
             </div>
           </div>
-          <div className="flex items-center gap-4 ml-10">
-            <span className="text-xl font-bold text-gray-800 mb-4">
-              Sắp xếp:
-            </span>
+          <div className="flex items-center gap-4 ml-20">
+            <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
             <div className="relative inline-block w-64">
               <select
                 value={sortOption}
