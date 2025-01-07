@@ -243,7 +243,7 @@ export class FilmShowService {
     if (!filmShow) throw customError("Không tìm thấy suất phim", 400);
     const room = await roomModel.findById(filmShow.roomId);
     if (!filmShow) throw customError("Không tìm thấy phòng", 400);
-    await checkBookedSeatsValidity(filmShow, room, seats);
+    await this.checkBookedSeatsValidity(filmShow, room, seats);
 
     filmShow.lockedSeats.push(
       ...seats.map((seat) => ({ i: seat.i, j: seat.j }))

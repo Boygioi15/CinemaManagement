@@ -31,14 +31,14 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     }
 
     if (ticketSelections) {
-      const totalTickets = tickets.reduce(
+      const totalTickets = ticketSelections.reduce(
         (sum, ticket) => sum + ticket.quantity,
         0
       );
       let noOfSeatSelected = 0;
-      for (let i = 0; i < seats.length; i++) {
-        for (let j = 0; j < seats[0].length; j++) {
-          if (seats[i][j].selected) {
+      for (let i = 0; i < seatSelections.length; i++) {
+        for (let j = 0; j < seatSelections[0].length; j++) {
+          if (seatSelections[i][j].selected) {
             noOfSeatSelected++;
           }
         }
@@ -89,7 +89,7 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
             const newSeat = seatSelections[i][j];
             newSeat.i = i;
             newSeat.j = j;
-            filteredSeat.push(newSeat);
+            seats.push(newSeat);
           }
         }
       }

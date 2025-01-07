@@ -529,6 +529,7 @@ const FilmDetailPage = () => {
             {availableDates.map((dateGroup) => {
               return (
                 <ScheduleChooseBox
+                  key={dateGroup.date}
                   date={dateGroup.date}
                   isSelected={selectedDate === dateGroup.date}
                   onClick={() => setSelectedDate(dateGroup.date)}
@@ -547,6 +548,7 @@ const FilmDetailPage = () => {
                   {dataGroup?.showTimes?.map((value) => {
                     return (
                       <ShowtimeChooseBox
+                        key={value.showTime}
                         time={value.showTime}
                         isSelected={selectedShowtime === value.showTime}
                         onClick={() => {
@@ -983,7 +985,7 @@ function BottomBar({
     try {
       const token = localStorage.getItem("accessToken");
       if(!token){
-        alert("Để tiến hành thanh toán, xin vui lòng bạn hãy đăng nhập");
+        alert("Để tiến hành thanh toán, xin bạn vui lòng hãy đăng nhập");
         navigate("/auth")
       }
       const response = await createPayment({
@@ -998,26 +1000,25 @@ function BottomBar({
         seatSelections: seatSelections,
         ticketSelections: ticketSelections.filter((element) => element.quantity !== 0)
         .map(element => {
-          return {_id: element._id, quantity: quantity }
+          return {_id: element._id, quantity: element.quantity }
         }),
         additionalItemSelections: additionalItemSelections.filter(
           (element) => element.quantity !== 0
         ).map(element => {
-          return {_id: element._id, quantity: quantity }
+          return {_id: element._id, quantity: element.quantity }
         }),
         promotionId: pro?._id,
       });
+      console.log(response)
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
       } else {
+        console.log("HI")
         alert("Không có URL thanh toán, vui lòng thử lại.");
       }
     } catch (error) {
-      if(error.response.data.status===401){
-        alert("Thông tin người dùng không hợp lệ! Vui lòng đăng nhập lại! ");
-      }else{
-        alert("Có lỗi xảy ra khi tiến hành thanh toán: Lỗi: " + error.response.data.msg);
-      }
+      console.log("HI")
+      console.log(error)
     }
   };
 
