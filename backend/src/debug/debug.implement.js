@@ -1,10 +1,11 @@
-import orderModel from "../order/order.schema.js";
+import {
+  orderModel
+} from "../order/order.schema.js";
 import expressAsyncHandler from "express-async-handler";
 class DebugImplement {
   resetOrderAll = expressAsyncHandler(async (req, res) => {
     try {
-      const result = await orderModel.updateMany(
-        {}, // No filter, so it applies to all documents
+      const result = await orderModel.updateMany({}, // No filter, so it applies to all documents
         {
           $set: {
             printed: false,
@@ -28,17 +29,17 @@ class DebugImplement {
   });
 
   resetOrderID = expressAsyncHandler(async (req, res, err) => {
-    const { id } = req.params;
+    const {
+      id
+    } = req.params;
     try {
       const order = await orderModel.findByIdAndUpdate(
-        id,
-        {
+        id, {
           printed: false,
           served: false,
           invalidReason_Printed: "",
           invalidReason_Served: "",
-        },
-        {
+        }, {
           new: true,
         }
       );

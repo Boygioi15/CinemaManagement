@@ -1,5 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
-import orderModel from "../order/order.schema.js";
+import {
+  orderModel
+} from "../order/order.schema.js";
 import filmShowModel from "../filmShow/filmShow.schema.js";
 import roomModel from "../room/room.controller.js";
 import filmModel from "../film/film.schema.js";
@@ -7,12 +9,20 @@ import filmModel from "../film/film.schema.js";
 class StatisticController {
   //Tỷ lệ vé đã phục vụ hoặc in theo ngày
   getTicketServeRate = expressAsyncHandler(async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = { $or: [{ printed: true }, { served: true }] };
+    let matchCondition = {
+      $or: [{
+        printed: true
+      }, {
+        served: true
+      }]
+    };
     if (selectedDate) {
       const selectedDateObj = new Date(selectedDate);
       const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
@@ -24,27 +34,41 @@ class StatisticController {
         $lte: formattedEndDate,
       };
     }
-    const totalTickets = await orderModel.aggregate([
-      { $unwind: "$tickets" },
+    const totalTickets = await orderModel.aggregate([{
+        $unwind: "$tickets"
+      },
       {
         $group: {
           _id: null,
-          totalQuantity: { $sum: { $toInt: "$tickets.quantity" } },
+          totalQuantity: {
+            $sum: {
+              $toInt: "$tickets.quantity"
+            }
+          },
         },
       },
     ]);
-    const servedTickets = await orderModel.aggregate([
-      {
+    const servedTickets = await orderModel.aggregate([{
         $match: {
           ...matchCondition,
-          $or: [{ printed: true }, { served: true }],
+          $or: [{
+            printed: true
+          }, {
+            served: true
+          }],
         },
       },
-      { $unwind: "$tickets" },
+      {
+        $unwind: "$tickets"
+      },
       {
         $group: {
           _id: null,
-          totalQuantity: { $sum: { $toInt: "$tickets.quantity" } },
+          totalQuantity: {
+            $sum: {
+              $toInt: "$tickets.quantity"
+            }
+          },
         },
       },
     ]);
@@ -56,12 +80,20 @@ class StatisticController {
 
   // Tỷ lệ các thể loại vé đã phục vụ hoặc in theo ngày
   getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = { $or: [{ printed: true }, { served: true }] };
+    let matchCondition = {
+      $or: [{
+        printed: true
+      }, {
+        served: true
+      }]
+    };
     if (selectedDate) {
       const selectedDateObj = new Date(selectedDate);
       const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
@@ -73,28 +105,49 @@ class StatisticController {
         $lte: formattedEndDate,
       };
     }
-    const tickets = await orderModel.aggregate([
-      { $match: matchCondition },
-      { $unwind: "$tickets" },
+    const tickets = await orderModel.aggregate([{
+        $match: matchCondition
+      },
+      {
+        $unwind: "$tickets"
+      },
       {
         $group: {
           _id: "$tickets.name",
-          totalQuantity: { $sum: { $toInt: "$tickets.quantity" } },
+          totalQuantity: {
+            $sum: {
+              $toInt: "$tickets.quantity"
+            }
+          },
         },
       },
-      { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
+      {
+        $project: {
+          name: "$_id",
+          totalQuantity: 1,
+          _id: 0
+        }
+      },
     ]);
     res.json(tickets);
   });
 
   // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ hoặc in theo ngày
   getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = { $or: [{ printed: true }, { served: true }] };
+    let matchCondition = {
+      $or: [{
+        printed: true
+      }, {
+        served: true
+      }]
+    };
     if (selectedDate) {
       const selectedDateObj = new Date(selectedDate);
       const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
@@ -106,28 +159,49 @@ class StatisticController {
         $lte: formattedEndDate,
       };
     }
-    const items = await orderModel.aggregate([
-      { $match: matchCondition },
-      { $unwind: "$items" },
+    const items = await orderModel.aggregate([{
+        $match: matchCondition
+      },
+      {
+        $unwind: "$items"
+      },
       {
         $group: {
           _id: "$items.name",
-          totalQuantity: { $sum: { $toInt: "$items.quantity" } },
+          totalQuantity: {
+            $sum: {
+              $toInt: "$items.quantity"
+            }
+          },
         },
       },
-      { $project: { name: "$_id", totalQuantity: 1, _id: 0 } },
+      {
+        $project: {
+          name: "$_id",
+          totalQuantity: 1,
+          _id: 0
+        }
+      },
     ]);
     res.json(items);
   });
 
   // Tỷ lệ vé theo phim đã phục vụ hoặc in theo ngày
   getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = { $or: [{ printed: true }, { served: true }] };
+    let matchCondition = {
+      $or: [{
+        printed: true
+      }, {
+        served: true
+      }]
+    };
     if (selectedDate) {
       const selectedDateObj = new Date(selectedDate);
       const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
@@ -139,16 +213,29 @@ class StatisticController {
         $lte: formattedEndDate,
       };
     }
-    const tickets = await orderModel.aggregate([
-      { $match: matchCondition },
-      { $unwind: "$tickets" },
+    const tickets = await orderModel.aggregate([{
+        $match: matchCondition
+      },
+      {
+        $unwind: "$tickets"
+      },
       {
         $group: {
           _id: "$filmName",
-          totalTickets: { $sum: { $toInt: "$tickets.quantity" } },
+          totalTickets: {
+            $sum: {
+              $toInt: "$tickets.quantity"
+            }
+          },
         },
       },
-      { $project: { filmName: "$_id", totalTickets: 1, _id: 0 } },
+      {
+        $project: {
+          filmName: "$_id",
+          totalTickets: 1,
+          _id: 0
+        }
+      },
     ]);
 
     res.json(tickets);
@@ -156,26 +243,39 @@ class StatisticController {
 
   // Tổng doanh số vé, bắp, đồ uống đã phục vụ hoặc in theo từng tháng
   getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
-    const { year } = req.query;
+    const {
+      year
+    } = req.query;
     if (!year) {
       res.status(400);
       throw new Error("Vui lòng cung cấp năm!");
     }
-    const monthlyStats = await orderModel.aggregate([
-      {
+    const monthlyStats = await orderModel.aggregate([{
         $match: {
-          $or: [{ printed: true }, { served: true }],
+          $or: [{
+            printed: true
+          }, {
+            served: true
+          }],
         },
       },
       {
         $project: {
-          month: { $month: "$createdAt" },
-          year: { $year: "$createdAt" },
+          month: {
+            $month: "$createdAt"
+          },
+          year: {
+            $year: "$createdAt"
+          },
           tickets: "$tickets",
           items: "$items",
         },
       },
-      { $match: { year: parseInt(year) } },
+      {
+        $match: {
+          year: parseInt(year)
+        }
+      },
       {
         $group: {
           _id: "$month",
@@ -187,9 +287,12 @@ class StatisticController {
                   input: "$tickets",
                   as: "t",
                   in: {
-                    $multiply: [
-                      { $toDouble: "$$t.quantity" }, // Chuyển quantity thành số nguyên
-                      { $toDouble: "$$t.unitPrice" }, // Chuyển unitPrice thành số thực
+                    $multiply: [{
+                        $toDouble: "$$t.quantity"
+                      }, // Chuyển quantity thành số nguyên
+                      {
+                        $toDouble: "$$t.unitPrice"
+                      }, // Chuyển unitPrice thành số thực
                     ],
                   },
                 },
@@ -204,8 +307,7 @@ class StatisticController {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [
-                      {
+                    $cond: [{
                         $regexMatch: {
                           input: "$$i.name",
                           regex: "Bắp",
@@ -213,9 +315,12 @@ class StatisticController {
                         },
                       },
                       {
-                        $multiply: [
-                          { $toDouble: "$$i.quantity" },
-                          { $toDouble: "$$i.unitPrice" },
+                        $multiply: [{
+                            $toDouble: "$$i.quantity"
+                          },
+                          {
+                            $toDouble: "$$i.unitPrice"
+                          },
                         ],
                       },
                       0,
@@ -233,8 +338,7 @@ class StatisticController {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [
-                      {
+                    $cond: [{
                         $regexMatch: {
                           input: "$$i.name",
                           regex: "Nước",
@@ -242,9 +346,12 @@ class StatisticController {
                         },
                       },
                       {
-                        $multiply: [
-                          { $toDouble: "$$i.quantity" },
-                          { $toDouble: "$$i.unitPrice" },
+                        $multiply: [{
+                            $toDouble: "$$i.quantity"
+                          },
+                          {
+                            $toDouble: "$$i.unitPrice"
+                          },
                         ],
                       },
                       0,
@@ -265,7 +372,11 @@ class StatisticController {
           _id: 0,
         },
       },
-      { $sort: { month: 1 } },
+      {
+        $sort: {
+          month: 1
+        }
+      },
     ]);
     res.json(monthlyStats);
   });
@@ -273,7 +384,9 @@ class StatisticController {
   // Tổng doanh thu ngày tính dựa vào tổng tiền (totalMoney) cho tất cả các đơn hàng đã phục vụ hoặc in
   // Doanh thu từ vé theo ngày và số lượng sản phẩm khác "bắp" và "nước" theo ngày
   getDailyStatistics = expressAsyncHandler(async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
@@ -284,11 +397,17 @@ class StatisticController {
     const formattedStartDate = startOfDay.toString();
     const formattedEndDate = endOfDay.toString();
     // Tính tổng doanh thu (totalMoney), doanh thu từ vé, và sản phẩm khác "bắp" và "nước"
-    const dailyStats = await orderModel.aggregate([
-      {
+    const dailyStats = await orderModel.aggregate([{
         $match: {
-          $or: [{ printed: true }, { served: true }],
-          date: { $gte: formattedStartDate, $lte: formattedEndDate },
+          $or: [{
+            printed: true
+          }, {
+            served: true
+          }],
+          date: {
+            $gte: formattedStartDate,
+            $lte: formattedEndDate
+          },
         },
       },
       {
@@ -301,7 +420,9 @@ class StatisticController {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$totalMoney" }, // Tổng doanh thu từ tất cả các đơn hàng
+          totalRevenue: {
+            $sum: "$totalMoney"
+          }, // Tổng doanh thu từ tất cả các đơn hàng
           totalTicketRevenue: {
             $sum: {
               $sum: {
@@ -309,9 +430,12 @@ class StatisticController {
                   input: "$tickets",
                   as: "t",
                   in: {
-                    $multiply: [
-                      { $toDouble: "$$t.quantity" }, // quantity của vé
-                      { $toDouble: "$$t.unitPrice" }, // đơn giá vé
+                    $multiply: [{
+                        $toDouble: "$$t.quantity"
+                      }, // quantity của vé
+                      {
+                        $toDouble: "$$t.unitPrice"
+                      }, // đơn giá vé
                     ],
                   },
                 },
@@ -325,10 +449,8 @@ class StatisticController {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [
-                      {
-                        $and: [
-                          {
+                    $cond: [{
+                        $and: [{
                             $not: {
                               $regexMatch: {
                                 input: "$$i.name",
@@ -349,9 +471,12 @@ class StatisticController {
                         ],
                       },
                       {
-                        $multiply: [
-                          { $toDouble: "$$i.quantity" },
-                          { $toDouble: "$$i.unitPrice" },
+                        $multiply: [{
+                            $toDouble: "$$i.quantity"
+                          },
+                          {
+                            $toDouble: "$$i.unitPrice"
+                          },
                         ],
                       },
                       0,
@@ -368,10 +493,8 @@ class StatisticController {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [
-                      {
-                        $and: [
-                          {
+                    $cond: [{
+                        $and: [{
                             $not: {
                               $regexMatch: {
                                 input: "$$i.name",
@@ -391,7 +514,9 @@ class StatisticController {
                           },
                         ],
                       },
-                      { $toDouble: "$$i.quantity" },
+                      {
+                        $toDouble: "$$i.quantity"
+                      },
                       0,
                     ],
                   },
@@ -420,7 +545,9 @@ class StatisticController {
   });
 
   getFilmStatisticsByDate = async (req, res) => {
-    const { selectedDate } = req.query;
+    const {
+      selectedDate
+    } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
@@ -451,17 +578,31 @@ class StatisticController {
     const events = [];
     const filmShows = await filmShowModel
       .find({
-        showDate: { $gte: startOfDayUTC, $lte: endOfDayUTC },
+        showDate: {
+          $gte: startOfDayUTC,
+          $lte: endOfDayUTC
+        },
       })
-      .populate({ path: "roomId", select: "roomName" })
+      .populate({
+        path: "roomId",
+        select: "roomName"
+      })
       .populate({
         path: "film",
         select: "name filmDuration filmDescription tagsRef",
-        populate: { path: "tagsRef", select: "name" },
+        populate: {
+          path: "tagsRef",
+          select: "name"
+        },
       })
       .exec();
     filmShows.forEach((show, index) => {
-      const { roomId, film, showTime, showDate } = show;
+      const {
+        roomId,
+        film,
+        showTime,
+        showDate
+      } = show;
       if (!roomId || !roomId.roomName) {
         console.warn(`Room not found for show: ${show._id}`);
         return;
@@ -491,7 +632,10 @@ class StatisticController {
       });
     });
     const rooms = Array.from(roomsSet);
-    return res.status(200).json({ rooms, events });
+    return res.status(200).json({
+      rooms,
+      events
+    });
   };
 }
 export default new StatisticController();

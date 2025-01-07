@@ -31,6 +31,7 @@ export class EmailService {
   };
 
   static sendEmailWithHTMLTemplate = async (to, subject, ticket) => {
+    console.log("🚀 ~ EmailService ~ sendEmailWithHTMLTemplate= ~ ticket:", ticket)
     try {
       const htmlTemplate = `
       <!DOCTYPE html>
@@ -72,15 +73,15 @@ export class EmailService {
           <table class="information">
             <tr>
               <th>PHIM</th>
-              <td>${ticket.filmName|| 'Không'}</td>
+              <td>${ticket?.filmShow?.filmName|| 'Không'}</td>
             </tr>
             <tr>
               <th>SUẤT CHIẾU</th>
-               <td>${(ticket.time && ticket.date) ? `${ticket.time}, ${ticket.date}` : 'Không'}</td>
+               <td>${(ticket?.filmShow?.showTime && ticket?.filmShow?.showDate) ? `${ticket?.filmShow?.showTime}, ${ticket?.filmShow?.showDate}` : 'Không'}</td>
             </tr>
             <tr>
               <th>PHÒNG CHIẾU</th>
-              <td>${ticket.roomName || 'Không'}</td>
+              <td>${ticket?.filmShow?.roomName || 'Không'}</td>
             </tr>
             <tr>
               <th>RẠP</th>
@@ -88,7 +89,7 @@ export class EmailService {
             </tr>
             <tr>
               <th>SỐ GHẾ</th>
-              <td>${ticket.seatNames?.length ? ticket.seatNames.join(", ") : 'Không'}</td>
+              <td>${ticket?.filmShow?.seatNames?.length ? ticket?.filmShow?.seatNames.join(", ") : 'Không'}</td>
             </tr>
             ${
               ticket.items.length > 0
@@ -101,10 +102,10 @@ export class EmailService {
                 : ""
             }
              ${
-               ticket.tickets.length > 0
+               ticket?.filmShow?.tickets.length > 0
                  ? `<tr>
                      <th>Loại vé</th>
-                     <td>${ticket.tickets
+                     <td>${ticket?.filmShow?.tickets
                        .map((item) => `${item.name} x${item.quantity}`)
                        .join(", ")}</td>
                    </tr>`
@@ -113,7 +114,7 @@ export class EmailService {
           </table>
       
           ${
-            ticket.items.length > 0 || ticket.tickets.length > 0
+            ticket.items.length > 0 || ticket?.filmShow?.tickets.length > 0
               ? (() => {
                   let currentIndex = 0;
                   return `
@@ -139,7 +140,7 @@ export class EmailService {
                         .join("")}
                       ${(() => {
                         currentIndex += ticket.items.length;
-                        return ticket.tickets
+                        return ticket?.filmShow?.tickets
                           .map(
                             (item, index) => `
                             <tr>
@@ -154,7 +155,7 @@ export class EmailService {
                       })()}
                       <tr style="background-color: #6b3fa4; color: white">
                         <td colspan="4">TỔNG TIỀN (VND)</td>
-                        <td>${ticket.totalMoney}</td>
+                        <td>${ticket.totalPrice}</td>
                       </tr>
                     </table>`;
                 })()
@@ -177,7 +178,7 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error("Error sending email:", error.message);
+      console.error("Error sending email:", error);
       return false;
     }
   };

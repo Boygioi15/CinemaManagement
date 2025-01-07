@@ -1,13 +1,18 @@
 import express from "express";
 import paymentController from "./payment.controller.js";
-import { checkOrderRequestComingFromFrontend } from "../middlewares/checkOrderRequestComingFromFrontend.js";
-import { checkPaymentResultFromMomo } from "../middlewares/checkPaymentResultFromMomo.js";
+import {
+  checkOrderRequestComingFromFrontend
+} from "../middlewares/checkOrderRequestComingFromFrontend.js";
+import {
+  validateToken
+} from "../middlewares/verifyToken.js";
 
 const router = express.Router();
 
 // Routes cho ticket
 router.post(
   "",
+  validateToken,
   checkOrderRequestComingFromFrontend,
   paymentController.createPayment
 );

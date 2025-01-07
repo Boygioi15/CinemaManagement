@@ -977,14 +977,11 @@ function BottomBar({
     }
     try {
       const response = await createPayment({
-        customerInfo: {
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-        },
-        tickets: ticketSelections.filter((element) => element.quantity !== 0),
-        seats: seatSelections,
-        additionalItems: additionalItemSelections.filter(
+        ticketSelections: ticketSelections.filter(
+          (element) => element.quantity !== 0
+        ),
+        seatSelections: seatSelections,
+        additionalItemSelections: additionalItemSelections.filter(
           (element) => element.quantity !== 0
         ),
         totalPrice: calculateTotalPrice(),
@@ -1174,9 +1171,7 @@ function BottomBar({
                   }`}
                 ></span>
               </span>
-              <span className="ml-3 text-lg">
-                {123123} điểm
-              </span>
+              <span className="ml-3 text-lg">{123123} điểm</span>
             </label>
           </div>
         </div>

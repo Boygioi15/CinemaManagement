@@ -6,7 +6,6 @@ import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 const PaymentSection = ({ selectedFood }) => {
   const [isLoading, setIsLoading] = useState(false); // State quản lý trạng thái loading
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
-  const { user } = useAuth(); // Lấy user từ context
   const [pro, setPro] = useState(null);
   const totalPrice = selectedFood.reduce(
     (sum, food) => sum + food.quantity * food.price,
@@ -15,14 +14,14 @@ const PaymentSection = ({ selectedFood }) => {
 
   const additionalItems = selectedFood.map((food) => {
     return {
-      id: food._id,
+      _id: food._id,
       quantity: food.quantity,
     };
   });
+  console.log("🚀 ~ additionalItems ~ additionalItems:", additionalItems);
   const handleGetPro = async () => {
     const response = await getCurrentPro(Date.now());
     setPro(response.data[0]);
-    console.log("123", response);
   };
   useEffect(() => {
     handleGetPro();
@@ -36,14 +35,8 @@ const PaymentSection = ({ selectedFood }) => {
         navigate("/auth");
       }
       const response = await createPayment({
-        customerInfo: {
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-        },
-        additionalItems,
+        additionalItemSelections: additionalItems,
         totalPrice,
-        promotionId: pro?._id,
       });
 
       if (response && response.payUrl) {

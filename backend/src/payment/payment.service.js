@@ -1,26 +1,37 @@
 import config from "./config.js";
 import crypto from "crypto";
 import axios from "axios";
-import { OrderService } from "../order/order.service.js";
+import {
+  OrderService
+} from "../order/order.service.js";
 import mongoose from "mongoose";
-import { Order_1Service } from "./Order_1/Order_1.service.js";
-import { FilmShowService } from "../filmShow/filmShow.service.js";
-import { EmailService } from "../email/email.service.js";
+import {
+  Order_1Service
+} from "./Order_1/Order_1.service.js";
+import {
+  FilmShowService
+} from "../filmShow/filmShow.service.js";
+import {
+  EmailService
+} from "../email/email.service.js";
 import expressAsyncHandler from "express-async-handler";
-import orderModel from "../order/order.schema.js";
+import {
+  orderModel
+} from "../order/order.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
 export class PaymentService {
   static createPayment = async (req, res) => {
     try {
       const totalPrice = req.body.totalPrice || 0;
-      let priceAfterDiscount = totalPrice;
-      if (req.body.promotionId) {
-        console.log("P1");
-        const promotion = await promotionModel.findById(req.body.promotionId);
-        priceAfterDiscount =
-          (totalPrice * (100 - +promotion.discountRate)) / 100.0;
-        console.log(priceAfterDiscount);
-      }
+      // let priceAfterDiscount = totalPrice;
+      // if (req.body.promotionId) {
+      //   const promotion = await promotionModel.findById(req.body.promotionId);
+      //   priceAfterDiscount =
+      //     (totalPrice * (100 - +promotion.discountRate)) / 100.0;
+      //   console.log(priceAfterDiscount);
+      // }
+
+
       const {
         accessKey,
         secretKey,
@@ -33,20 +44,23 @@ export class PaymentService {
       } = config;
 
       const transactionData = req.body || {};
-      if (transactionData.seats) {
+      if (transactionData.seatSelections) {
         const filteredSeat = [];
-        for (let i = 0; i < transactionData.seats.length; i++) {
-          for (let j = 0; j < transactionData.seats[0].length; j++) {
-            if (transactionData.seats[i][j].selected) {
-              const newSeat = transactionData.seats[i][j];
+        for (let i = 0; i < transactionData.seatSelections.length; i++) {
+          for (let j = 0; j < transactionData.seatSelections[0].length; j++) {
+            if (transactionData.seatSelections[i][j].selected) {
+              const newSeat = transactionData.seatSelections[i][j];
               newSeat.i = i;
               newSeat.j = j;
               filteredSeat.push(newSeat);
             }
           }
         }
-        transactionData.seats = filteredSeat;
+        transactionData.seatSelections = filteredSeat;
       }
+
+      let amount = totalPrice
+
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
         return res.status(400).json({
@@ -96,7 +110,6 @@ export class PaymentService {
         signature,
       });
       // Axios request with error handling
-      console.log(priceAfterDiscount);
       const result = await axios({
         method: "POST",
         url: "https://test-payment.momo.vn/v2/gateway/api/create",
@@ -108,9 +121,12 @@ export class PaymentService {
       });
       await Order_1Service.createNewEntry(orderId, signature);
 
-      const { filmShowId, seats } = req.body;
-      if (filmShowId && seats) {
-        await FilmShowService.appendLockedSeats(filmShowId, seats);
+      const {
+        filmShowId,
+        seatSelections
+      } = req.body;
+      if (filmShowId && seatSelections) {
+        await FilmShowService.appendLockedSeats(filmShowId, seatSelections);
       }
 
       return res.status(200).json(result.data);
@@ -128,13 +144,14 @@ export class PaymentService {
     }
   };
   static momoCallBackService = async (req, res) => {
-    const { resultCode, amount, orderId, extraData } = req.body;
+    const {
+      resultCode,
+      amount,
+      orderId,
+      extraData
+    } = req.body;
 
     const extraDataObj = JSON.parse(extraData);
-    console.log(
-      "🚀 ~ PaymentService ~ momoCallBackService= ~ extraDataObj:",
-      extraDataObj
-    );
     //success
     if (resultCode === 0) {
       // create order
@@ -145,32 +162,33 @@ export class PaymentService {
         if (!newOrder) throw customError("Tạo đơn hàng thất bại");
         // cuưa dăng nhap ma mua
 
-        if (!newOrder.customerID) {
-          await EmailService.sendEmailWithHTMLTemplate(
-            newOrder.customerInfo.email,
-            "Thư xác nhận đơn hàng",
-            newOrder
-          );
-        } else {
-          // user da dăng nhap
-          const user = await userModel.findById(newOrder.customerID);
-          await EmailService.sendEmailWithHTMLTemplate(
-            user.userEmail,
-            "Thư xác nhận đơn hàng",
-            newOrder
-          );
-        }
+
+        // user da dăng nhap
+        const orderDetail = await OrderService.getDetailOrder(newOrder._id);
+
+        await EmailService.sendEmailWithHTMLTemplate(
+          newOrder.customerInfo.email,
+          "Thư xác nhận đơn hàng",
+          orderDetail?.data
+        );
+
         return res.status(204).json(newOrder);
       } catch (error) {
         console.log("🚀 ~ PaymentService ~ callbackService= ~ error:", error);
-        const { filmShowId, seats } = extraDataObj;
+        const {
+          filmShowId,
+          seats
+        } = extraDataObj;
         if (filmShowId && seats) {
           await FilmShowService.releaseLockedSeats(filmShowId, seats);
         }
       }
     } else {
       // fail
-      const { filmShowId, seats } = extraDataObj;
+      const {
+        filmShowId,
+        seats
+      } = extraDataObj;
       if (filmShowId && seats) {
         await FilmShowService.releaseLockedSeats(filmShowId, seats);
       }

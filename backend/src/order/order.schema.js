@@ -113,6 +113,10 @@ const orderSchemaV2 = new mongoose.Schema({
   verifyCode: {
     type: String,
   },
+  createdDate: {
+    type: Date,
+    required: true,
+  },
   totalPrice: {
     type: Number,
     required: true,
@@ -138,6 +142,31 @@ const orderSchemaV2 = new mongoose.Schema({
       type: String,
       required: true,
     }
+  }
+}, {
+  timestamps: true,
+});
+
+const Orders_Decorators_Offline = new mongoose.Schema({
+  orderRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  printed: {
+    type: Boolean,
+    default: false,
+  },
+  served: {
+    type: Boolean,
+    default: false,
+  },
+  invalidReason_Printed: {
+    type: String,
+    default: "",
+  },
+  invalidReason_Served: {
+    type: String,
+    default: "",
   }
 }, {
   timestamps: true,
@@ -250,11 +279,9 @@ const Orders_Decorators_PointUsage = new mongoose.Schema({
   timestamps: true,
 });
 
-const orderModel = mongoose.model("orders", orderSchemaV2);
-const ordersDataFilmShowModel = mongoose.model("ordersData_FilmShow", Orders_Data_FilmShow);
-const ordersDecoratorsPointUsageModel = mongoose.model("orders_Decorators_PointUsage", Orders_Decorators_PointUsage);
-const ordersDecoratorsPromotionsModel = mongoose.model("orders_Decorators_Promotions", Orders_Decorators_Promotions);
-const ordersDataItemsModel = mongoose.model("orders_Data_Items", Orders_Data_Items);
-
-
-export default orderModel;
+export const orderModel = mongoose.model("orders", orderSchemaV2);
+export const ordersDataFilmShowModel = mongoose.model("ordersData_FilmShow", Orders_Data_FilmShow);
+export const ordersDecoratorsPointUsageModel = mongoose.model("orders_Decorators_PointUsage", Orders_Decorators_PointUsage);
+export const ordersDecoratorsPromotionsModel = mongoose.model("orders_Decorators_Promotions", Orders_Decorators_Promotions);
+export const ordersDataItemsModel = mongoose.model("orders_Data_Items", Orders_Data_Items);
+export const ordersDecoratorsOfflineModel = mongoose.model("orders_Decorators_Offline", Orders_Decorators_Offline);

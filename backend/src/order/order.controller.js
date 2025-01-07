@@ -1,4 +1,5 @@
 import {
+  OrderHelper,
   OrderService
 } from "./order.service.js";
 import expressAsyncHandler from "express-async-handler";
@@ -32,7 +33,7 @@ class OrderController {
       _id
     } = req.params;
     try {
-      const order = await OrderService.getOrderBy_id(_id);
+      const order = await OrderService.getDetailOrder(_id);
       if (!order) {
         return res.status(404).json({
           error: "Order not found!",
@@ -60,7 +61,7 @@ class OrderController {
       });
     }
 
-    const order = await OrderService.disapprovePrinted(_id, reason);
+    const order = await OrderHelper.disapprovePrinted(_id, reason);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",
@@ -82,7 +83,7 @@ class OrderController {
       });
     }
 
-    const order = await OrderService.disapproveServed(_id, reason);
+    const order = await OrderHelper.disapproveServed(_id, reason);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",
@@ -90,11 +91,12 @@ class OrderController {
     }
     res.status(200).json(order);
   });
+
   markOrderPrinted = expressAsyncHandler(async (req, res) => {
     const {
       _id
     } = req.params;
-    const order = await OrderService.markOrderPrinted(_id);
+    const order = await OrderHelper.markOrderPrinted(_id);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",
@@ -106,7 +108,7 @@ class OrderController {
     const {
       _id
     } = req.params;
-    const order = await OrderService.markOrderServed(_id);
+    const order = await OrderHelper.markOrderServed(_id);
     if (!order) {
       return res.status(404).json({
         error: "Order not found!",
