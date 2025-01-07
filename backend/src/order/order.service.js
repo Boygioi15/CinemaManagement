@@ -281,6 +281,32 @@ export class OrderService {
     }
   };
 
+  static getAllOrdersByUserId = async (userId = null) => {
+    try {
+
+      const orders = await orderModel.find({
+        'customerInfo.customerRef': new mongoose.Types.ObjectId(userId)
+      });
+
+      const ordersWithDetails = await Promise.all(
+        orders.map(async (order) => {
+          const orderDetails = await this.getDetailOrder(order._id);
+          return orderDetails.data;
+        })
+      );
+
+      return {
+        success: true,
+        data: ordersWithDetails
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  };
 }
 
 
