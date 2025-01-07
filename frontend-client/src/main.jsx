@@ -25,6 +25,7 @@ import OrderFailPage from "./pages/OrderFailed";
 import OrderSuccessPage from "./pages/OrderSuccess";
 import RulePage from "./pages/RulePage";
 import UpdateDocumentTitle from "./utils/UpdataDocumentTittle";
+import RedirectToRoot from "../../frontend-admin/src/components/RedirectToRoot";
 const router = createBrowserRouter([
   {
     path: "/",

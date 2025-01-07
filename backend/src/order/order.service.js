@@ -16,7 +16,6 @@ export class OrderService {
   static getAllOrders = async () => {
     return await orderModel.find().sort({ createdAt: -1 });
   };
-
   static getOrderBy_id = async (_id) => {
     try {
       const ticket = await orderModel
@@ -119,12 +118,10 @@ export class OrderService {
     let filmShow = {};
     let film = {};
     let roomName = null;
-
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
-      roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       if (!filmShow) throw new Error("Film Show not found");
-
+      roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       film = await filmModel.findById(filmShow.film);
     }
 
@@ -170,23 +167,8 @@ export class OrderService {
       }
     }
 
-    let totalLoyalPoint = 0;
-    const loyalPointUser = await userModel.findById(customerId);
-    if (loyalPointUser) {
-      totalLoyalPoint = loyalPointUser.loyalPoint || 0;
-    }
-
     const totalMoneyAfterDiscount =
-      totalPrice - (totalPrice * discountRate) / 100 - totalLoyalPoint;
-
-    const earnedLoyalPoints = [
-      ...nTickets.map(
-        (ticket) => ticket.unitPrice * ticket.quantity * ticket.loyalPointRate
-      ),
-      ...nItems.map(
-        (item) => item.unitPrice * item.quantity * item.loyalPointRate
-      ),
-    ].reduce((sum, points) => sum + points, 0);
+      totalPrice - (totalPrice * discountRate) / 100;
 
     const newOrder = await orderModel.create({
       roomName,
@@ -194,7 +176,7 @@ export class OrderService {
       ageRestriction,
       ...dataFilmShow,
       totalMoney: totalPrice,
-      totalMoneyAfterDiscount,
+      totalMoneyAfterDiscount: totalMoneyAfterDiscount,
       items: nItems,
       tickets: nTickets,
       customerID: customerId,

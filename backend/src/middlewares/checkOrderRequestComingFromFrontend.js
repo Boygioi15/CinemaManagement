@@ -17,9 +17,14 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       throw new Error("Thông tin người dùng bị thiếu!");
     }
-    const { tickets, additionalItems, filmShowId, totalPrice, seats,promotionId } =
-      req.body;
-
+    const {
+      tickets,
+      additionalItems,
+      filmShowId,
+      totalPrice,
+      seats,
+      promotionId,
+    } = req.body;
     let totalPriceByServer = 0;
 
     if (tickets) {
@@ -79,6 +84,19 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
       }
     }
     totalPriceByServer += vCount * 20000;
+    if (seats) {
+      let vCount = 0;
+      for (let i = 0; i < seats.length; i++) {
+        for (let j = 0; j < seats[i].length; j++) {
+          if (seats[i][j].selected) {
+            if (seats[i][j].seatType === "V") {
+              vCount++;
+            }
+          }
+        }
+      }
+      totalPriceByServer += vCount * 20000;
+    }
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
 

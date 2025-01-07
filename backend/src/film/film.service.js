@@ -71,7 +71,8 @@ export class FilmService {
 
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = filmData;
+    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } =
+      filmData;
     const tagsArray = JSON.parse(tagsRef);
     //console.log(filmData);
     // Kiểm tra tuổi
@@ -80,8 +81,16 @@ export class FilmService {
     const formattedTwoDthreeD = await FilmService.isValid2D3DArray(twoDthreeD);
     // Kiểm tra các thể loại phim (tags)
     await FilmService.validateTags(tagsArray);
+
+    if (filmDuration < 0) {
+      throw customError("Thời lượng phim phải là một số nguyên không âm");
+    }
+    if (filmDuration > 1000) {
+      throw customError("Thời lượng phim phải không được vượt quá 1000!");
+    }
     return await filmModel.create({
       ...rest,
+      filmDuration,
       tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,

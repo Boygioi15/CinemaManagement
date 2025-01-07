@@ -1,4 +1,8 @@
-import { AgeRestrictionModel, TicketTypeModel } from "./param.schema.js";
+import {
+  AgeRestrictionModel,
+  ParamModel,
+  TicketTypeModel
+} from "./param.schema.js";
 
 export class ParamService {
   static createAgeRestriction = async (ageResData) => {
@@ -57,4 +61,20 @@ export class ParamService {
       throw new Error(error.message);
     }
   };
+
+
+
+  static getParams = async () => {
+    const params = await ParamModel.findOne();
+    return params;
+  };
+
+  static updateParams = async (data) => {
+    const params = await ParamModel.findOneAndUpdate({}, data, {
+      new: true,
+      upsert: true,
+    });
+    return params;
+  };
+
 }

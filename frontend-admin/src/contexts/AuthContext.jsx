@@ -5,21 +5,18 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [employeeDetail, setEmployeeDetail] = useState(null);
-  const [signInNotification, setSignInNotification] = useState(false);
-  const signIn = (newToken) => {
+  const signIn = async (newToken) => {
     localStorage.setItem('access_token', newToken);
-    setSignInNotification(true);
+    await fetchEmployeeDetail();
   };
 
   const signOut = () => {
     localStorage.removeItem('access_token');
-    setSignInNotification(false);    
   };
-  useEffect(()=>{fetchEmployeeDetail()},[signInNotification])
   const fetchEmployeeDetail = async () => {
     const token = localStorage.getItem('access_token');
     if(!token){
-      throw new Error('Không có token');
+      return;
     }
     try {
       const response = await axios.get('http://localhost:8000/api/user/employee/get-employee-detail', {
@@ -44,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
   return (
-    <AuthContext.Provider value={{signIn, signOut, employeeDetail, fetchEmployeeDetail, signInNotification}}>
+    <AuthContext.Provider value={{signIn, signOut, employeeDetail, fetchEmployeeDetail}}>
       {children}
     </AuthContext.Provider>
   );

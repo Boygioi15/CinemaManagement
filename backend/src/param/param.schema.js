@@ -6,6 +6,28 @@ const AgeRestrictionSchema = new mongoose.Schema({
     required: true,
   },
 });
+
+const ParamSchema = new mongoose.Schema({
+  promotion_PointToReducedPriceRatio: {
+    type: Number,
+    default: 10,
+  },
+  promotion_PriceToPointRatio: {
+    type: Number,
+    default: 10,
+  },
+  addedPriceForCenterSeat: {
+    type: Number,
+    default: 10,
+  },
+  addedPriceForVIPSeat: {
+    type: Number,
+    default: 20,
+  }
+});
+
+
+
 const TicketTypeSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -24,11 +46,20 @@ const TicketTypeSchema = new mongoose.Schema({
     default: 1,
   },
 });
-const ParamSchema = new mongoose.Schema({});
+
+const ParamModel = mongoose.model(
+  "params",
+  ParamSchema
+);
+
 const AgeRestrictionModel = mongoose.model(
   "ageRestrictions",
   AgeRestrictionSchema
 );
 const TicketTypeModel = mongoose.model("ticketTypes", TicketTypeSchema);
 
-export { AgeRestrictionModel, TicketTypeModel };
+export {
+  AgeRestrictionModel,
+  TicketTypeModel,
+  ParamModel
+};

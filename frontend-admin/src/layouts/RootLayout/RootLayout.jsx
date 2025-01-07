@@ -19,42 +19,34 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 
 const filmTab = {
-  // name: "Danh sách phim",
-  // path: "/admin/phim",
-  // icon: <FiFilm className="w-6 h-6" />,
-  name: "Khuyến mãi",
-  path: "/admin/tab/khuyen-mai",
+  name: "Quản lý phim",
+  path: "/admin/film-management",
   icon: <FiFilm className="w-6 h-6" />,
 };
 const filmShowListTab = {
-  name: "Suất phim",
-  path: "/admin/suat-phim",
+  name: "Danh sách suất phim",
+  path: "/admin/film-show-management/list",
   icon: <FiTrello className="w-6 h-6" />,
 };
 const filmShowChartTab = {
   name: "Biểu đồ suất phim",
-  path: "/admin/suat-phim/bieu-do",
+  path: "/admin/film-show-management/chart",
   icon: <FiCalendar className="w-6 h-6" />,
 };
 const offlineTicketTab = {
   name: "Tạo vé trực tiếp",
-  path: "/offline-ticket",
+  path: "/create-offline-ticket",
   icon: <RxDashboard className="w-6 h-6" />,
 };
 const printTicketTab = {
-  name: "Duyệt vé",
-  path: "/admin/tab/duyet-ve",
-  icon: <FiPrinter className="w-6 h-6" />,
-};
-const serveTicketTab = {
-  name: "Bắp nước",
-  path: "/admin/tab/phuc-vu-ve",
+  name: "Duyệt vé",
+  path: "/admin/ticket-management/print-list",
   icon: <FiPackage className="w-6 h-6" />,
 };
-const roomTab = {
-  name: "Danh sách phòng",
-  path: "/admin/co-so-vat-chat",
-  icon: <FiList className="w-6 h-6" />,
+const serveTicketTab = {
+  name: "Phục vụ vé",
+  path: "/admin/ticket-management/serve-list",
+  icon: <FiPackage className="w-6 h-6" />,
 };
 const dailyReportTab = {
   name: "Báo cáo hằng ngày",
@@ -66,31 +58,49 @@ const revenueOverviewTab = {
   path: "/admin/thong-ke/nam",
   icon: <FiBarChart2 className="w-6 h-6" />,
 };
+
+
+const roomTab = {
+  name: "Quản lý phòng",
+  path: "/admin/room-management",
+  icon: <FiList className="w-6 h-6" />,
+};
+const statisticTab = {
+  name: "Báo cáo & Thống kê",
+  path: "/admin/statistic",
+  icon: <FiFile className="w-6 h-6" />,
+};
 const otherProductTab = {
-  name: "Sản phẩm khác",
-  path: "/admin/san-pham-khac",
+  name: "Quản lý sản phẩm ngoài",
+  path: "/admin/additionalItem",
   icon: <FiGift className="w-6 h-6" />,
 };
 const accountTab = {
   name: "Quản lý tài khoản",
-  path: "/admin/tai-khoan-nguoi-dung",
+  path: "/admin/user-account",
   icon: <RxDashboard className="w-6 h-6" />,
 };
 const otherRuleTab = {
-  name: "Các quy định khác",
-  path: "/admin/quy-dinh-khac",
+  name: "Cài đặt quy định hệ thống",
+  path: "/admin/admin-param",
   icon: <FiShield className="w-6 h-6" />,
 };
 const employeeTab = {
   name: "Quản lý nhân viên",
-  path: "/admin/nhan-vien",
+  path: "/admin/employee-management",
   icon: <FiUser className="w-6 h-6" />,
 };
 const permissionTab = {
-  name: "Phân quyền",
-  path: "/admin/phan-quyen",
+  name: "Phân quyền nhân viên",
+  path: "/admin/role-division",
   icon: <FiLock className="w-6 h-6" />,
 };
+const promotionTab = {
+  name: "Quản lý sự kiện",
+  path: "/admin/promotion-management",
+  icon: <FiLock className="w-6 h-6" />,
+}
+
 
 const RootLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -116,13 +126,13 @@ const RootLayout = () => {
         updatedTab.push(filmShowListTab, filmShowChartTab);
       }
       if (roleList.includes("ticket")) {
-        updatedTab.push(printTicketTab, serveTicketTab);
+        updatedTab.push(printTicketTab, serveTicketTab,offlineTicketTab);
       }
       if (roleList.includes("room")) {
         updatedTab.push(roomTab);
       }
       if (roleList.includes("statistic")) {
-        updatedTab.push(dailyReportTab, revenueOverviewTab);
+        updatedTab.push(statisticTab);
       }
       if (roleList.includes("additional_item")) {
         updatedTab.push(otherProductTab);
@@ -135,6 +145,9 @@ const RootLayout = () => {
       }
       if (roleList.includes("role_division")) {
         updatedTab.push(permissionTab);
+      }
+      if (roleList.includes("promotion")) {
+        updatedTab.push(promotionTab);
       }
       setTabs(updatedTab);
     }

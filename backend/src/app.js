@@ -43,8 +43,9 @@ app.use(mainRouter);
 
 //special function to catch unhandled error.
 app.use((err, req, res, next) => {
-  console.log("HELLO");
-  console.log("🚀 ~ app.use ~ err:", err);
+  console.log("There was an exception");
+  console.log("Exception detail: ", err);
+
   res.status(err.status || 500).json({
     msg: err.message || "Internal Server Error",
     success: false,
