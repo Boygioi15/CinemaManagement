@@ -166,10 +166,7 @@ const RoleDivisionPage = () => {
       }
     } catch (error) {
       setIsFailModalOpen(true);
-      setDialogData({
-        title: "Thất bại",
-        message: "Đã xảy ra lỗi trong quá trình cập nhật quyền!",
-      });
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     } finally {
       setLoading(false); // Ẩn loading dù thành công hay thất bại
     }
@@ -192,7 +189,10 @@ const RoleDivisionPage = () => {
             {/* Nhãn */}
             {/* Ô tìm kiếm */}
             <div className="relative w-200 ">
-              <div style={{width:"400px"}}className="flex w-200 items-center border-2 border-gray-300 rounded-lg focus-within:border-blue-500">
+              <div
+                style={{ width: "400px" }}
+                className="flex w-200 items-center border-2 border-gray-300 rounded-lg focus-within:border-blue-500"
+              >
                 <FaSearch className="ml-3 text-gray-400" />
                 <input
                   type="text"
@@ -253,7 +253,7 @@ const RoleDivisionPage = () => {
           {/* Danh sách checkbox roles */}
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Các vai trò</h3>
-            <div style={{paddingLeft:"20px"}} className="space-y-2">
+            <div style={{ paddingLeft: "20px" }} className="space-y-2">
               {allRoles.map((role) => (
                 <label
                   key={role.id}
@@ -274,7 +274,8 @@ const RoleDivisionPage = () => {
             </div>
           </div>
         </div>
-        <button style={{marginLeft:"40px"}}
+        <button
+          style={{ marginLeft: "40px" }}
           className="ml-5 px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddClick()}
         >

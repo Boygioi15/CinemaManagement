@@ -105,7 +105,7 @@ export default function TicketServeListPage() {
         console.log("thành công");
       }
     } catch (error) {
-      console.error("Error canceling order:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
 
     handleRefresh();
@@ -134,7 +134,7 @@ export default function TicketServeListPage() {
           console.log("thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
       }
 
       handleRefresh();
@@ -156,7 +156,7 @@ export default function TicketServeListPage() {
       );
       setOrders(filteredOrders);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 

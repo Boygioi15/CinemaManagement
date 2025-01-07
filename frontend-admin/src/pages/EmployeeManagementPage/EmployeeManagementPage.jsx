@@ -142,11 +142,7 @@ const EmployeeManagementPage = () => {
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.error("Error:", error);
-      setDialogData({
-        title: "Thất bại",
-        message: "Có lỗi xảy ra. Vui lòng thử lại!",
-      });
-      setIsFailModalOpen(true);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -296,6 +292,7 @@ const EmployeeManagementPage = () => {
                 }`}
               />
             </button>
+            <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
             <div className="flex items-center w-[300px]">
               <input
                 type="text"
@@ -314,6 +311,11 @@ const EmployeeManagementPage = () => {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
+          </div>
+          <div className="flex items-center gap-4 ml-10">
+            <span className="text-xl font-bold text-gray-800 mb-4">
+              Sắp xếp:
+            </span>
             <div className="relative inline-block w-64">
               <select
                 value={sortOption}

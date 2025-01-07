@@ -40,7 +40,7 @@ const StatisticPage = () => {
       }));
       setTicketTypeData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -59,7 +59,7 @@ const StatisticPage = () => {
 
       setTicketMovieData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -76,7 +76,7 @@ const StatisticPage = () => {
       }));
       setItemData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -94,7 +94,7 @@ const StatisticPage = () => {
         totalOtherItemsRevenue: data.totalRevenue - data.totalTicketRevenue,
       }));
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -110,7 +110,7 @@ const StatisticPage = () => {
         totalTicket: data.servedTickets,
       }));
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -154,11 +154,13 @@ const StatisticPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Daily Report</h1>
         <div className="flex items-center space-x-4">
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => {
-              const formattedDate = new Date(date).toISOString().split("T")[0]; // Định dạng yyyy-mm-dd
-              setSelectedDate(formattedDate);
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => {
+              const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
+              setSelectedDate(localDate); // Cập nhật state
+              console.log(localDate);
             }}
             className="p-2 border rounded-md"
           />

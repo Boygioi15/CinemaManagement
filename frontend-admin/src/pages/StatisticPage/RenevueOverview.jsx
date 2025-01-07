@@ -26,7 +26,7 @@ const AnnualRevenuePage = () => {
         [year]: transformedData,
       }));
     } catch (error) {
-      console.error("Failed to fetch revenue data:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 

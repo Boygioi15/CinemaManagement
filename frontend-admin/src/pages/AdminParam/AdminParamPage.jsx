@@ -341,12 +341,8 @@ const AdminParamPage = () => {
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.log(error);
-
-      setDialogData({
-        title: "Thất bại",
-        message: "Đã xảy ra lỗi khi thực hiện hành động. Vui lòng thử lại.",
-      });
-      setIsFailModalOpen(true);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+      //setIsFailModalOpen(true);
     }
   };
 

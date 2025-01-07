@@ -163,11 +163,7 @@ const FilmShowListPage = () => {
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.error("Error:", error);
-      setDialogData({
-        title: "Thất bại",
-        message: "Có lỗi xảy ra. Vui lòng thử lại!",
-      });
-      setIsFailModalOpen(true);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -314,7 +310,7 @@ const FilmShowListPage = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Thông tin suất chiếu
           </h2>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center ">
             <div className="flex items-center gap-4 justify-between">
               <button
                 onClick={handleRefresh}
@@ -329,6 +325,7 @@ const FilmShowListPage = () => {
                   }`}
                 />
               </button>
+              <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
               <div className="flex items-center w-[250px]">
                 <input
                   type="text"
@@ -338,17 +335,7 @@ const FilmShowListPage = () => {
                   className="w-full px-4 py-2 rounded-lg focus:outline-none border"
                 />
               </div>
-              {/* <DatePicker
-                selected={selectedDate}
-                onChange={(date) => {
-                  const offset = date.getTimezoneOffset() * 60000; // Lấy chênh lệch múi giờ
-                  const localDate = new Date(date.getTime() - offset) // Chuyển đổi về local time
-                    .toISOString()
-                    .split("T")[0]; // yyyy-mm-dd
-                  setSelectedDate(localDate);
-                }}
-                className="p-2 border rounded-md"
-              /> */}
+
               <input
                 type="date"
                 value={selectedDate}
@@ -400,19 +387,27 @@ const FilmShowListPage = () => {
               Suất phim mới +
             </button>
           </div>
-
-          <div className="relative inline-block w-64 ml-20">
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Không sắp xếp</option>
-              {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
-              {selectedDate && <option value="Theo giờ">Theo giờ</option>}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <BsSortDown className="h-4 w-4" />
+          <div className="flex items-center justify-between ml-10 w-full">
+            <div className="flex items-center gap-4 justify-between">
+              <span className="text-xl font-bold text-gray-800 mb-4">
+                Sắp xếp:
+              </span>
+              <div className=" flex items-center w-[200px] ">
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Không sắp xếp</option>
+                  {!selectedDate && (
+                    <option value="Theo ngày">Theo ngày</option>
+                  )}
+                  {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <BsSortDown className="h-4 w-4" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

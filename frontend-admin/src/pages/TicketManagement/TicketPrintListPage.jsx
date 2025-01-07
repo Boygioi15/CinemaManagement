@@ -113,7 +113,7 @@ const TicketPrintListPage = () => {
         console.log("thành công");
       }
     } catch (error) {
-      console.error("Error canceling order:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
 
     handleRefresh();
@@ -142,7 +142,7 @@ const TicketPrintListPage = () => {
           console.log("thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
       }
 
       handleRefresh();
@@ -159,9 +159,14 @@ const TicketPrintListPage = () => {
     try {
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
-      setOrders(response.data);
+      setOrders(
+        response.data.map((item) => ({
+          ...item,
+          date: new Date(item.date).toLocaleDateString("vi-VN"), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
+        }))
+      );
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -393,6 +398,7 @@ const TicketPrintListPage = () => {
               }`}
             />
           </button>
+          <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
           <div className="flex items-center w-[200px]">
             <input
               type="text"
@@ -448,18 +454,21 @@ const TicketPrintListPage = () => {
             </select>
           </div>
         </div>
-        <div className="relative inline-block w-64 ml-20">
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Không sắp xếp</option>
-            {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
-            {selectedDate && <option value="Theo giờ">Theo giờ</option>}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <BsSortDown className="h-4 w-4" />
+        <div className="ml-10 flex items-center gap-4">
+          <span className="text-xl font-bold text-gray-800 mb-4">Sắp xếp:</span>
+          <div className="relative inline-block w-64 ">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Không sắp xếp</option>
+              {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
+              {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <BsSortDown className="h-4 w-4" />
+            </div>
           </div>
         </div>
       </div>

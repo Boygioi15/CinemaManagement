@@ -40,6 +40,7 @@ const FilmShowChartPage = () => {
       );
     } catch (err) {
       setError(err.message); // Lưu lỗi
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 

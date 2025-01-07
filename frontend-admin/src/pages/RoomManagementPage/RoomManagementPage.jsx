@@ -29,7 +29,7 @@ const RoomManagementPage = () => {
       // Lọc những order có printed === false
       setRooms(response.data.data);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
