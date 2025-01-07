@@ -283,6 +283,7 @@ export class EmployeeService {
       })
       .lean();
   }
+
   static createEmployee = async (userdata) => {
     const {
       jobTitle,
@@ -295,6 +296,7 @@ export class EmployeeService {
       phone,
     } = userdata;
     userdata._id = null;
+
     if (
       !jobTitle ||
       !salary ||
@@ -303,8 +305,31 @@ export class EmployeeService {
       !name ||
       !birthDate
     ) {
-      throw customError("Chưa điền đầy đủ các trường. Vui lòng nhập lại!");
+      throw customError("Chưa điền đầy đủ các trường. Vui lòng nhập lại!", 400);
     }
+
+    // Kiểm tra lương
+    if (isNaN(salary) || salary <= 0) {
+      throw customError("Lương nhân viên phải là một số nguyên không âm", 400);
+    }
+
+    // Kiểm tra thời gian ca làm việc
+    if (new Date(shiftStart) >= new Date(shiftEnd)) {
+      throw customError("Thời gian bắt đầu làm phải trước khi thời gian kết thúc", 400);
+    }
+
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw customError("Email không đúng định dạng", 400);
+    }
+
+    // Kiểm tra định dạng số điện thoại
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      throw customError("Số điện thoại không đúng định dạng", 400);
+    }
+
     const existingEmployeePhone = await this.findEmployeeByPhone(phone);
     if (existingEmployeePhone) {
       return {
@@ -318,13 +343,48 @@ export class EmployeeService {
         error: "Email đã được đăng ký!",
       };
     }
+
     userdata.role = "employee";
     return await userModel.create(userdata);
   };
 
   static updateEmployeeById = async (id, updatedata) => {
     try {
-      const { email, phone } = updatedata;
+      const { email, phone, salary, shiftStart, shiftEnd } = updatedata;
+
+      // Kiểm tra lương
+      if (salary !== undefined && (isNaN(salary) || salary <= 0)) {
+        return {
+          error: "Lương nhân viên phải là một số nguyên không âm",
+        };
+      }
+
+      // Kiểm tra thời gian ca làm việc
+      if (shiftStart && shiftEnd && new Date(shiftStart) >= new Date(shiftEnd)) {
+        return {
+          error: "Thời gian bắt đầu làm phải trước khi thời gian kết thúc",
+        };
+      }
+
+      // Kiểm tra định dạng email
+      if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          return {
+            error: "Email không đúng định dạng",
+          };
+        }
+      }
+
+      // Kiểm tra định dạng số điện thoại
+      if (phone) {
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(phone)) {
+          return {
+            error: "Số điện thoại không đúng định dạng",
+          };
+        }
+      }
 
       const conflicts = await userModel.findOne({
         role: "employee",
@@ -337,6 +397,7 @@ export class EmployeeService {
           error: "Số điện thoại hay email đã được đăng ký!",
         };
       }
+
       const updatedEmployee = await userModel.findOneAndUpdate(
         {
           _id: id,

@@ -14,9 +14,14 @@ export class FilmShowService {
     showStart.setHours(0, 0, 0, 0);
     showStart.setMinutes(hour * 60 + minute);
 
+    // Kiểm tra nếu showStart nhỏ hơn thời gian hiện tại
+    if (showStart <= Date.now()) {
+      throw customError("Thời gian chiếu phải lớn hơn thời gian hiện tại!", 400);
+    }
+
     const filmDetails = await FilmService.getFilmDetail(film);
     if (!filmDetails) {
-      throw customError("Phim không tồn tại", 404);
+      throw customError("Phim không tồn tại", 400);
     }
     const filmDuration = filmDetails.filmDuration;
     const showEnd = new Date(showStart.getTime() + filmDuration * 60000);
@@ -27,12 +32,12 @@ export class FilmShowService {
       $or: [
         {
           showTime: {
-            $gte: new Date(showStart.getTime() - 30 * 60000).toISOString(),
+            $gte: new Date(showStart.getTime() - 15 * 60000).toISOString(),
           },
         },
         {
           showTime: {
-            $lte: new Date(showEnd.getTime() + 30 * 60000).toISOString(),
+            $lte: new Date(showEnd.getTime() + 15 * 60000).toISOString(),
           },
         },
       ],
@@ -43,7 +48,7 @@ export class FilmShowService {
         if (!existingShow.showTime) {
           throw customError(
             "Dữ liệu không hợp lệ: Thiếu thời gian chiếu trong cơ sở dữ liệu.",
-            500
+            400
           );
         }
 
@@ -73,8 +78,8 @@ export class FilmShowService {
         const isExistingEndInsideNew =
           existingShowEnd > showStart && existingShowEnd <= showEnd;
         const isGapTooSmall =
-          Math.abs(showStart - existingShowEnd) < 30 * 60000 ||
-          Math.abs(showEnd - existingShowStart) < 30 * 60000;
+          Math.abs(showStart - existingShowEnd) < 15 * 60000 ||
+          Math.abs(showEnd - existingShowStart) < 15 * 60000;
 
         return (
           isStartInsideExisting ||
@@ -88,7 +93,7 @@ export class FilmShowService {
 
     if (isOverlapping.some((overlap) => overlap)) {
       throw customError(
-        "Khoảng thời gian không khả dụng. Các suất chiếu cách nhau tối thiểu 30p.",
+        "Hiện đang có suất phim khác được chiếu trong khoảng thời gian này! Các suất chiếu cách nhau tối thiểu 15p.",
         400
       );
     }

@@ -13,7 +13,7 @@ export class FilmService {
     });
 
     if (!ageRestriction) {
-      throw customError("Giới hạn tuổi không hợp lệ", 400);
+      throw customError("Dữ liệu giới hạn tuổi không hợp lệ", 400);
     }
   };
 
@@ -51,7 +51,7 @@ export class FilmService {
       .select("_id");
     // Compare the number of matching tags with the input tagIDs
     if (tagsInDB.length !== tagIDs.length) {
-      throw customError("Các danh mục không hợp lệ!", 404);
+      throw customError("Dữ liệu thể loại phim không hợp lệ", 400);
     }
     return true; // All tags are valid
   };
@@ -83,11 +83,12 @@ export class FilmService {
     await FilmService.validateTags(tagsArray);
 
     if (filmDuration < 0) {
-      throw customError("Thời lượng phim phải là một số nguyên không âm");
+      throw customError("Thời lượng phim phải là một số nguyên không âm", 400);
     }
     if (filmDuration > 1000) {
-      throw customError("Thời lượng phim phải không được vượt quá 1000!");
+      throw customError("Thời lượng phim phải không được vượt quá 1000!", 400);
     }
+    
     return await filmModel.create({
       ...rest,
       filmDuration,
@@ -150,14 +151,25 @@ export class FilmService {
     );
   };
 
-  // Tương tự, cập nhật updateFilmById
+  // Cập nhật 1 bộ phim
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, ...rest } = updateData;
+    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } = updateData;
     const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);
+    // Kiểm tra định dạng 2D, 3D
     const formattedTwoDthreeD = await FilmService.isValid2D3DArray(twoDthreeD);
+    // Kiểm tra thể loại phim
     await FilmService.validateTags(tagsArray);
+
+    // Kiểm tra thời lượng phim
+    if (filmDuration < 0) {
+      throw customError("Thời lượng phim phải là một số nguyên không âm", 400);
+    }
+    if (filmDuration > 1000) {
+      throw customError("Thời lượng phim phải không được vượt quá 1000!", 400);
+    }
+
     const oldFilm = await filmModel.findByIdAndUpdate(filmId, {
       ...rest,
       tagsRef: tagsArray,
