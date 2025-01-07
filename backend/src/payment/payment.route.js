@@ -2,6 +2,7 @@ import express from "express";
 import paymentController from "./payment.controller.js";
 import { checkOrderRequestComingFromFrontend } from "../middlewares/checkOrderRequestComingFromFrontend.js";
 import { checkPaymentResultFromMomo } from "../middlewares/checkPaymentResultFromMomo.js";
+import { validateToken } from "../middlewares/verifyToken.js";
 
 const router = express.Router();
 
@@ -9,6 +10,7 @@ const router = express.Router();
 router.post(
   "",
   checkOrderRequestComingFromFrontend,
+  validateToken,
   paymentController.createPayment
 );
 router.post("/callback", paymentController.momoCallBack);

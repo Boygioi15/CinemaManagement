@@ -582,6 +582,11 @@ const FilmDetailPage = () => {
                   <QuantitySelectorV2
                     quantity={ticketType.quantity}
                     onIncrement={(e) => {
+                      const token = localStorage.getItem("accessToken");
+                      if(!token){
+                        alert("Để tiến hành đặt vé, xin vui lòng bạn hãy đăng nhập");
+                        navigate("/auth")
+                      }
                       let updatedQuantity = ticketType.quantity + 1;
                       if (updatedQuantity > 8) {
                         alert("Bạn chỉ có thể mua tối đa 8 vé loại này");
@@ -976,31 +981,43 @@ function BottomBar({
       navigate("/auth");
     }
     try {
+      const token = localStorage.getItem("accessToken");
+      if(!token){
+        alert("Để tiến hành thanh toán, xin vui lòng bạn hãy đăng nhập");
+        navigate("/auth")
+      }
       const response = await createPayment({
         customerInfo: {
           name: user.name,
           email: user.email,
           phone: user.phone,
         },
-        tickets: ticketSelections.filter((element) => element.quantity !== 0),
-        seats: seatSelections,
-        additionalItems: additionalItemSelections.filter(
-          (element) => element.quantity !== 0
-        ),
+        JWT: token,
         totalPrice: calculateTotalPrice(),
         filmShowId: selectedFilmShowId,
+        seatSelections: seatSelections,
+        ticketSelections: ticketSelections.filter((element) => element.quantity !== 0)
+        .map(element => {
+          return {_id: element._id, quantity: quantity }
+        }),
+        additionalItemSelections: additionalItemSelections.filter(
+          (element) => element.quantity !== 0
+        ).map(element => {
+          return {_id: element._id, quantity: quantity }
+        }),
         promotionId: pro?._id,
       });
-      console.log(response);
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
-        window.location.href = response.payUrl;
       } else {
         alert("Không có URL thanh toán, vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Lỗi khi tạo thanh toán:", error);
-      alert("Có lỗi xảy ra. Vui lòng thử lại.");
+      if(error.response.data.status===401){
+        alert("Thông tin người dùng không hợp lệ! Vui lòng đăng nhập lại! ");
+      }else{
+        alert("Có lỗi xảy ra khi tiến hành thanh toán: Lỗi: " + error.response.data.msg);
+      }
     }
   };
 

@@ -218,29 +218,36 @@ export class FilmShowService {
 
     return roomOfFilmShow;
   });
-  static appendLockedSeats = expressAsyncHandler(async (filmShowID, seats) => {
-    const filmShow = await filmShowModel.findById(filmShowID);
-    if (!filmShow) throw customError("Không tìm thấy suất phim", 400);
-    // Ensure none of the seatIDs are in filmShow.lockedSeats
-    let hasLockedSeats = false;
-    for (const seat of seats) {
+  static async checkBookedSeatsValidity(filmShow, room, seats) {
+    for (const seat in seats) {
+      if (seat.i < 0 || seat.i >= room.noOfSeatRow) {
+        throw customError("Dữ liệu đặt ghế không hợp lệ!", 400);
+      }
+      if (seat.j < 0 || seat.j >= room.noOfSeatInEachRow) {
+        throw customError("Dữ liệu đặt ghế không hợp lệ!", 400);
+      }
+      if (room.seats[seat.i][seat.j] === "") {
+        throw customError("Dữ liệu đặt ghế không hợp lệ!", 400);
+      }
       if (
         filmShow.lockedSeats.find(
           (lockedSeat) => lockedSeat.i === seat.i && lockedSeat.j === seat.j
         )
       ) {
-        hasLockedSeats = true;
-        break;
+        throw customError("Ghế đã bị khóa từ trước!", 400);
       }
     }
+  }
+  static appendLockedSeats = expressAsyncHandler(async (filmShowID, seats) => {
+    const filmShow = await filmShowModel.findById(filmShowID);
+    if (!filmShow) throw customError("Không tìm thấy suất phim", 400);
+    const room = await roomModel.findById(filmShow.roomId);
+    if (!filmShow) throw customError("Không tìm thấy phòng", 400);
+    await checkBookedSeatsValidity(filmShow, room, seats);
 
-    if (hasLockedSeats) {
-      throw customError("Ghế đã bị khóa từ trước", 404);
-    }
     filmShow.lockedSeats.push(
       ...seats.map((seat) => ({ i: seat.i, j: seat.j }))
     );
-    console.log(filmShow.lockedSeats);
     await filmShow.save();
   });
 
