@@ -21,6 +21,9 @@ const userSchema = new mongoose.Schema(
     account: {
       type: String,
     },
+    loyalPoint: {
+      type: Number,
+    },
     password: {
       type: String,
     },

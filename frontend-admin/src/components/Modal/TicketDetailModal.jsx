@@ -4,6 +4,7 @@ import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
 
 const TicketModal = ({ isOpen, onClose, onConfirm, order, view }) => {
   if (!isOpen) return null;
+  console.log(order);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

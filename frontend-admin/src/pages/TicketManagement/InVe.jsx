@@ -234,6 +234,11 @@ const InVe = () => {
       key: "totalMoney",
       render: (value) => formatCurrencyNumber(value),
     },
+    // {
+    //   header: "Tổng tiền sau KM(VNĐ)",
+    //   key: "priceAfterDiscount",
+    //   render: (value) => formatCurrencyNumber(value),
+    // },
     {
       header: "Trạng thái",
       key: "status",
@@ -345,6 +350,7 @@ const InVe = () => {
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
             />
           </div>
+
           <div className="flex items-center w-[300px]">
             <select
               name="status"

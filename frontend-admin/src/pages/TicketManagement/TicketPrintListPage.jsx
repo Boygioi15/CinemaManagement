@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
+import { BsSortDown } from "react-icons/bs";
 import { BiRefresh } from "react-icons/bi";
 import slugify from "slugify";
 import TicketDetailModal from "../../components/Modal/TicketDetailModal";
@@ -17,7 +18,10 @@ const TicketPrintListPage = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reason, setReason] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
+  const [filmNameQuery, setFilmNameQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [cusNameQuery, setCusNameQuery] = useState("");
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("all");
@@ -109,7 +113,7 @@ const TicketPrintListPage = () => {
         console.log("thành công");
       }
     } catch (error) {
-      console.error("Error canceling order:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
 
     handleRefresh();
@@ -138,7 +142,7 @@ const TicketPrintListPage = () => {
           console.log("thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
       }
 
       handleRefresh();
@@ -155,9 +159,14 @@ const TicketPrintListPage = () => {
     try {
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
-      setOrders(response.data);
+      setOrders(
+        response.data.map((item) => ({
+          ...item,
+          date: new Date(item.date).toLocaleDateString("vi-VN"), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
+        }))
+      );
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -171,35 +180,86 @@ const TicketPrintListPage = () => {
   console.log(orders);
 
   const itemsPerPage = 7;
-  const filteredData = orders.filter((order) => {
-    const matchesName = cusNameQuery
-      ? order.customerInfo.name
-          .toLowerCase()
-          .includes(cusNameQuery.toLowerCase())
-      : true;
 
-    // Lọc theo mã code
-    const matchesCode =
-      !tableSearchQuery ||
-      order.verifyCode?.toLowerCase().includes(tableSearchQuery.toLowerCase());
+  const filteredData = useMemo(() => {
+    let filtered = orders.filter((order) => {
+      const matchesDate = selectedDate
+        ? order.date &&
+          new Date(order.date).toLocaleDateString() ===
+            new Date(selectedDate).toLocaleDateString()
+        : true;
 
-    // Lọc theo trạng thái
-    const matchesStatus =
-      statusQuery === "all" ||
-      (!order.printed &&
-        statusQuery === "Chưa in" &&
-        !order.invalidReason_Printed) ||
-      (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
-      (order.printed &&
-        statusQuery === "Đã in" &&
-        !order.served &&
-        !order.invalidReason_Served) ||
-      (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
-      (order.served && statusQuery === "Đã phục vụ");
+      const matchesfilmName = filmNameQuery
+        ? order.filmName?.toLowerCase().includes(filmNameQuery.toLowerCase())
+        : true;
 
-    // Kết hợp cả hai điều kiện
-    return matchesCode && matchesStatus && matchesName;
-  });
+      const matchesName = cusNameQuery
+        ? order.customerInfo.name
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(cusNameQuery.toLowerCase().normalize("NFC"))
+        : true;
+
+      // Lọc theo mã code
+      const matchesCode =
+        !tableSearchQuery ||
+        order.verifyCode
+          ?.toLowerCase()
+          .includes(tableSearchQuery.toLowerCase());
+
+      // Lọc theo trạng thái
+      const matchesStatus =
+        statusQuery === "all" ||
+        (!order.printed &&
+          statusQuery === "Chưa in" &&
+          !order.invalidReason_Printed) ||
+        (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
+        (order.printed &&
+          statusQuery === "Đã in" &&
+          !order.served &&
+          !order.invalidReason_Served) ||
+        (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
+        (order.served && statusQuery === "Đã phục vụ");
+
+      return (
+        matchesCode &&
+        matchesStatus &&
+        matchesName &&
+        matchesDate &&
+        matchesfilmName
+      );
+    });
+
+    if (sortOption === "Theo ngày") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+        const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+        return dateA - dateB; // So sánh ngày tăng dần
+      });
+    } else if (sortOption === "Theo giờ") {
+      filtered = filtered.sort((a, b) => {
+        return (
+          new Date(`2023-01-01 ${a.showTime}`) -
+          new Date(`2023-01-01 ${b.showTime}`)
+        );
+      });
+    }
+
+    return filtered;
+  }, [
+    orders,
+    filmNameQuery,
+    selectedDate,
+    statusQuery,
+    tableSearchQuery,
+    cusNameQuery,
+    sortOption,
+  ]);
+
+  // Reset sort option when date is selected/deselected
+  useEffect(() => {
+    setSortOption("");
+  }, [selectedDate]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -233,16 +293,16 @@ const TicketPrintListPage = () => {
       header: "Tổng tiền trước thanh toán(VNĐ)",
       key: "totalMoney",
       render: (value) => formatCurrencyNumber(value),
-      style: {textAlign:"center"}
+      style: { textAlign: "center" },
     },
     {
       header: "Tổng tiền sau giảm giá(VNĐ)",
       key: "totalMoneyAfterDiscount",
       render: (value) => {
-        if(value){
-          return formatCurrencyNumber(value)
+        if (value) {
+          return formatCurrencyNumber(value);
         }
-        return "Không được giảm giá"
+        return "Không được giảm giá";
       },
     },
     {
@@ -338,7 +398,8 @@ const TicketPrintListPage = () => {
               }`}
             />
           </button>
-          <div className="flex items-center w-[300px]">
+          <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
+          <div className="flex items-center w-[200px]">
             <input
               type="text"
               placeholder="Tên khách hàng...."
@@ -347,7 +408,16 @@ const TicketPrintListPage = () => {
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
             />
           </div>
-          <div className="flex items-center w-1/4">
+          <div className="flex items-center w-[200px]">
+            <input
+              type="text"
+              placeholder="Tên phim...."
+              value={filmNameQuery}
+              onChange={(e) => setFilmNameQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+            />
+          </div>
+          <div className="flex items-center w-[200px]">
             <input
               type="text"
               placeholder="Nhập code..."
@@ -356,7 +426,16 @@ const TicketPrintListPage = () => {
               className="w-full px-4 py-2 rounded-lg focus:outline-none border"
             />
           </div>
-          <div className="flex items-center w-[300px]">
+          <input
+            type="date"
+            value={selectedDate || ""}
+            onChange={(e) => {
+              const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
+              setSelectedDate(localDate); // Cập nhật state
+            }}
+            className="p-2 border rounded-md"
+          />
+          <div className="flex items-center w-[200px]">
             <select
               name="status"
               value={statusQuery}
@@ -373,6 +452,23 @@ const TicketPrintListPage = () => {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+        <div className="ml-10 flex items-center gap-4">
+          <span className="text-xl font-bold text-gray-800 mb-4">Sắp xếp:</span>
+          <div className="relative inline-block w-64 ">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Không sắp xếp</option>
+              {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
+              {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <BsSortDown className="h-4 w-4" />
+            </div>
           </div>
         </div>
       </div>

@@ -41,6 +41,10 @@ const TicketTypeSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  loyalPointRate: {
+    type: Number,
+    default: 1,
+  },
 });
 
 const ParamModel = mongoose.model(

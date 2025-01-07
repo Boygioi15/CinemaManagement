@@ -110,7 +110,7 @@ const UserAccountManagementPage = () => {
         console.log("thành công");
       }
     } catch (error) {
-      console.error("Error canceling order:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
 
     handleRefresh();
@@ -139,7 +139,7 @@ const UserAccountManagementPage = () => {
           console.log("thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
       }
 
       handleRefresh();
@@ -158,7 +158,7 @@ const UserAccountManagementPage = () => {
       // Lọc những order có printed === false
       setUsers(response.data);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 

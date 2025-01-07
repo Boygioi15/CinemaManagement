@@ -29,7 +29,7 @@ const RoomManagementPage = () => {
       // Lọc những order có printed === false
       setRooms(response.data.data);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -100,7 +100,10 @@ const RoomManagementPage = () => {
   const itemsPerPage = 6;
 
   const filteredData = rooms.filter((item) =>
-    item.roomName.toLowerCase().includes(tableSearchQuery.toLowerCase())
+    item.roomName
+      .normalize("NFC")
+      .toLowerCase()
+      .includes(tableSearchQuery.normalize("NFC").toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);

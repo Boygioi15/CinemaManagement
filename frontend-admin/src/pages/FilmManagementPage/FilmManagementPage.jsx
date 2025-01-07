@@ -97,7 +97,9 @@ const FilmManagementPage = () => {
         title: "Thành công",
         message: "Xóa phim thành công",
       });
-    } catch (err) {}
+    } catch (error) {
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    }
   };
 
   const handleCloseModal = () => {

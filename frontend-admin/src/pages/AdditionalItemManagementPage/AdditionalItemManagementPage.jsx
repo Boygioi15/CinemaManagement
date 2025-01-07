@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { BsSortDown } from "react-icons/bs";
 import { BiRefresh } from "react-icons/bi";
 import AdditionalItemModal from "../../components/Modal/AdditionalItemModal";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
@@ -12,6 +13,7 @@ import axios from "axios";
 const AdditionalItemManagementPage = () => {
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState("");
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -115,6 +117,19 @@ const AdditionalItemManagementPage = () => {
         await axios.delete(
           `http://localhost:8000/api/additional-items/${selectedItem._id}`
         );
+        const updatedFilteredData = items.filter((item) =>
+          item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
+        );
+        const newTotalPages = Math.ceil(
+          updatedFilteredData.length / itemsPerPage
+        );
+
+        // Kiểm tra nếu trang hiện tại không còn dữ liệu, chuyển về trang trước
+        if (newTotalPages < currentPage && newTotalPages > 0) {
+          setCurrentPage(newTotalPages); // Quay về trang trước nếu trang hiện tại không còn dữ liệu
+        } else {
+          setCurrentPage(currentPage - 1); // Giữ nguyên trang hiện tại nếu còn dữ liệu
+        }
       } else if (actionType === "edit") {
         const res = await axios.put(
           `http://localhost:8000/api/additional-items/${selectedItem._id}`,
@@ -132,19 +147,7 @@ const AdditionalItemManagementPage = () => {
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
-      const updatedFilteredData = items.filter((item) =>
-        item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
-      );
-      const newTotalPages = Math.ceil(
-        updatedFilteredData.length / itemsPerPage
-      );
 
-      // Kiểm tra nếu trang hiện tại không còn dữ liệu, chuyển về trang trước
-      if (newTotalPages < currentPage && newTotalPages > 0) {
-        setCurrentPage(newTotalPages); // Quay về trang trước nếu trang hiện tại không còn dữ liệu
-      } else {
-        setCurrentPage(currentPage - 1); // Giữ nguyên trang hiện tại nếu còn dữ liệu
-      }
       // Hiển thị thông báo thành công
       setDialogData({
         title: "Thành công",
@@ -153,11 +156,7 @@ const AdditionalItemManagementPage = () => {
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.error("Error:", error);
-      setDialogData({
-        title: "Thất bại",
-        message: "Có lỗi xảy ra. Vui lòng thử lại!",
-      });
-      setIsFailModalOpen(true);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -179,6 +178,7 @@ const AdditionalItemManagementPage = () => {
   const columns = [
     { header: "Tên sản phẩm", key: "name" },
     { header: "Giá", key: "price" },
+    { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Hành động",
       key: "actions",
@@ -202,9 +202,23 @@ const AdditionalItemManagementPage = () => {
   ];
   const itemsPerPage = 6;
 
-  const filteredData = items.filter((item) =>
-    item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
-  );
+  const filteredData = useMemo(() => {
+    // Lọc dữ liệu theo tên sản phẩm
+    let filtered = items.filter((item) =>
+      item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
+    );
+
+    // Sắp xếp dữ liệu sau khi lọc
+    if (sortOption === "Asc") {
+      console.log("Sắp xếp giá tăng dần");
+      filtered = filtered.sort((a, b) => a.price - b.price); // Sắp xếp giá tăng dần
+    } else if (sortOption === "Des") {
+      console.log("Sắp xếp giá giảm dần");
+      filtered = filtered.sort((a, b) => b.price - a.price); // Sắp xếp giá giảm dần
+    }
+
+    return filtered;
+  }, [items, tableSearchQuery, sortOption]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -234,6 +248,7 @@ const AdditionalItemManagementPage = () => {
                 }`}
               />
             </button>
+            <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
             <div className="flex items-center w-[300px]">
               <input
                 type="text"
@@ -242,6 +257,25 @@ const AdditionalItemManagementPage = () => {
                 onChange={(e) => setTableSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 ml-10">
+            <span className="text-xl font-bold text-gray-800 mb-4">
+              Sắp xếp:
+            </span>
+            <div className="relative inline-block w-64">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Không sắp xếp</option>
+                <option value="Asc">Tăng dần giá</option>
+                <option value="Des">Giảm dần giá</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <BsSortDown className="h-4 w-4" />
+              </div>
             </div>
           </div>
         </div>

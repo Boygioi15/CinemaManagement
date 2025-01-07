@@ -4,7 +4,7 @@ import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
 import { TbCancel } from "react-icons/tb";
 import { FiSearch } from "react-icons/fi";
-import { BiRefresh } from "react-icons/bi"; 
+import { BiRefresh } from "react-icons/bi";
 import OrderDetailModal from "../../components/Modal/OrderDetailModal";
 import TicketCancelModal from "../../components/Modal/TicketCancelModal";
 import Dialog from "../../components/Dialog/ConfirmDialog";
@@ -105,7 +105,7 @@ export default function TicketServeListPage() {
         console.log("thành công");
       }
     } catch (error) {
-      console.error("Error canceling order:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
 
     handleRefresh();
@@ -134,7 +134,7 @@ export default function TicketServeListPage() {
           console.log("thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
       }
 
       handleRefresh();
@@ -156,7 +156,7 @@ export default function TicketServeListPage() {
       );
       setOrders(filteredOrders);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -173,7 +173,8 @@ export default function TicketServeListPage() {
     const matchesName = cusNameQuery
       ? order.customerInfo.name
           .toLowerCase()
-          .includes(cusNameQuery.toLowerCase())
+          .normalize("NFC")
+          .includes(cusNameQuery.toLowerCase().normalize("NFC"))
       : true;
 
     // Lọc theo mã code

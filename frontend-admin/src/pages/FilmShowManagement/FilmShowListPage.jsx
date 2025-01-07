@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../components/Table";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
+import { BsSortDown } from "react-icons/bs";
 import FilmShowModal from "../../components/Modal/FilmShowModal";
 import ViewModal from "../../components/Modal/FilmShow_FilmDetailModal";
 import RefreshLoader from "../../components/Loading";
@@ -16,14 +17,18 @@ const FilmShowListPage = () => {
   const [filmNameQuery, setFilmNameQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [roomQuery, setRoomQuery] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState("");
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [mode, setMode] = useState("add");
   const [filmshows, setFilmShows] = useState([]);
+  const [tableData, settableData] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -108,8 +113,20 @@ const FilmShowListPage = () => {
     }
   };
 
+  const fetchRooms = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/rooms");
+      const data = response.data.data;
+
+      setRooms(data);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu:", error);
+    }
+  };
+
   useEffect(() => {
     fetchFilmShows();
+    fetchRooms();
   }, []);
 
   // Gọi API khi component được render lần đầu
@@ -146,11 +163,7 @@ const FilmShowListPage = () => {
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.error("Error:", error);
-      setDialogData({
-        title: "Thất bại",
-        message: "Có lỗi xảy ra. Vui lòng thử lại!",
-      });
-      setIsFailModalOpen(true);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -237,22 +250,51 @@ const FilmShowListPage = () => {
   ];
   const itemsPerPage = 6;
 
-  const filteredData = filmshows.filter((item) => {
-    const matchesName = filmNameQuery
-      ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
-      : true;
+  const filteredData = useMemo(() => {
+    let filtered = filmshows.filter((item) => {
+      const matchesName = filmNameQuery
+        ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
+        : true;
 
-    const matchesDate = selectedDate
-      ? item.showDate === new Date(selectedDate).toLocaleDateString()
-      : true; // Nếu không có ngày chọn thì không lọc theo ngày
+      const matchesDate = selectedDate
+        ? item.showDate === new Date(selectedDate).toLocaleDateString()
+        : true;
 
-    const matchesStatus =
-      statusQuery === "" ||
-      statusQuery === "all" ||
-      item.status === statusQuery;
+      const matchesStatus =
+        statusQuery === "" ||
+        statusQuery === "all" ||
+        item.status === statusQuery;
 
-    return matchesName && matchesDate && matchesStatus;
-  });
+      const matchesRoom =
+        roomQuery === "" || roomQuery === "all" || item.room === roomQuery;
+
+      return matchesName && matchesDate && matchesStatus && matchesRoom;
+    });
+
+    if (sortOption === "Theo ngày") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+        const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+        return dateA - dateB; // So sánh ngày tăng dần
+      });
+    } else if (sortOption === "Theo giờ") {
+      filtered = filtered.sort((a, b) => {
+        return (
+          new Date(`2023-01-01 ${a.showTime}`) -
+          new Date(`2023-01-01 ${b.showTime}`)
+        );
+      });
+    }
+
+    return filtered;
+  }, [
+    filmshows,
+    filmNameQuery,
+    selectedDate,
+    statusQuery,
+    roomQuery,
+    sortOption,
+  ]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -268,7 +310,7 @@ const FilmShowListPage = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Thông tin suất chiếu
           </h2>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center ">
             <div className="flex items-center gap-4 justify-between">
               <button
                 onClick={handleRefresh}
@@ -283,7 +325,8 @@ const FilmShowListPage = () => {
                   }`}
                 />
               </button>
-              <div className="flex items-center w-[300px]">
+              <h1 className="text-xl font-bold text-gray-800 mb-4">Lọc:</h1>
+              <div className="flex items-center w-[250px]">
                 <input
                   type="text"
                   placeholder="Tên phim...."
@@ -292,17 +335,7 @@ const FilmShowListPage = () => {
                   className="w-full px-4 py-2 rounded-lg focus:outline-none border"
                 />
               </div>
-              {/* <DatePicker
-                selected={selectedDate}
-                onChange={(date) => {
-                  const offset = date.getTimezoneOffset() * 60000; // Lấy chênh lệch múi giờ
-                  const localDate = new Date(date.getTime() - offset) // Chuyển đổi về local time
-                    .toISOString()
-                    .split("T")[0]; // yyyy-mm-dd
-                  setSelectedDate(localDate);
-                }}
-                className="p-2 border rounded-md"
-              /> */}
+
               <input
                 type="date"
                 value={selectedDate}
@@ -312,7 +345,25 @@ const FilmShowListPage = () => {
                 }}
                 className="p-2 border rounded-md"
               />
-              <div className="flex items-center w-[300px]">
+              <div className="flex items-center w-[200px]">
+                <select
+                  name="age"
+                  value={roomQuery}
+                  onChange={(e) => setRoomQuery(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled>
+                    <span className="text-gray-400">Phòng chiếu</span>
+                  </option>
+                  <option value="all">Tất cả</option>
+                  {rooms.map((room) => (
+                    <option key={room._id} value={room.roomName}>
+                      {`${room.roomName}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center w-[200px]">
                 <select
                   name="age"
                   value={statusQuery}
@@ -335,6 +386,29 @@ const FilmShowListPage = () => {
             >
               Suất phim mới +
             </button>
+          </div>
+          <div className="flex items-center justify-between ml-10 w-full">
+            <div className="flex items-center gap-4 justify-between">
+              <span className="text-xl font-bold text-gray-800 mb-4">
+                Sắp xếp:
+              </span>
+              <div className=" flex items-center w-[200px] ">
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Không sắp xếp</option>
+                  {!selectedDate && (
+                    <option value="Theo ngày">Theo ngày</option>
+                  )}
+                  {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <BsSortDown className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

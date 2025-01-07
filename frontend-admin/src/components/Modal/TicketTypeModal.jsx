@@ -13,6 +13,7 @@ const TicketTypeModal = ({ isOpen, onClose, type, onSave, mode }) => {
     _id: type?._id || "",
     title: type?.title || "",
     price: type?.price || "",
+    loyalPointRate: type?.loyalPointRate || "",
     isPair: type?.isPair ?? false,
   });
   useEffect(() => {
@@ -21,6 +22,7 @@ const TicketTypeModal = ({ isOpen, onClose, type, onSave, mode }) => {
         _id: "",
         title: "",
         price: "",
+        loyalPointRate: "",
         isPair: false,
       });
     } else {
@@ -29,13 +31,14 @@ const TicketTypeModal = ({ isOpen, onClose, type, onSave, mode }) => {
         _id: type?._id || "",
         title: type?.title || "",
         price: type?.price || "",
+        loyalPointRate: type?.loyalPointRate || "",
         isPair: type?.isPair ?? false,
       });
     }
   }, [isEditMode, type]);
 
   const isFormValid = useMemo(() => {
-    const requiredFields = ["title", "price"];
+    const requiredFields = ["title", "price", "loyalPointRate"];
 
     return requiredFields.every((field) => !!formData[field]);
   }, [formData]);
@@ -172,6 +175,24 @@ const TicketTypeModal = ({ isOpen, onClose, type, onSave, mode }) => {
                   setFormData({
                     ...formData,
                     price: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Điểm tích lũy (%)
+              </label>
+              <input
+                type="text"
+                name="loyalPointRate"
+                value={formData.loyalPointRate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    loyalPointRate: e.target.value,
                   })
                 }
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

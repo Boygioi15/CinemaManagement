@@ -6,7 +6,6 @@ import {
   FaCreditCard,
   FaUtensils,
 } from "react-icons/fa";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import PieCharts from "../../components/Statistic/PieChart";
 import axios from "axios";
@@ -40,7 +39,7 @@ const DailyReport = () => {
       }));
       setTicketTypeData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -59,7 +58,7 @@ const DailyReport = () => {
 
       setTicketMovieData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -76,7 +75,7 @@ const DailyReport = () => {
       }));
       setItemData(transformedData);
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -94,7 +93,7 @@ const DailyReport = () => {
         totalOtherItemsRevenue: data.totalRevenue - data.totalTicketRevenue,
       }));
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -110,7 +109,7 @@ const DailyReport = () => {
         totalTicket: data.servedTickets,
       }));
     } catch (error) {
-      console.error("Error fetching films:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
   };
 
@@ -154,11 +153,12 @@ const DailyReport = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Daily Report</h1>
         <div className="flex items-center space-x-4">
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => {
-              const formattedDate = new Date(date).toISOString().split("T")[0]; // Định dạng yyyy-mm-dd
-              setSelectedDate(formattedDate);
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => {
+              const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
+              setSelectedDate(localDate); // Cập nhật state
             }}
             className="p-2 border rounded-md"
           />
