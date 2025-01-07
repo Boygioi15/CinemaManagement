@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import UserInfoLayout from "../../layouts/UserSpaceLayout";
-import { AiOutlineDown } from "react-icons/ai";
+import { FaChevronDown } from "react-icons/fa";
 
 const UserTransHistory = () => {
   const [transactions, setTransactions] = useState([]); // Dữ liệu giao dịch hiện tại
@@ -144,7 +144,7 @@ const UserTransHistory = () => {
                     Tổng cộng: {transaction.total}
                   </p>
                 </div>
-                <AiOutlineDown
+                <FaChevronDown
                   className={`text-gray-500 cursor-pointer transition-transform duration-500 ease-in-out ${
                     activeCollapse === transaction._id ? "rotate-180" : ""
                   }`}
