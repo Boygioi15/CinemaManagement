@@ -113,38 +113,29 @@ export class OrderService {
     totalPrice,
     seats = null,
     promotionId = null,
+    online,
   }) => {
     console.log(additionalItems);
     let filmShow = {};
     let film = {};
     let roomName = null;
+  
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
-      if (!filmShow) throw new Error("Film Show not found");
+      if (!filmShow) throw customError("Không tìm thấy film", 400);
       roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       film = await filmModel.findById(filmShow.film);
     }
-
+  
     const ageRestriction = film?.ageRestriction || null;
     const dataFilmShow = {
       filmName: filmShow?.film?.name || null,
       date: filmShow?.showDate || null,
       time: filmShow?.showTime || null,
     };
-
+  
+    // Tính toán số ghế đã chọn và vé
     const seatNames = seats.map((seat) => seat.seatName);
-    const nItems = await Promise.all(
-      additionalItems.map(async (items) => {
-        const item = await additionalItemModel.findById(items._id);
-        return {
-          name: item.name,
-          unitPrice: item.price,
-          quantity: items.quantity,
-          loyalPointRate: item.loyalPointRate,
-        };
-      })
-    );
-
     const nTickets = await Promise.all(
       tickets.map(async (ticket) => {
         const ticketData = await TicketTypeModel.findById(ticket._id);
@@ -156,9 +147,33 @@ export class OrderService {
         };
       })
     );
-
+  
+    // Kiểm tra điều kiện cho đơn hàng offline
+    if (!online) {
+      const totalTickets = nTickets.reduce((sum, ticket) => sum + ticket.quantity, 0);
+      if (totalTickets <= 0 || totalTickets >= 8) {
+        throw customError("Số lượng vé phải lớn hơn 0, bé hơn 8", 400);
+      }
+  
+      if (seatNames.length !== totalTickets) {
+        throw customError("Số lượng ghế đã chọn phải bằng số lượng vé", 400);
+      }
+    }
+  
+    const nItems = await Promise.all(
+      additionalItems.map(async (items) => {
+        const item = await additionalItemModel.findById(items._id);
+        return {
+          name: item.name,
+          unitPrice: item.price,
+          quantity: items.quantity,
+          loyalPointRate: item.loyalPointRate,
+        };
+      })
+    );
+  
     console.log(nItems, nTickets);
-
+  
     let discountRate = 0;
     if (promotionId) {
       const promotion = await promotionModel.findById(promotionId);
@@ -166,10 +181,10 @@ export class OrderService {
         discountRate = promotion.discountRate || 0;
       }
     }
-
+  
     const totalMoneyAfterDiscount =
       totalPrice - (totalPrice * discountRate) / 100;
-
+  
     const newOrder = await orderModel.create({
       roomName,
       seatNames,
@@ -182,16 +197,17 @@ export class OrderService {
       customerID: customerId,
       promotionID: promotionId,
       customerInfo,
+      online,
     });
-
+  
     newOrder.verifyCode = generateRandomVerifyCode();
     console.log(newOrder);
-
+  
     if (customerId) {
       await userModel.findByIdAndUpdate(customerId, {
         $inc: { loyalPoint: earnedLoyalPoints },
       });
     }
     return await newOrder.save();
-  };
+  };  
 }
