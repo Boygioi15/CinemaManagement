@@ -58,7 +58,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
           </div>
         </div>
       )}
-      <nav className="p-4">
+      <nav style={{marginBottom:"100px"}} className="p-4 relative">
         <ul className="space-y-2">
           {filteredTabs.map((tab, index) => {
             const isActive = location.pathname === tab.path;
@@ -86,8 +86,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
               </li>
             );
           })}
+          
         </ul>
-        <div className="mt-auto">
+        
+      </nav>
+      <div style={{position:"fixed", bottom:"0px", backgroundColor:"white",width:"280px", borderTop: "1px solid gray"}} className="mt-auto shadow-2xl">
           <Link
             to="/admin/auth"
             className="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100"
@@ -105,7 +108,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, tabs }) => {
             {isSidebarOpen && <span className="ml-3">Đăng xuất</span>}
           </Link>
         </div>
-      </nav>
     </div>
   );
 };
