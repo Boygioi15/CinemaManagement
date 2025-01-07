@@ -16,14 +16,14 @@ import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import TicketType from "../../Components/TicketType";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { getShowTimeOfDateByFilmId } from "../../config/api";
+import { getCurrentPro, getShowTimeOfDateByFilmId } from "../../config/api";
 import formatCurrencyNumber from "../../utils/FormatCurrency";
 import QuantitySelectorV2 from "../../Components/QuantitySelectorV2";
 import { use } from "react";
 import FoodCardV2 from "../../Components/FoodCard/FoodCardV2";
-import "./oStyle.css"
-import "./cStyle.css"
-import whiteScreen from "../../assets/whiteScreen.png"
+import "./oStyle.css";
+import "./cStyle.css";
+import whiteScreen from "../../assets/whiteScreen.png";
 import CustomButton from "../../Components/button/index"; // Giả sử bạn đã có CustomButton component
 import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 import { createPayment } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
@@ -33,7 +33,6 @@ const seatHeight = 40;
 const gapX = 5;
 const gapY = 5;
 
-
 const FilmDetailPage = () => {
   const { filmID } = useParams();
 
@@ -42,7 +41,10 @@ const FilmDetailPage = () => {
 
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
-  useEffect(()=>{setSelectedFilmShowID(null)},[selectedDate]) 
+  useEffect(() => {
+    setSelectedFilmShowID(null);
+  }, [selectedDate]);
+
   const [selectedShowtime, setSelectedShowtime] = useState(initShowTime || "");
 
   const [availableDates, setAvailableDates] = useState([]);
@@ -158,10 +160,10 @@ const FilmDetailPage = () => {
 
   const [usedSingle, setUsedSingle] = useState(0);
   const [usedPair, setUsedPair] = useState(0);
-  useEffect(()=>{
-    if(selectedFilmShow) return;
+  useEffect(() => {
+    if (selectedFilmShow) return;
     setRoomDetail(null);
-  },[selectedFilmShow])
+  }, [selectedFilmShow]);
   //FETCH
   useEffect(() => {
     try {
@@ -218,198 +220,199 @@ const FilmDetailPage = () => {
   }, []);
   useEffect(() => {
     const fetchFilmShowDetail = async () => {
-      if(selectedFilmShowID!==null){
-        try{
-          const response = await axios.get(`http://localhost:8000/api/film-show/${selectedFilmShowID}`);
+      if (selectedFilmShowID !== null) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/api/film-show/${selectedFilmShowID}`
+          );
           setSelectedFilmShow(response.data.data);
-        }
-        catch(error){
-          
-        }
-      }else{
+        } catch (error) {}
+      } else {
         setSelectedFilmShow(null);
       }
-    }
+    };
     fetchFilmShowDetail();
-  },[selectedFilmShowID])
-  useEffect(()=>{console.log(selectedFilmShow)},[selectedFilmShow])
+  }, [selectedFilmShowID]);
+  useEffect(() => {
+    console.log(selectedFilmShow);
+  }, [selectedFilmShow]);
 
   const [roomDetail, setRoomDetail] = useState();
-  const [roomSeat,setRoomSeat] = useState();
+  const [roomSeat, setRoomSeat] = useState();
   const fetchRoom = async () => {
-    if(!selectedFilmShow){return}
-    try{
-      const response = await axios.get(`http://localhost:8000/api/rooms/${selectedFilmShow.roomId}`);
-      setRoomDetail(response.data.data)
-    }catch (error) {
+    if (!selectedFilmShow) {
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/rooms/${selectedFilmShow.roomId}`
+      );
+      setRoomDetail(response.data.data);
+    } catch (error) {
       if (error.response) {
-          alert(`Lấy thông tin phòng thất bại, lỗi: ` + error.response.data.msg);
+        alert(`Lấy thông tin phòng thất bại, lỗi: ` + error.response.data.msg);
       } else if (error.request) {
-          alert('Không nhận được phản hồi từ server');
+        alert("Không nhận được phản hồi từ server");
       } else {
-          alert('Lỗi bất ngờ: ' + error.message);
+        alert("Lỗi bất ngờ: " + error.message);
       }
     }
-  }          
+  };
   //init room
-  useEffect(()=>{
+  useEffect(() => {
     fetchRoom();
-  },[selectedFilmShow])
+  }, [selectedFilmShow]);
   //init room seat
-  useEffect(()=>{
-    if(!roomDetail){
-      return
+  useEffect(() => {
+    if (!roomDetail) {
+      return;
     }
-    const appendedSeat = roomDetail.seats.map(row => 
-        row.map(seat => ({
-            ...seat, // Preserve exi    sting properties
-            selected: false,
-            enabled: false,
-            booked: false
-        }))
+    const appendedSeat = roomDetail.seats.map((row) =>
+      row.map((seat) => ({
+        ...seat, // Preserve exi    sting properties
+        selected: false,
+        enabled: false,
+        booked: false,
+      }))
     );
-    setRoomSeat(appendedSeat)
-  },[roomDetail])        
-  
-  const handleSelectSeat = (row, col) =>{
-    const updatedRoomSeat = [...roomSeat]; 
-    if(updatedRoomSeat[row][col-1].seatType==="P"){
-        col--;
+    setRoomSeat(appendedSeat);
+  }, [roomDetail]);
+
+  const handleSelectSeat = (row, col) => {
+    const updatedRoomSeat = [...roomSeat];
+    if (updatedRoomSeat[row][col - 1].seatType === "P") {
+      col--;
     }
-    if(updatedRoomSeat[row][col].seatType===""){
-        return;
+    if (updatedRoomSeat[row][col].seatType === "") {
+      return;
     }
-    if(updatedRoomSeat[row][col].booked){
-        return;
+    if (updatedRoomSeat[row][col].booked) {
+      return;
     }
-    if(updatedRoomSeat[row][col].selected){
-        updatedRoomSeat[row][col].selected=false;
-        setRoomSeat(updatedRoomSeat)
-        return;
+    if (updatedRoomSeat[row][col].selected) {
+      updatedRoomSeat[row][col].selected = false;
+      setRoomSeat(updatedRoomSeat);
+      return;
     }
-    if(!updatedRoomSeat[row][col].enabled){
-        return;
+    if (!updatedRoomSeat[row][col].enabled) {
+      return;
     }
-    updatedRoomSeat[row][col].selected=true;
-    setRoomSeat(updatedRoomSeat)
-}
+    updatedRoomSeat[row][col].selected = true;
+    setRoomSeat(updatedRoomSeat);
+  };
   const updateUsedTicket = () => {
-      if(!roomSeat){
-          return;
-      }
-      let usedSingle = 0, usedPair = 0;
-      for(let i = 0;i<roomSeat.length;i++){
-          for(let j = 0;j<roomSeat[0].length;j++){
-              if(roomSeat[i][j].selected){
-                  if(roomSeat[i][j].seatType==="P"){
-                      usedPair++;
-                  }
-                  else{
-                      usedSingle++;
-                  }
-              }
+    if (!roomSeat) {
+      return;
+    }
+    let usedSingle = 0,
+      usedPair = 0;
+    for (let i = 0; i < roomSeat.length; i++) {
+      for (let j = 0; j < roomSeat[0].length; j++) {
+        if (roomSeat[i][j].selected) {
+          if (roomSeat[i][j].seatType === "P") {
+            usedPair++;
+          } else {
+            usedSingle++;
           }
+        }
       }
-      setUsedSingle(usedSingle);
-      setUsedPair(usedPair)
-  }
+    }
+    setUsedSingle(usedSingle);
+    setUsedPair(usedPair);
+  };
   const setBookedSeat = () => {
-      if(!selectedFilmShow){
-        return;
-      }
-      const bookedSeatPoss = selectedFilmShow.lockedSeats;
-      const updatedSeat = roomSeat;
-      for(const bookedSeatPos of bookedSeatPoss){
-          updatedSeat[bookedSeatPos.i][bookedSeatPos.j].booked = true;
-      }
-      setRoomSeat(updatedSeat)
-  }
+    if (!selectedFilmShow) {
+      return;
+    }
+    const bookedSeatPoss = selectedFilmShow.lockedSeats;
+    const updatedSeat = roomSeat;
+    for (const bookedSeatPos of bookedSeatPoss) {
+      updatedSeat[bookedSeatPos.i][bookedSeatPos.j].booked = true;
+    }
+    setRoomSeat(updatedSeat);
+  };
   //update room seat effect
-  useEffect(()=>{
-    if(!roomSeat){
-        return;
+  useEffect(() => {
+    if (!roomSeat) {
+      return;
     }
     setBookedSeat();
     updateUsedTicket();
-  },[roomSeat])    
+  }, [roomSeat]);
   //update enable seat
-  useEffect(()=>{
-    if(!roomSeat){
-        return;
+  useEffect(() => {
+    if (!roomSeat) {
+      return;
     }
     const updatedRoomSeat = [...roomSeat];
     //disable all
-    if(usedSingle>=totalTicket_Single){
-        for(let i = 0;i<updatedRoomSeat.length;i++){
-            for(let j = 0;j<updatedRoomSeat[0].length;j++){
-                if(updatedRoomSeat[i][j].seatType!=="P"){
-                    updatedRoomSeat[i][j].enabled = false;
-                }    
-            }
-        }
-    }
-    else{
-        for(let i = 0;i<updatedRoomSeat.length;i++){
-            for(let j = 0;j<updatedRoomSeat[0].length;j++){
-                if(updatedRoomSeat[i][j].seatType!=="P"){
-                    updatedRoomSeat[i][j].enabled = true;
-                    //console.log(`${i},${j} ${updatedRoomSeat[i][j].enabled} `)
-                }    
-            }
-        }
-    }
-    setRoomSeat(updatedRoomSeat)
-  },[usedSingle,totalTicket_Single])  
-  useEffect(()=>{
-    if(!roomSeat){
-        return;
-    }
-    const updatedRoomSeat = [...roomSeat];
-    //disable all
-    if(usedPair>=totalTicket_Pair){
-        for(let i = 0;i<updatedRoomSeat.length;i++){
-            for(let j = 0;j<updatedRoomSeat.length;j++){
-                if(updatedRoomSeat[i][j].seatType==="P"){
-                    updatedRoomSeat[i][j].enabled = false;
-                }    
-            }
-        }
-    }
-    else{
-        for(let i = 0;i<updatedRoomSeat.length;i++){
-            for(let j = 0;j<updatedRoomSeat.length;j++){
-                if(updatedRoomSeat[i][j].seatType==="P"){
-                    updatedRoomSeat[i][j].enabled = true;
-                }    
-            }
-        }
-    }
-    setRoomSeat(updatedRoomSeat)
-  },[usedPair,totalTicket_Pair])   
-  
-  const updateTotalTicket = () => {
-      let single = 0, pair = 0;
-      for(let i = 0; i<ticketSelection.length;i++){
-          if(!ticketSelection[i].isPair){
-              single+=ticketSelection[i].quantity;
+    if (usedSingle >= totalTicket_Single) {
+      for (let i = 0; i < updatedRoomSeat.length; i++) {
+        for (let j = 0; j < updatedRoomSeat[0].length; j++) {
+          if (updatedRoomSeat[i][j].seatType !== "P") {
+            updatedRoomSeat[i][j].enabled = false;
           }
-          else{
-              pair+=ticketSelection[i].quantity;
-          }
+        }
       }
-      setTotalTicket_Single(single);
-      setTotalTicket_Pair(pair);
-  }
+    } else {
+      for (let i = 0; i < updatedRoomSeat.length; i++) {
+        for (let j = 0; j < updatedRoomSeat[0].length; j++) {
+          if (updatedRoomSeat[i][j].seatType !== "P") {
+            updatedRoomSeat[i][j].enabled = true;
+            //console.log(`${i},${j} ${updatedRoomSeat[i][j].enabled} `)
+          }
+        }
+      }
+    }
+    setRoomSeat(updatedRoomSeat);
+  }, [usedSingle, totalTicket_Single]);
+  useEffect(() => {
+    if (!roomSeat) {
+      return;
+    }
+    const updatedRoomSeat = [...roomSeat];
+    //disable all
+    if (usedPair >= totalTicket_Pair) {
+      for (let i = 0; i < updatedRoomSeat.length; i++) {
+        for (let j = 0; j < updatedRoomSeat.length; j++) {
+          if (updatedRoomSeat[i][j].seatType === "P") {
+            updatedRoomSeat[i][j].enabled = false;
+          }
+        }
+      }
+    } else {
+      for (let i = 0; i < updatedRoomSeat.length; i++) {
+        for (let j = 0; j < updatedRoomSeat.length; j++) {
+          if (updatedRoomSeat[i][j].seatType === "P") {
+            updatedRoomSeat[i][j].enabled = true;
+          }
+        }
+      }
+    }
+    setRoomSeat(updatedRoomSeat);
+  }, [usedPair, totalTicket_Pair]);
+
+  const updateTotalTicket = () => {
+    let single = 0,
+      pair = 0;
+    for (let i = 0; i < ticketSelection.length; i++) {
+      if (!ticketSelection[i].isPair) {
+        single += ticketSelection[i].quantity;
+      } else {
+        pair += ticketSelection[i].quantity;
+      }
+    }
+    setTotalTicket_Single(single);
+    setTotalTicket_Pair(pair);
+  };
   //ticket
-  useEffect(()=>{
+  useEffect(() => {
     updateTotalTicket();
-  },[ticketSelection])
-  //additional item  
-  
-  const handleSubmit = () => {
-    
-  }
-  
+  }, [ticketSelection]);
+  //additional item
+
+  const handleSubmit = () => {};
+
   if (!filmDetail) {
     return <div>Loading...</div>;
   }
@@ -547,8 +550,8 @@ const FilmDetailPage = () => {
                         time={value.showTime}
                         isSelected={selectedShowtime === value.showTime}
                         onClick={() => {
-                          setSelectedShowtime(value.showTime)
-                          setSelectedFilmShowID(value._id)
+                          setSelectedShowtime(value.showTime);
+                          setSelectedFilmShowID(value._id);
                         }}
                       />
                     );
@@ -560,122 +563,141 @@ const FilmDetailPage = () => {
         </div>
       </div>
 
-      {selectedFilmShow && <div className="flex flex-col justify-center items-center space-y-12">
-        <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
-        <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
-          {ticketSelection.map((ticketType) => {
-            return (
-              <div className="ticketBox">
-                <span
-                  style={{ fontWeight: "medium" }}
-                  className="text-xl group-hover:text-[#f2ea28]"
-                >
-                  {ticketType.title}
-                </span>
-                <span className="text-lg">
-                  {formatCurrencyNumber(ticketType.price) + "VNĐ"}
-                </span>
-                <QuantitySelectorV2
-                  quantity={ticketType.quantity}
+      {selectedFilmShow && (
+        <div className="flex flex-col justify-center items-center space-y-12">
+          <h1 className="font-interExtraBold">CHỌN LOẠI VÉ</h1>
+          <div className="flex flex-wrap lg:grid lg:grid-cols-3 justify-center items-center mt-6 gap-4 lg:gap-8">
+            {ticketSelection.map((ticketType) => {
+              return (
+                <div className="ticketBox">
+                  <span
+                    style={{ fontWeight: "medium" }}
+                    className="text-xl group-hover:text-[#f2ea28]"
+                  >
+                    {ticketType.title}
+                  </span>
+                  <span className="text-lg">
+                    {formatCurrencyNumber(ticketType.price) + "VNĐ"}
+                  </span>
+                  <QuantitySelectorV2
+                    quantity={ticketType.quantity}
+                    onIncrement={(e) => {
+                      let updatedQuantity = ticketType.quantity + 1;
+                      if (updatedQuantity > 8) {
+                        alert("Bạn chỉ có thể mua tối đa 8 vé loại này");
+                      } else {
+                        setTicketSelection((prev) =>
+                          prev.map(
+                            (item) =>
+                              item._id === ticketType._id // Match by id
+                                ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                                : item // Keep other items unchanged
+                          )
+                        );
+                      }
+                    }}
+                    onDecrement={(e) => {
+                      let updatedQuantity = ticketType.quantity - 1;
+                      if (updatedQuantity < 0) {
+                        updatedQuantity = 0; // Parse the new quantity
+                      } else {
+                        setTicketSelection((prev) =>
+                          prev.map(
+                            (item) =>
+                              item._id === ticketType._id // Match by id
+                                ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                                : item // Keep other items unchanged
+                          )
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        {roomDetail && roomSeat && (
+          <RoomDisplay
+            roomSeat={roomSeat}
+            roomName={roomDetail.roomName}
+            center={{
+              x1: roomDetail.centerX1,
+              x2: roomDetail.centerX2,
+              y1: roomDetail.centerY1,
+              y2: roomDetail.centerY2,
+            }}
+            handleSelectSeat={handleSelectSeat}
+          />
+        )}
+      </div>
+
+      {selectedFilmShow && (
+        <div className="flex flex-col justify-center items-center space-y-12">
+          <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
+          <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
+            {additionalItemSelections.map((food) => {
+              return (
+                <FoodCardV2
+                  food={food}
+                  quantity={food.quantity}
                   onIncrement={(e) => {
-                    let updatedQuantity = ticketType.quantity + 1;
-                    if (updatedQuantity > 8) {
-                      alert("Bạn chỉ có thể mua tối đa 8 vé loại này");
-                    } else {
-                      setTicketSelection((prev) =>
-                        prev.map(
-                          (item) =>
-                            item._id === ticketType._id // Match by id
-                              ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
-                              : item // Keep other items unchanged
-                        )
-                      );
+                    let updatedQuantity = food.quantity + 1;
+                    if (updatedQuantity > 4) {
+                      alert("Bạn chỉ có thể mua tối đa 4 sản phẩm loại này");
+                      return;
                     }
+                    setAdditionalItemSelections((prev) =>
+                      prev.map(
+                        (item) =>
+                          item._id === food._id // Match by id
+                            ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                            : item // Keep other items unchanged
+                      )
+                    );
                   }}
                   onDecrement={(e) => {
-                    let updatedQuantity = ticketType.quantity - 1;
+                    let updatedQuantity = food.quantity - 1;
                     if (updatedQuantity < 0) {
                       updatedQuantity = 0; // Parse the new quantity
-                    } else {
-                      setTicketSelection((prev) =>
-                        prev.map(
-                          (item) =>
-                            item._id === ticketType._id // Match by id
-                              ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
-                              : item // Keep other items unchanged
-                        )
-                      );
                     }
+                    setAdditionalItemSelections((prev) =>
+                      prev.map(
+                        (item) =>
+                          item._id === food._id // Match by id
+                            ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
+                            : item // Keep other items unchanged
+                      )
+                    );
                   }}
                 />
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>}
-      <div style={{display:"flex",justifyContent:"center",alignItems:"center",flexDirection:"column"}}>
-        {roomDetail && roomSeat &&
-          <RoomDisplay roomSeat={roomSeat} roomName={roomDetail.roomName} 
-              center={{
-                  x1: roomDetail.centerX1,
-                  x2: roomDetail.centerX2,
-                  y1: roomDetail.centerY1,
-                  y2: roomDetail.centerY2
-              }}
-              handleSelectSeat={handleSelectSeat}
-          />              
-        }
-      </div>
-    
-      {selectedFilmShow && <div className="flex flex-col justify-center items-center space-y-12">
-        <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>
-        <div className="flex flex-wrap justify-center items-center mt-6 gap-4 md:gap-8">
-          {additionalItemSelections.map((food) => {
-            return (
-              <FoodCardV2
-                food={food}
-                quantity={food.quantity}
-                onIncrement={(e) => {
-                  let updatedQuantity = food.quantity + 1;
-                  if (updatedQuantity > 4) {
-                    alert("Bạn chỉ có thể mua tối đa 4 sản phẩm loại này");
-                    return;
-                  }
-                  setAdditionalItemSelections((prev) =>
-                    prev.map(
-                      (item) =>
-                        item._id === food._id // Match by id
-                          ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
-                          : item // Keep other items unchanged
-                    )
-                  );
-                }}
-                onDecrement={(e) => {
-                  let updatedQuantity = food.quantity - 1;
-                  if (updatedQuantity < 0) {
-                    updatedQuantity = 0; // Parse the new quantity
-                  }
-                  setAdditionalItemSelections((prev) =>
-                    prev.map(
-                      (item) =>
-                        item._id === food._id // Match by id
-                          ? { ...item, quantity: updatedQuantity } // Update the quantity for the matched item
-                          : item // Keep other items unchanged
-                    )
-                  );
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>}
+      )}
 
-      {roomDetail && roomSeat && <BottomBar filmName="Alibaba" date="20-12-2024" time="10:30" roomName={roomDetail.roomName} seatSelections={roomSeat} 
+      {roomDetail && roomSeat && (
+        <BottomBar
+          filmName="Alibaba"
+          date="20-12-2024"
+          time="10:30"
+          roomName={roomDetail.roomName}
+          seatSelections={roomSeat}
           ticketSelections={ticketSelection}
           additionalItemSelections={additionalItemSelections}
-          selectedFilmShowId = {selectedFilmShowID}
-      />}                      
-
+          selectedFilmShowId={selectedFilmShowID}
+        />
+      )}
     </div>
   );
 };
@@ -685,7 +707,7 @@ function RoomDisplay({ roomSeat, roomName, handleSelectSeat, center }) {
   return (
     <div className="RoomDisplay">
       <h1>{roomName}</h1>
-      <div style={{zIndex:1}} className="screen">
+      <div style={{ zIndex: 1 }} className="screen">
         <img src={whiteScreen} alt="Screen" />
         <h1 className="center-text">Màn hình</h1>
       </div>
@@ -905,37 +927,53 @@ function BottomBar({
   seatSelections,
   ticketSelections,
   additionalItemSelections,
-  selectedFilmShowId
+  selectedFilmShowId,
 }) {
+  const [pro, setPro] = useState();
+  useEffect(() => {
+    handleGetPro();
+  }, []);
+  const handleGetPro = async () => {
+    const response = await getCurrentPro(Date.now());
+    setPro(response.data[0]);
+    console.log("123", response);
+  };
+  const [usePoints, setUsePoints] = useState(false);
+
+  const handleTogglePoints = () => {
+    setUsePoints(!usePoints);
+  };
   const calculateTotalPrice = () => {
     let total = 0;
     let vCount = 0;
-    for(let i = 0;i<ticketSelections.length;i++){
-        total+=ticketSelections[i].quantity*ticketSelections[i].price;
+    for (let i = 0; i < ticketSelections.length; i++) {
+      total += ticketSelections[i].quantity * ticketSelections[i].price;
     }
-    for(let i = 0;i<seatSelections.length;i++){
-        for(let j = 0;j<seatSelections[i].length;j++){
-            if(seatSelections[i][j].selected){
-                //console.log(seatSelections[i][j].seatType)
-                if(seatSelections[i][j].seatType==="V"){
-                    vCount++;
-                }
-            }
-        }      
+    for (let i = 0; i < seatSelections.length; i++) {
+      for (let j = 0; j < seatSelections[i].length; j++) {
+        if (seatSelections[i][j].selected) {
+          //console.log(seatSelections[i][j].seatType)
+          if (seatSelections[i][j].seatType === "V") {
+            vCount++;
+          }
+        }
+      }
     }
-    total+=vCount*20000;
-    for(let i = 0;i<additionalItemSelections.length;i++){
-        total+=additionalItemSelections[i].quantity*additionalItemSelections[i].price;
+    total += vCount * 20000;
+    for (let i = 0; i < additionalItemSelections.length; i++) {
+      total +=
+        additionalItemSelections[i].quantity *
+        additionalItemSelections[i].price;
     }
-    return total;    
-  }
+    return total;
+  };
   const { user } = useAuth(); // Lấy user từ context
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const navigate = useNavigate();
   const handleCreatePayment = async () => {
-    if(!localStorage.getItem("accessToken")){
+    if (!localStorage.getItem("accessToken")) {
       alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
-      navigate('/auth');
+      navigate("/auth");
     }
     try {
       const response = await createPayment({
@@ -944,13 +982,16 @@ function BottomBar({
           email: user.email,
           phone: user.phone,
         },
-        tickets:ticketSelections.filter((element)=>element.quantity!==0),
-        seats:seatSelections,
-        additionalItems: additionalItemSelections.filter((element)=>element.quantity!==0),
+        tickets: ticketSelections.filter((element) => element.quantity !== 0),
+        seats: seatSelections,
+        additionalItems: additionalItemSelections.filter(
+          (element) => element.quantity !== 0
+        ),
         totalPrice: calculateTotalPrice(),
-        filmShowId: selectedFilmShowId
+        filmShowId: selectedFilmShowId,
+        promotionId: pro?._id,
       });
-      console.log(response)
+      console.log(response);
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
         window.location.href = response.payUrl;
@@ -963,11 +1004,16 @@ function BottomBar({
     }
   };
 
-  
-  return(
-    <div style={{zIndex:5,width:"-webkit-fill-available"}}className="flex justify-between items-center px-24 bg-[#0f172a] text-white sticky bottom-0 py-4">
+  return (
+    <div
+      style={{ zIndex: 5, width: "-webkit-fill-available" }}
+      className="flex justify-between items-center px-24 bg-[#0f172a] text-white sticky bottom-0 py-4"
+    >
       {/* Phần Hóa đơn */}
-      <div style={{fontSize:"16px"}}className="flex flex-col items-start max-w-xl w-full">
+      <div
+        style={{ fontSize: "16px" }}
+        className="flex flex-col items-start max-w-xl w-full"
+      >
         <h1 className="text-3xl font-bold">HÓA ĐƠN</h1>
         {(() => {
           let string = "";
@@ -1083,10 +1129,56 @@ function BottomBar({
         })()}
       </div>
 
-      <div style={{width:"100%"}}className="flex flex-col items-end max-w-md w-full border-l-2 pl-6 py-4">
-        <div className="flex justify-between w-full ">
-          <p className="text-lg">Tạm tính</p>
-          <p className="text-xl font-bold">{calculateTotalPrice().toLocaleString()} VNĐ</p>
+      <div
+        style={{ width: "100%" }}
+        className="flex flex-col items-end max-w-md w-full border-l-2 pl-6 py-4"
+      >
+        <div className="flex flex-col w-full">
+          <div className="flex justify-between">
+            <p className="text-lg">Tạm tính</p>
+            <p className="text-xl font-bold">
+              {calculateTotalPrice().toLocaleString()} VNĐ
+            </p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-lg">Khuyến mãi</p>
+            <p className="text-xl font-bold">{pro?.discountRate}%</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-lg">Tổng tiền</p>
+            <p className="text-xl font-bold">
+              {(
+                calculateTotalPrice() -
+                (calculateTotalPrice() * +pro?.discountRate) / 100
+              ).toLocaleString()}{" "}
+              VNĐ
+            </p>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-lg">Sử dụng điểm</p>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="hidden"
+                checked={usePoints}
+                onChange={handleTogglePoints}
+              />
+              <span
+                className={`w-10 h-5 flex items-center rounded-full p-1 ${
+                  usePoints ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ${
+                    usePoints ? "translate-x-5" : "translate-x-0"
+                  }`}
+                ></span>
+              </span>
+              <span className="ml-3 text-lg">
+                {123123} điểm
+              </span>
+            </label>
+          </div>
         </div>
 
         <div className="w-full mt-2">
@@ -1105,7 +1197,7 @@ function BottomBar({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default FilmDetailPage;
