@@ -25,8 +25,8 @@ const NotFound = () => {
             chuyển.
           </p>
           <p className="text-gray-500 text-sm">
-            Có thể sản phẩm đã hết hàng hoặc đường dẫn không chính xác. Vui lòng
-            kiểm tra lại đường dẫn hoặc quay về trang chủ để tiếp tục mua sắm.
+            Đường dẫn không chính xác. Vui lòng
+            kiểm tra lại đường dẫn hoặc quay về trang chủ để tiếp tục.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row justify-center gap-4">

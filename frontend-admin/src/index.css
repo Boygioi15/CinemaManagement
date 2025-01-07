@@ -13,93 +13,106 @@
 >>>>>>> Stashed changes
 /* Tùy chỉnh toàn bộ thanh cuộn */
 ::-webkit-scrollbar {
-    width: 6px; /* Độ rộng thanh cuộn dọc */
-    height: 8px; /* Độ cao thanh cuộn ngang */
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: rgb(200,200,200); /* Màu thanh cuộn */
-    border-radius: 10px; /* Bo góc thanh cuộn */
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgb(180,180,180); /* Màu khi hover */
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: #f1f5f9; /* Màu nền của track */
-    border-radius: 10px; /* Bo góc track */
-  }
-  
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-h1 {
-    display: block;
-    font-size: 2em;
-    margin-block-start: 0.67em;
-    margin-block-end: 0.67em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-    unicode-bidi: isolate;
+  width: 6px; /* Độ rộng thanh cuộn dọc */
+  height: 8px; /* Độ cao thanh cuộn ngang */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(200, 200, 200); /* Màu thanh cuộn */
+  border-radius: 10px; /* Bo góc thanh cuộn */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(180, 180, 180); /* Màu khi hover */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* Màu nền của track */
+  border-radius: 10px; /* Bo góc track */
+}
+
+<<<<<<<
+  Updated
+  upstream
+  <<<<<<<
+  Updated
+  upstream>>>>>>>Stashed
+  changes
+  =======>>>>>>>Stashed
+  changes
+  =======>>>>>>>Stashed
+  changes
+  h1 {
+  display: block;
+  font-size: 2em;
+  margin-block-start: 0.67em;
+  margin-block-end: 0.67em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
+  unicode-bidi: isolate;
 }
 h3 {
-    display: block;
-    font-size: 1.17em;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-    unicode-bidi: isolate;
+  display: block;
+  font-size: 1.17em;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
+  unicode-bidi: isolate;
 }
 
-.button, .input, .optgroup, .select, .textarea {
-    font-family: inherit;
-    font-feature-settings: inherit;
-    font-variation-settings: inherit;
-    font-size: 100%;
-    font-weight: inherit;
-    line-height: inherit;
-    letter-spacing: inherit;
-    color: inherit;
-    margin: 0;
-    padding: 5px;
+.button,
+.input,
+.optgroup,
+.select,
+.textarea {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 5px;
 
-    border-width: 1px;
-    border-style: solid;
-    border-color: light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
-    border-image: initial;
-    border-radius: 0px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+  border-image: initial;
+  border-radius: 0px;
 }
 
-.Login_Dropdown{
-    position: absolute;
-    width:100px;
-    top:100%;
-    display: none;
-    flex-direction: column;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    background-color: white;
+.Login_Dropdown {
+  position: absolute;
+  width: 100px;
+  top: 100%;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  background-color: white;
 }
-.sc_dropdown{
-    display: inline-block;
-    position: relative;
+.sc_dropdown {
+  display: inline-block;
+  position: relative;
 }
-.sc_dropdown:hover .Login_Dropdown{
-    display: flex;
+.sc_dropdown:hover .Login_Dropdown {
+  display: flex;
 }
-.abc_label{
-    padding: 5px;
+.abc_label {
+  padding: 5px;
 }
-.abc_label:hover{
-    cursor: pointer;
-    background-color: #0969DA;
-    color: white;
+.abc_label:hover {
+  cursor: pointer;
+  background-color: #0969da;
+  color: white;
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

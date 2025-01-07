@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
+import { FaCheckCircle } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
@@ -12,6 +13,7 @@ import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
 import RefreshLoader from "../../components/Loading";
 import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
+import { useReactToPrint } from "react-to-print";
 
 const TicketPrintListPage = () => {
   const [orders, setOrders] = useState([]);
@@ -33,11 +35,37 @@ const TicketPrintListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  const [printContentRef, setPrintContentRef] = useState(null);
+
+  // Ref cho modal chi tiết vé
+  const ticketModalRef = useRef();
+  const [isPrintPdf, setIsPrintPdf] = useState(false);
+
+  // Hàm in
+  const handlePrint = useReactToPrint({
+    contentRef: printContentRef, // Dùng contentRef
+    documentTitle: "Chi tiết vé",
+    onAfterPrint: () => {
+      console.log("In hoàn tất!");
+    },
+    onPrintError: (errorLocation, error) => {
+      console.error(`Lỗi in tại ${errorLocation}:`, error);
+    },
+  });
+  //Mở modal chi tiết vé
+  const handlePrintPdf = (order) => {
+    setSelectedOrder(order);
+    setIsTicketModalOpen(true);
+    setView(true);
+    setIsPrintPdf(true); // Đánh dấu nguồn là từ `handlePrintPdf`
+  };
+
   //Mở modal chi tiết vé
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
     setIsTicketModalOpen(true);
     setView(true);
+    setIsPrintPdf(false); // Đánh dấu nguồn là từ `handlePrintClick`
   };
 
   //Mở modal xem thông tin vé ( ko có nút in)
@@ -67,9 +95,7 @@ const TicketPrintListPage = () => {
       message: "Bạn chắc chắn muốn hủy vé này ?",
     });
   };
-  useEffect(() => {
-    console.log("Modal open: " + isConfirmModalOpen);
-  }, [isConfirmModalOpen]);
+  useEffect(() => {}, [isConfirmModalOpen]);
   //Đóng modal
   const handleCloseModal = () => {
     setIsTicketModalOpen(false);
@@ -82,6 +108,7 @@ const TicketPrintListPage = () => {
 
   //Nhấn nút in vé
   const handleConfirmModal = (order) => {
+    setPrintContentRef(ticketModalRef); // Lưu giá trị ref hiện tại
     setIsConfirmModalOpen(true);
     setSelectedOrder(order);
     setDialogData({
@@ -124,30 +151,44 @@ const TicketPrintListPage = () => {
   //Xác nhận in vé
   const handleConfirmClick = async () => {
     console.log(selectedOrder._id);
+
+    // Nếu modal được mở bởi `handlePrintPdf`, chỉ in
+    if (isPrintPdf) {
+      console.log("Thực hiện in từ PDF");
+      handlePrint(); // Gọi in
+      setIsTicketModalOpen(false); // Đóng modal sau khi in
+      setIsConfirmModalOpen(false);
+      return;
+    }
+
+    // Nếu không phải từ `handlePrintPdf`, thực hiện cập nhật trạng thái
     if (
       dialogData.title === "Xác nhận" &&
       dialogData.message.includes("Bạn chắc chắn muốn hủy vé này ?")
     ) {
       await handleCancelConfirmClick();
     } else {
+      console.log("ticketModalRef.current:", ticketModalRef.current);
       try {
         const response = await axios.put(
           `http://localhost:8000/api/orders/${selectedOrder._id}/print`
         );
         if (response.status === 200) {
-          console.log("thành công");
+          console.log("Cập nhật trạng thái thành công");
         }
       } catch (error) {
-        console.error("Error marking order as printed:", error);
+        console.error("Lỗi cập nhật trạng thái:", error);
       }
 
       handleRefresh();
-      setDialogData({
-        title: "Thành công",
-        message: "In vé thành công",
-      });
-      setIsTicketModalOpen(false);
-      setIsConfirmModalOpen(false);
+      setTimeout(() => {
+        setDialogData({
+          title: "Thành công",
+          message: "Cập nhật trạng thái thành công",
+        });
+        setIsTicketModalOpen(false);
+        setIsConfirmModalOpen(false);
+      }, 1000); // Đợi 1 giây để đảm bảo hoàn thành trước khi đóng modal
     }
   };
 
@@ -168,7 +209,6 @@ const TicketPrintListPage = () => {
   if (!orders) {
     return;
   }
-  console.log(orders);
 
   const itemsPerPage = 7;
   const filteredData = orders.filter((order) => {
@@ -233,16 +273,16 @@ const TicketPrintListPage = () => {
       header: "Tổng tiền trước thanh toán(VNĐ)",
       key: "totalMoney",
       render: (value) => formatCurrencyNumber(value),
-      style: {textAlign:"center"}
+      style: { textAlign: "center" },
     },
     {
       header: "Tổng tiền sau giảm giá(VNĐ)",
       key: "totalMoneyAfterDiscount",
       render: (value) => {
-        if(value){
-          return formatCurrencyNumber(value)
+        if (value) {
+          return formatCurrencyNumber(value);
         }
-        return "Không được giảm giá"
+        return "Không được giảm giá";
       },
     },
     {
@@ -296,10 +336,19 @@ const TicketPrintListPage = () => {
               row.invalidReason_Served
             }
           >
-            <FaPrint
-              className="w-4 h-4"
-              onClick={() => handlePrintClick(row)}
-            />
+            <FaPrint className="w-4 h-4" onClick={() => handlePrintPdf(row)} />
+          </button>
+          <button
+            className="text-green-600 hover:text-green-800"
+            disabled={
+              row.printed ||
+              row.served ||
+              row.invalidReason_Printed ||
+              row.invalidReason_Served
+            }
+            onClick={() => handlePrintClick(row)} // Gọi hàm cập nhật trạng thái
+          >
+            <FaCheckCircle />
           </button>
           <button
             className="text-red-600 hover:text-red-800"
@@ -402,6 +451,7 @@ const TicketPrintListPage = () => {
       </div>
 
       <TicketDetailModal
+        ref={ticketModalRef}
         order={selectedOrder}
         isOpen={isTicketModalOpen}
         onClose={handleCloseModal}
