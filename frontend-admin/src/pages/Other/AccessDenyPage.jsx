@@ -22,10 +22,10 @@ const AccessDenied = () => {
 
         <div className="flex justify-center">
           <button
-            onClick={() => (window.location.href = "/")}
+            onClick={() => (window.location.href = "/admin/auth")}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-200"
           >
-            Quay về trang chủ
+            Quay lại
           </button>
         </div>
       </div>

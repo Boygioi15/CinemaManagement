@@ -31,6 +31,8 @@ import StatisticPage from "./pages/StatisticPage/StatisticPage";
 import PromotionManagementPage from "./pages/PromotionManagementPage/PromotionManagementPage";
 import AdditionalItemManagementPage from "./pages/AdditionalItemManagementPage/AdditionalItemManagementPage";
 import Error from "./pages/Other/Error";
+import AccessDenied from "./pages/Other/AccessDenyPage";
+import NotFound from "./pages/Other/NotFound";
 
 const generateIconURL = () => {
   const svgString = ReactDOMServer.renderToString(<FiShield size={64} />);
@@ -66,6 +68,7 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: <RootLayout />,
+    errorElement: <Error />,
     children: [
       {
         path: "film-management",
