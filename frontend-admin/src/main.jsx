@@ -30,6 +30,7 @@ import RedirectToRoot from "./components/RedirectToRoot";
 import StatisticPage from "./pages/StatisticPage/StatisticPage";
 import PromotionManagementPage from "./pages/PromotionManagementPage/PromotionManagementPage";
 import AdditionalItemManagementPage from "./pages/AdditionalItemManagementPage/AdditionalItemManagementPage";
+import Error from "./pages/Other/Error";
 
 const generateIconURL = () => {
   const svgString = ReactDOMServer.renderToString(<FiShield size={64} />);
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <RedirectToRoot />,
+    errorElement: <Error />,
   },
   {
     path: "/admin",
