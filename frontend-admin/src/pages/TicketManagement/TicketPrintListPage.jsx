@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
 import { FaPrint } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
+import { BsSortDown } from "react-icons/bs";
 import { BiRefresh } from "react-icons/bi";
 import slugify from "slugify";
 import TicketDetailModal from "../../components/Modal/TicketDetailModal";
@@ -17,6 +18,7 @@ const TicketPrintListPage = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [reason, setReason] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
   const [filmNameQuery, setFilmNameQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -173,52 +175,90 @@ const TicketPrintListPage = () => {
   console.log(orders);
 
   const itemsPerPage = 7;
-  const filteredData = orders.filter((order) => {
-    const matchesDate = selectedDate
-      ? order.date &&
-        new Date(order.date).toLocaleDateString() ===
-          new Date(selectedDate).toLocaleDateString()
-      : true;
 
-    const matchesfilmName = filmNameQuery
-      ? order.filmName?.toLowerCase().includes(filmNameQuery.toLowerCase())
-      : true;
+  const filteredData = useMemo(() => {
+    return orders.filter((order) => {
+      const matchesDate = selectedDate
+        ? order.date &&
+          new Date(order.date).toLocaleDateString() ===
+            new Date(selectedDate).toLocaleDateString()
+        : true;
 
-    const matchesName = cusNameQuery
-      ? order.customerInfo.name
-          .toLowerCase()
-          .normalize("NFC")
-          .includes(cusNameQuery.toLowerCase().normalize("NFC"))
-      : true;
+      const matchesfilmName = filmNameQuery
+        ? order.filmName?.toLowerCase().includes(filmNameQuery.toLowerCase())
+        : true;
 
-    // Lọc theo mã code
-    const matchesCode =
-      !tableSearchQuery ||
-      order.verifyCode?.toLowerCase().includes(tableSearchQuery.toLowerCase());
+      const matchesName = cusNameQuery
+        ? order.customerInfo.name
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(cusNameQuery.toLowerCase().normalize("NFC"))
+        : true;
 
-    // Lọc theo trạng thái
-    const matchesStatus =
-      statusQuery === "all" ||
-      (!order.printed &&
-        statusQuery === "Chưa in" &&
-        !order.invalidReason_Printed) ||
-      (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
-      (order.printed &&
-        statusQuery === "Đã in" &&
-        !order.served &&
-        !order.invalidReason_Served) ||
-      (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
-      (order.served && statusQuery === "Đã phục vụ");
+      // Lọc theo mã code
+      const matchesCode =
+        !tableSearchQuery ||
+        order.verifyCode
+          ?.toLowerCase()
+          .includes(tableSearchQuery.toLowerCase());
 
-    // Kết hợp cả hai điều kiện
-    return (
-      matchesCode &&
-      matchesStatus &&
-      matchesName &&
-      matchesDate &&
-      matchesfilmName
-    );
-  });
+      // Lọc theo trạng thái
+      const matchesStatus =
+        statusQuery === "all" ||
+        (!order.printed &&
+          statusQuery === "Chưa in" &&
+          !order.invalidReason_Printed) ||
+        (order.invalidReason_Printed && statusQuery === "Từ chối in vé") ||
+        (order.printed &&
+          statusQuery === "Đã in" &&
+          !order.served &&
+          !order.invalidReason_Served) ||
+        (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
+        (order.served && statusQuery === "Đã phục vụ");
+
+      return (
+        matchesCode &&
+        matchesStatus &&
+        matchesName &&
+        matchesDate &&
+        matchesfilmName
+      );
+    });
+  }, [
+    orders,
+    filmNameQuery,
+    selectedDate,
+    statusQuery,
+    tableSearchQuery,
+    cusNameQuery,
+  ]);
+
+  useEffect(() => {
+    console.log("sortOption: ", sortOption);
+    if (sortOption) {
+      const sortedData = [...orders].sort((a, b) => {
+        if (sortOption === "Theo ngày") {
+          console.log("haha");
+          // Chuyển đổi showDate từ "dd/mm/yyyy" sang đối tượng Date để so sánh
+          const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+          const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+          return dateA - dateB; // So sánh ngày tăng dần
+        } else if (sortOption === "Theo giờ") {
+          return (
+            new Date(`2023-01-01 ${a.showTime}`) -
+            new Date(`2023-01-01 ${b.showTime}`)
+          );
+        }
+        return 0;
+      });
+      setOrders(sortedData);
+    }
+  }, [sortOption]);
+
+  // Reset sort option when date is selected/deselected
+  useEffect(() => {
+    setSortOption("");
+  }, [selectedDate]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -410,6 +450,20 @@ const TicketPrintListPage = () => {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+        <div className="relative inline-block w-64">
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Chọn sắp xếp</option>
+            {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
+            {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <BsSortDown className="h-4 w-4" />
           </div>
         </div>
       </div>

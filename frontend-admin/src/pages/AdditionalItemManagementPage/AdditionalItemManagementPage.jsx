@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { BsSortDown } from "react-icons/bs";
 import { BiRefresh } from "react-icons/bi";
 import AdditionalItemModal from "../../components/Modal/AdditionalItemModal";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
@@ -12,6 +13,7 @@ import axios from "axios";
 const AdditionalItemManagementPage = () => {
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState("");
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -204,6 +206,24 @@ const AdditionalItemManagementPage = () => {
   ];
   const itemsPerPage = 6;
 
+  useEffect(() => {
+    console.log("sortOption: ", sortOption);
+    if (sortOption) {
+      const sortedData = [...items].sort((a, b) => {
+        if (sortOption === "Asc") {
+          console.log("Sắp xếp giá tăng dần");
+          return a.price - b.price; // Sắp xếp giá tăng dần
+        } else if (sortOption === "Des") {
+          console.log("Sắp xếp giá giảm dần");
+          return b.price - a.price; // Sắp xếp giá giảm dần
+        }
+        return 0; // Không thay đổi nếu không khớp với tùy chọn nào
+      });
+
+      setItems(sortedData); // Cập nhật dữ liệu đã sắp xếp
+    }
+  }, [sortOption]);
+
   const filteredData = items.filter((item) =>
     item.name.toLowerCase().includes(tableSearchQuery.toLowerCase())
   );
@@ -244,6 +264,20 @@ const AdditionalItemManagementPage = () => {
                 onChange={(e) => setTableSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
+            </div>
+            <div className="relative inline-block w-64">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Chọn sắp xếp</option>
+                <option value="Asc">Tăng dần giá</option>
+                <option value="Des">Giảm dần giá</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <BsSortDown className="h-4 w-4" />
+              </div>
             </div>
           </div>
         </div>

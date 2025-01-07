@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../components/Table";
 import { FiSearch } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
+import { BsSortDown } from "react-icons/bs";
 import FilmShowModal from "../../components/Modal/FilmShowModal";
 import ViewModal from "../../components/Modal/FilmShow_FilmDetailModal";
 import RefreshLoader from "../../components/Loading";
@@ -19,12 +20,14 @@ const FilmShowListPage = () => {
   const [roomQuery, setRoomQuery] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState("");
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [mode, setMode] = useState("add");
   const [filmshows, setFilmShows] = useState([]);
+  const [tableData, settableData] = useState([]);
   const [rooms, setRooms] = useState([]);
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -251,29 +254,73 @@ const FilmShowListPage = () => {
   ];
   const itemsPerPage = 6;
 
-  const filteredData = filmshows.filter((item) => {
-    const matchesName = filmNameQuery
-      ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
-      : true;
+  useEffect(() => {
+    console.log("sortOption: ", sortOption);
+    if (sortOption) {
+      const sortedData = [...filmshows].sort((a, b) => {
+        if (sortOption === "Theo ngày") {
+          console.log("haha");
+          // Chuyển đổi showDate từ "dd/mm/yyyy" sang đối tượng Date để so sánh
+          const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+          const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+          return dateA - dateB; // So sánh ngày tăng dần
+        } else if (sortOption === "Theo giờ") {
+          return (
+            new Date(`2023-01-01 ${a.showTime}`) -
+            new Date(`2023-01-01 ${b.showTime}`)
+          );
+        }
+        return 0;
+      });
+      setFilmShows(sortedData);
+    }
+  }, [sortOption]);
 
-    console.log("item: ", item.showDate);
-    console.log("seleted: ", new Date(selectedDate).toLocaleDateString());
+  // Reset sort option when date is selected/deselected
+  useEffect(() => {
+    setSortOption("");
+  }, [selectedDate]);
+  // const filteredData = filmshows.filter((item) => {
+  //   const matchesName = filmNameQuery
+  //     ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
+  //     : true;
 
-    const matchesDate = selectedDate
-      ? item.showDate === new Date(selectedDate).toLocaleDateString()
-      : true; // Nếu không có ngày chọn thì không lọc theo ngày
+  //   console.log(item);
 
-    const matchesStatus =
-      statusQuery === "" ||
-      statusQuery === "all" ||
-      item.status === statusQuery;
+  //   const matchesDate = selectedDate
+  //     ? item.showDate === new Date(selectedDate).toLocaleDateString()
+  //     : true; // Nếu không có ngày chọn thì không lọc theo ngày
 
-    console.log(roomQuery);
+  //   const matchesStatus =
+  //     statusQuery === "" ||
+  //     statusQuery === "all" ||
+  //     item.status === statusQuery;
 
-    const matchesRoom =
-      roomQuery === "" || roomQuery === "all" || item.room === roomQuery;
-    return matchesName && matchesDate && matchesStatus && matchesRoom;
-  });
+  //   const matchesRoom =
+  //     roomQuery === "" || roomQuery === "all" || item.room === roomQuery;
+  //   return matchesName && matchesDate && matchesStatus && matchesRoom;
+  // });
+  const filteredData = useMemo(() => {
+    return filmshows.filter((item) => {
+      const matchesName = filmNameQuery
+        ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
+        : true;
+
+      const matchesDate = selectedDate
+        ? item.showDate === new Date(selectedDate).toLocaleDateString()
+        : true;
+
+      const matchesStatus =
+        statusQuery === "" ||
+        statusQuery === "all" ||
+        item.status === statusQuery;
+
+      const matchesRoom =
+        roomQuery === "" || roomQuery === "all" || item.room === roomQuery;
+
+      return matchesName && matchesDate && matchesStatus && matchesRoom;
+    });
+  }, [filmshows, filmNameQuery, selectedDate, statusQuery, roomQuery]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -374,6 +421,21 @@ const FilmShowListPage = () => {
             >
               Suất phim mới +
             </button>
+          </div>
+
+          <div className="relative inline-block w-64">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Chọn sắp xếp</option>
+              {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
+              {selectedDate && <option value="Theo giờ">Theo giờ</option>}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <BsSortDown className="h-4 w-4" />
+            </div>
           </div>
         </div>
       </div>
