@@ -79,12 +79,6 @@ const EmployeeModal = ({ isOpen, onClose, employee, onSave, mode }) => {
 
     const startTotalMinutes = startHour * 60 + startMinute; // Quy đổi phút
     const endTotalMinutes = endHour * 60 + endMinute;
-
-    if (startTotalMinutes >= endTotalMinutes) {
-      setError("Ca bắt đầu không thể sau hoặc trùng với ca kết thúc!");
-    } else {
-      setError(""); // Xóa lỗi nếu hợp lệ
-    }
   };
 
   const handleEmailChange = (e) => {
