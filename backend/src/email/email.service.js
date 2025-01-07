@@ -31,7 +31,6 @@ export class EmailService {
   };
 
   static sendEmailWithHTMLTemplate = async (to, subject, ticket) => {
-    console.log("🚀 ~ EmailService ~ sendEmailWithHTMLTemplate= ~ ticket:", ticket)
     try {
       const htmlTemplate = `
       <!DOCTYPE html>
@@ -133,8 +132,8 @@ export class EmailService {
                             <td>${currentIndex + index + 1}</td>
                             <td>${item.name}</td>
                             <td>${item.quantity}</td>
-                            <td>${item.unitPrice}</td>
-                            <td>${item.quantity * item.unitPrice}</td>
+                            <td>${item.price}</td>
+                            <td>${item.quantity * item.price}</td>
                           </tr>`
                         )
                         .join("")}
@@ -147,8 +146,8 @@ export class EmailService {
                               <td>${currentIndex + index + 1}</td>
                               <td>${item.name}</td>
                               <td>${item.quantity}</td>
-                              <td>${item.unitPrice}</td>
-                              <td>${item.quantity * item.unitPrice}</td>
+                              <td>${item.price}</td>
+                              <td>${item.quantity * item.price}</td>
                             </tr>`
                           )
                           .join("");

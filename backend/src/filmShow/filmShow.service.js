@@ -1,14 +1,25 @@
 import mongoose from "mongoose";
-import { FilmService } from "../film/film.service.js";
-import { customError } from "../middlewares/errorHandlers.js";
+import {
+  FilmService
+} from "../film/film.service.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
 import roomModel from "../room/room.schema.js";
 import filmShowModel from "./filmShow.schema.js";
 import expressAsyncHandler from "express-async-handler";
-import { RoomService } from "../room/room.service.js";
+import {
+  RoomService
+} from "../room/room.service.js";
 
 export class FilmShowService {
   //Cho phép tạo suất chiếu cùng 1 phim nếu khác phòng
-  static createFilmShow = async ({ roomId, showTime, showDate, film }) => {
+  static createFilmShow = async ({
+    roomId,
+    showTime,
+    showDate,
+    film
+  }) => {
     const [hour, minute] = showTime.split(":").map(Number);
     const showStart = new Date(showDate);
     showStart.setHours(0, 0, 0, 0);
@@ -29,8 +40,7 @@ export class FilmShowService {
     const overlappingShows = await filmShowModel.find({
       roomId,
       showDate,
-      $or: [
-        {
+      $or: [{
           showTime: {
             $gte: new Date(showStart.getTime() - 15 * 60000).toISOString(),
           },
@@ -138,8 +148,7 @@ export class FilmShowService {
   static getShowtimesByDate = async (filmId, date) => {
     const selectedDate = new Date(date);
 
-    const res = await filmShowModel.aggregate([
-      {
+    const res = await filmShowModel.aggregate([{
         $match: {
           film: new mongoose.Types.ObjectId(filmId),
           showDate: date,
@@ -178,7 +187,9 @@ export class FilmShowService {
       })
       .select("showDate")
       .lean()
-      .sort({ showDate: 1 });
+      .sort({
+        showDate: 1
+      });
 
     const arrayShowDates = filmShows.map((item) => item.showDate);
     const uniqueShowDates = [
@@ -223,8 +234,9 @@ export class FilmShowService {
 
     return roomOfFilmShow;
   });
+
   static async checkBookedSeatsValidity(filmShow, room, seats) {
-    for (const seat in seats) {
+    for (const seat of seats) {
       if (seat.i < 0 || seat.i >= room.noOfSeatRow) {
         throw customError("Dữ liệu đặt ghế không hợp lệ!", 400);
       }
@@ -233,6 +245,7 @@ export class FilmShowService {
       }
       if (room.seats[seat.i][seat.j] === "") {
         throw customError("Dữ liệu đặt ghế không hợp lệ!", 400);
+        x
       }
       if (
         filmShow.lockedSeats.find(
@@ -251,31 +264,38 @@ export class FilmShowService {
     await this.checkBookedSeatsValidity(filmShow, room, seats);
 
     filmShow.lockedSeats.push(
-      ...seats.map((seat) => ({ i: seat.i, j: seat.j }))
+      ...seats.map((seat) => ({
+        i: seat.i,
+        j: seat.j
+      }))
     );
     await filmShow.save();
   });
 
   static releaseLockedSeats = expressAsyncHandler(
-    async (filmShowID, seatIDs) => {
+    async (filmShowID, seats) => {
       const filmShow = await filmShowModel.findById(filmShowID);
-      await this.checkIfSeatAreInRoom(filmShow.roomId, seatIDs);
+
       if (!filmShow) throw customError("Filmshow not found ", 400);
 
-      filmShow.lockedSeatIds = filmShow.lockedSeatIds.filter(
-        (seatId) => !filmShow.lockedSeatIds.includes(seatId)
+      filmShow.lockedSeats = filmShow.lockedSeats.filter(
+        (lockedSeat) => !seats.some(
+          (seatToRemove) =>
+          lockedSeat.i === seatToRemove.i &&
+          lockedSeat.j === seatToRemove.j
+        )
       );
+
       await filmShow.save();
+      return filmShow;
     }
   );
 
   static refreshLockedSeat = expressAsyncHandler(async (id) => {
     const filmShow = await filmShowModel.findByIdAndUpdate(
-      id,
-      {
+      id, {
         lockedSeatIds: [],
-      },
-      {
+      }, {
         new: true,
       }
     );
@@ -283,7 +303,9 @@ export class FilmShowService {
   });
 
   static getAllFilmShows = async () => {
-    const filmShows = await filmShowModel.find({}).sort({ createdAt: -1 });
+    const filmShows = await filmShowModel.find({}).sort({
+      createdAt: -1
+    });
     return filmShows;
   };
 
@@ -295,7 +317,9 @@ export class FilmShowService {
         },
       })
       .select("showDate")
-      .sort({ showDate: 1 })
+      .sort({
+        showDate: 1
+      })
       .lean();
 
     const arrayShowDates = filmShows.map((item) => item.showDate);
@@ -324,8 +348,7 @@ export class FilmShowService {
 
     const skip = (page - 1) * limit;
 
-    const filmShowsV3 = await filmShowModel.aggregate([
-      {
+    const filmShowsV3 = await filmShowModel.aggregate([{
         $match: matchConditions,
       },
       {

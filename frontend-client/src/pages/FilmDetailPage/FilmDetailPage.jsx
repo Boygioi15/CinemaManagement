@@ -374,7 +374,7 @@ const FilmDetailPage = () => {
     //disable all
     if (usedPair >= totalTicket_Pair) {
       for (let i = 0; i < updatedRoomSeat.length; i++) {
-        for (let j = 0; j < updatedRoomSeat.length; j++) {
+        for (let j = 0; j < updatedRoomSeat[0].length; j++) {
           if (updatedRoomSeat[i][j].seatType === "P") {
             updatedRoomSeat[i][j].enabled = false;
           }
@@ -382,7 +382,7 @@ const FilmDetailPage = () => {
       }
     } else {
       for (let i = 0; i < updatedRoomSeat.length; i++) {
-        for (let j = 0; j < updatedRoomSeat.length; j++) {
+        for (let j = 0; j < updatedRoomSeat[0].length; j++) {
           if (updatedRoomSeat[i][j].seatType === "P") {
             updatedRoomSeat[i][j].enabled = true;
           }
@@ -993,7 +993,7 @@ function BottomBar({
         setPaymentUrl(response.payUrl);
         window.location.href = response.payUrl;
       } else {
-        alert("Không có URL thanh toán, vui lòng thử lại.");
+        alert(response.message);
       }
     } catch (error) {
       console.error("Lỗi khi tạo thanh toán:", error);
