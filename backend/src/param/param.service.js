@@ -3,6 +3,7 @@ import {
   ParamModel,
   TicketTypeModel
 } from "./param.schema.js";
+import { customError } from "../middlewares/errorHandlers.js";
 
 export class ParamService {
   static createAgeRestriction = async (ageResData) => {
@@ -30,6 +31,7 @@ export class ParamService {
     }
     return await TicketTypeModel.create(ticketTypeData);
   };
+
   static updateTicketType = async (id, ticketTypeData) => {
     const { price } = ticketTypeData;
     if (price <= 0) {
