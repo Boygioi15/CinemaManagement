@@ -30,7 +30,9 @@ import RedirectToRoot from "./components/RedirectToRoot";
 import StatisticPage from "./pages/StatisticPage/StatisticPage";
 import PromotionManagementPage from "./pages/PromotionManagementPage/PromotionManagementPage";
 import AdditionalItemManagementPage from "./pages/AdditionalItemManagementPage/AdditionalItemManagementPage";
-
+import Error from "./pages/Other/Error";
+import AccessDenied from "./pages/Other/AccessDenyPage";
+import NotFound from "./pages/Other/NotFound";
 
 const generateIconURL = () => {
   const svgString = ReactDOMServer.renderToString(<FiShield size={64} />);
@@ -61,63 +63,65 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <RedirectToRoot />,
+    errorElement: <Error />,
   },
   {
     path: "/admin",
     element: <RootLayout />,
+    errorElement: <Error />,
     children: [
       {
         path: "film-management",
-        element: <FilmManagementPage />
+        element: <FilmManagementPage />,
       },
       {
         path: "film-show-management/chart",
-        element: <FilmShowChartPage />
+        element: <FilmShowChartPage />,
       },
       {
         path: "film-show-management/list",
-        element: <FilmShowListPage />
+        element: <FilmShowListPage />,
       },
       {
         path: "ticket-management/print-list",
-        element: <TicketPrintListPage />
+        element: <TicketPrintListPage />,
       },
       {
         path: "ticket-management/serve-list",
-        element: <TicketServeListPage />
+        element: <TicketServeListPage />,
       },
       {
         path: "room-management",
-        element: <RoomManagementPage />
+        element: <RoomManagementPage />,
       },
       {
         path: "user-account",
-        element: <UserAccountManagementPage />
+        element: <UserAccountManagementPage />,
       },
       {
         path: "employee-management",
-        element: <EmployeeManagementPage />
+        element: <EmployeeManagementPage />,
       },
       {
         path: "role-division",
-        element: <RoleDivisionPage />
+        element: <RoleDivisionPage />,
       },
       {
         path: "admin-param",
-        element: <AdminParamPage />
+        element: <AdminParamPage />,
       },
       {
         path: "statistic",
-        element: <StatisticPage />
+        element: <StatisticPage />,
       },
       {
         path: "promotion-management",
-        element: <PromotionManagementPage />
+        element: <PromotionManagementPage />,
       },
       {
         path: "additionalItem",
-        element: <AdditionalItemManagementPage />
-      }
+        element: <AdditionalItemManagementPage />,
+      },
     ],
   },
   {
@@ -136,6 +140,14 @@ const router = createBrowserRouter([
   {
     path: "/create-offline-ticket",
     element: <CreateOfflineTicketPage />,
+  },
+  {
+    path: "/access-denied",
+    element: <AccessDenied />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
