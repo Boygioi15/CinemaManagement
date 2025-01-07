@@ -31,6 +31,17 @@ class OrderController {
     }
   });
 
+  getAllOrdersByUserId = expressAsyncHandler(async (req, res) => {
+    try {
+      const orders = await OrderService.getAllOrdersByUserId(req.user._id);
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({
+        error: error.message,
+      });
+    }
+  });
+
   getOrderById = expressAsyncHandler(async (req, res) => {
     const {
       _id
