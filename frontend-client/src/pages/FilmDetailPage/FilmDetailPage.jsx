@@ -529,7 +529,6 @@ const FilmDetailPage = () => {
             {availableDates.map((dateGroup) => {
               return (
                 <ScheduleChooseBox
-                  key={dateGroup.date}
                   date={dateGroup.date}
                   isSelected={selectedDate === dateGroup.date}
                   onClick={() => setSelectedDate(dateGroup.date)}
@@ -548,7 +547,6 @@ const FilmDetailPage = () => {
                   {dataGroup?.showTimes?.map((value) => {
                     return (
                       <ShowtimeChooseBox
-                        key={value.showTime}
                         time={value.showTime}
                         isSelected={selectedShowtime === value.showTime}
                         onClick={() => {
@@ -584,11 +582,6 @@ const FilmDetailPage = () => {
                   <QuantitySelectorV2
                     quantity={ticketType.quantity}
                     onIncrement={(e) => {
-                      const token = localStorage.getItem("accessToken");
-                      if(!token){
-                        alert("Để tiến hành đặt vé, xin vui lòng bạn hãy đăng nhập");
-                        navigate("/auth")
-                      }
                       let updatedQuantity = ticketType.quantity + 1;
                       if (updatedQuantity > 8) {
                         alert("Bạn chỉ có thể mua tối đa 8 vé loại này");
@@ -983,42 +976,28 @@ function BottomBar({
       navigate("/auth");
     }
     try {
-      const token = localStorage.getItem("accessToken");
-      if(!token){
-        alert("Để tiến hành thanh toán, xin bạn vui lòng hãy đăng nhập");
-        navigate("/auth")
-      }
       const response = await createPayment({
-        customerInfo: {
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-        },
-        JWT: token,
-        totalPrice: calculateTotalPrice(),
-        filmShowId: selectedFilmShowId,
+        ticketSelections: ticketSelections.filter(
+          (element) => element.quantity !== 0
+        ),
         seatSelections: seatSelections,
-        ticketSelections: ticketSelections.filter((element) => element.quantity !== 0)
-        .map(element => {
-          return {_id: element._id, quantity: element.quantity }
-        }),
         additionalItemSelections: additionalItemSelections.filter(
           (element) => element.quantity !== 0
-        ).map(element => {
-          return {_id: element._id, quantity: element.quantity }
-        }),
+        ),
+        totalPrice: calculateTotalPrice(),
+        filmShowId: selectedFilmShowId,
         promotionId: pro?._id,
       });
-      console.log(response)
+      console.log(response);
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
+        window.location.href = response.payUrl;
       } else {
-        console.log("HI")
         alert("Không có URL thanh toán, vui lòng thử lại.");
       }
     } catch (error) {
-      console.log("HI")
-      console.log(error)
+      console.error("Lỗi khi tạo thanh toán:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
 
@@ -1192,9 +1171,7 @@ function BottomBar({
                   }`}
                 ></span>
               </span>
-              <span className="ml-3 text-lg">
-                {123123} điểm
-              </span>
+              <span className="ml-3 text-lg">{123123} điểm</span>
             </label>
           </div>
         </div>

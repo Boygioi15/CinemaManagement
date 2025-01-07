@@ -79,21 +79,19 @@ export const resetPassword = async (email) => {
 };
 
 export const createPayment = async ({
-  customerInfo,
-  JWT,
   totalPrice,
   filmShowId = null,
   seatSelections = null,
+  promotionId = null,
   ticketSelections = null,
   additionalItemSelections = null,
-  promotionId=null,
 }) => {
+  console.log(promotionId);
   return await axios.post(`/payment`, {
-    customerInfo,
-    JWT,
     totalPrice,
     filmShowId,
     seatSelections,
+    promotionId,
     ticketSelections,
     additionalItemSelections,
   });
