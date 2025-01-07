@@ -229,8 +229,8 @@ const FilmModal = ({ isOpen, onClose, film, onSave, mode }) => {
         setIsSuccessDialogOpen(true); // Hiển thị dialog thành công
       }
     } catch (error) {
-      console.error("Error updating/adding film:", error);
-      alert("An error occurred while updating the film. Please try again.");
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+      setIsConfirmDialogOpen(false);
       setIsLoading(false); // Tắt trạng thái loading
     }
   };

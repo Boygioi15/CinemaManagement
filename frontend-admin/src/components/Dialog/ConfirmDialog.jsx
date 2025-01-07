@@ -2,7 +2,6 @@ import { FiAlertCircle } from "react-icons/fi";
 
 const Dialog = ({ isOpen, onClose, onConfirm, title, message, data, mode }) => {
   if (!isOpen) return null;
-  console.log("hahaha");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50">
