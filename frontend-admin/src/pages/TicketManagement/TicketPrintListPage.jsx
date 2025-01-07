@@ -177,7 +177,7 @@ const TicketPrintListPage = () => {
   const itemsPerPage = 7;
 
   const filteredData = useMemo(() => {
-    return orders.filter((order) => {
+    let filtered = orders.filter((order) => {
       const matchesDate = selectedDate
         ? order.date &&
           new Date(order.date).toLocaleDateString() ===
@@ -224,6 +224,23 @@ const TicketPrintListPage = () => {
         matchesfilmName
       );
     });
+
+    if (sortOption === "Theo ngày") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+        const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+        return dateA - dateB; // So sánh ngày tăng dần
+      });
+    } else if (sortOption === "Theo giờ") {
+      filtered = filtered.sort((a, b) => {
+        return (
+          new Date(`2023-01-01 ${a.showTime}`) -
+          new Date(`2023-01-01 ${b.showTime}`)
+        );
+      });
+    }
+
+    return filtered;
   }, [
     orders,
     filmNameQuery,
@@ -231,29 +248,8 @@ const TicketPrintListPage = () => {
     statusQuery,
     tableSearchQuery,
     cusNameQuery,
+    sortOption,
   ]);
-
-  useEffect(() => {
-    console.log("sortOption: ", sortOption);
-    if (sortOption) {
-      const sortedData = [...orders].sort((a, b) => {
-        if (sortOption === "Theo ngày") {
-          console.log("haha");
-          // Chuyển đổi showDate từ "dd/mm/yyyy" sang đối tượng Date để so sánh
-          const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
-          const dateB = new Date(b.showDate.split("/").reverse().join("-"));
-          return dateA - dateB; // So sánh ngày tăng dần
-        } else if (sortOption === "Theo giờ") {
-          return (
-            new Date(`2023-01-01 ${a.showTime}`) -
-            new Date(`2023-01-01 ${b.showTime}`)
-          );
-        }
-        return 0;
-      });
-      setOrders(sortedData);
-    }
-  }, [sortOption]);
 
   // Reset sort option when date is selected/deselected
   useEffect(() => {
@@ -452,13 +448,13 @@ const TicketPrintListPage = () => {
             </select>
           </div>
         </div>
-        <div className="relative inline-block w-64">
+        <div className="relative inline-block w-64 ml-20">
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
             className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">Chọn sắp xếp</option>
+            <option value="">Không sắp xếp</option>
             {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
             {selectedDate && <option value="Theo giờ">Theo giờ</option>}
           </select>

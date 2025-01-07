@@ -2,7 +2,7 @@ import React from "react";
 import Table from "../../components/Table";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { BiRefresh } from "react-icons/bi";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BsSortDown } from "react-icons/bs";
 import axios from "axios";
 import Dialog from "../../components/Dialog/ConfirmDialog";
@@ -235,41 +235,37 @@ const EmployeeManagementPage = () => {
 
   const itemsPerPage = 7;
 
-  useEffect(() => {
-    console.log("sortOption: ", sortOption);
-    if (sortOption) {
-      const sortedData = [...employee].sort((a, b) => {
-        if (sortOption === "Asc") {
-          console.log("Sắp xếp giá tăng dần");
-          return a.salary - b.salary; // Sắp xếp giá tăng dần
-        } else if (sortOption === "Des") {
-          console.log("Sắp xếp giá giảm dần");
-          return b.salary - a.salary; // Sắp xếp giá giảm dần
-        }
-        return 0; // Không thay đổi nếu không khớp với tùy chọn nào
-      });
+  const filteredData = useMemo(() => {
+    // Lọc dữ liệu theo tên và chức vụ
+    let filtered = employee.filter((item) => {
+      const matchesName = NameQuery
+        ? item.name
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(NameQuery.toLowerCase().normalize("NFC"))
+        : true;
 
-      setEmployees(sortedData); // Cập nhật dữ liệu đã sắp xếp
+      const matchesJob = jobQuery
+        ? item.jobTitle
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(jobQuery.toLowerCase().normalize("NFC"))
+        : true;
+
+      return matchesName && matchesJob;
+    });
+
+    // Sắp xếp dữ liệu sau khi lọc
+    if (sortOption === "Asc") {
+      console.log("Sắp xếp lương tăng dần");
+      filtered = filtered.sort((a, b) => a.salary - b.salary); // Sắp xếp lương tăng dần
+    } else if (sortOption === "Des") {
+      console.log("Sắp xếp lương giảm dần");
+      filtered = filtered.sort((a, b) => b.salary - a.salary); // Sắp xếp lương giảm dần
     }
-  }, [sortOption]);
 
-  const filteredData = employee.filter((item) => {
-    const matchesName = NameQuery
-      ? item.name
-          .toLowerCase()
-          .normalize("NFC")
-          .includes(NameQuery.toLowerCase().normalize("NFC"))
-      : true;
-
-    const matchesJob = jobQuery
-      ? item.jobTitle
-          .toLowerCase()
-          .normalize("NFC")
-          .includes(jobQuery.toLowerCase().normalize("NFC"))
-      : true;
-
-    return matchesName && matchesJob;
-  });
+    return filtered;
+  }, [employee, NameQuery, jobQuery, sortOption]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -324,7 +320,7 @@ const EmployeeManagementPage = () => {
                 onChange={(e) => setSortOption(e.target.value)}
                 className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Chọn sắp xếp</option>
+                <option value="">Không sắp xếp</option>
                 <option value="Asc">Tăng dần lương</option>
                 <option value="Des">Giảm dần lương</option>
               </select>

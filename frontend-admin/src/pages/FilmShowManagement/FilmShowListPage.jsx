@@ -254,54 +254,8 @@ const FilmShowListPage = () => {
   ];
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    console.log("sortOption: ", sortOption);
-    if (sortOption) {
-      const sortedData = [...filmshows].sort((a, b) => {
-        if (sortOption === "Theo ngày") {
-          console.log("haha");
-          // Chuyển đổi showDate từ "dd/mm/yyyy" sang đối tượng Date để so sánh
-          const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
-          const dateB = new Date(b.showDate.split("/").reverse().join("-"));
-          return dateA - dateB; // So sánh ngày tăng dần
-        } else if (sortOption === "Theo giờ") {
-          return (
-            new Date(`2023-01-01 ${a.showTime}`) -
-            new Date(`2023-01-01 ${b.showTime}`)
-          );
-        }
-        return 0;
-      });
-      setFilmShows(sortedData);
-    }
-  }, [sortOption]);
-
-  // Reset sort option when date is selected/deselected
-  useEffect(() => {
-    setSortOption("");
-  }, [selectedDate]);
-  // const filteredData = filmshows.filter((item) => {
-  //   const matchesName = filmNameQuery
-  //     ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
-  //     : true;
-
-  //   console.log(item);
-
-  //   const matchesDate = selectedDate
-  //     ? item.showDate === new Date(selectedDate).toLocaleDateString()
-  //     : true; // Nếu không có ngày chọn thì không lọc theo ngày
-
-  //   const matchesStatus =
-  //     statusQuery === "" ||
-  //     statusQuery === "all" ||
-  //     item.status === statusQuery;
-
-  //   const matchesRoom =
-  //     roomQuery === "" || roomQuery === "all" || item.room === roomQuery;
-  //   return matchesName && matchesDate && matchesStatus && matchesRoom;
-  // });
   const filteredData = useMemo(() => {
-    return filmshows.filter((item) => {
+    let filtered = filmshows.filter((item) => {
       const matchesName = filmNameQuery
         ? item.film.toLowerCase().includes(filmNameQuery.toLowerCase())
         : true;
@@ -320,7 +274,31 @@ const FilmShowListPage = () => {
 
       return matchesName && matchesDate && matchesStatus && matchesRoom;
     });
-  }, [filmshows, filmNameQuery, selectedDate, statusQuery, roomQuery]);
+
+    if (sortOption === "Theo ngày") {
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.showDate.split("/").reverse().join("-")); // Đổi thành "yyyy-mm-dd"
+        const dateB = new Date(b.showDate.split("/").reverse().join("-"));
+        return dateA - dateB; // So sánh ngày tăng dần
+      });
+    } else if (sortOption === "Theo giờ") {
+      filtered = filtered.sort((a, b) => {
+        return (
+          new Date(`2023-01-01 ${a.showTime}`) -
+          new Date(`2023-01-01 ${b.showTime}`)
+        );
+      });
+    }
+
+    return filtered;
+  }, [
+    filmshows,
+    filmNameQuery,
+    selectedDate,
+    statusQuery,
+    roomQuery,
+    sortOption,
+  ]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -423,13 +401,13 @@ const FilmShowListPage = () => {
             </button>
           </div>
 
-          <div className="relative inline-block w-64">
+          <div className="relative inline-block w-64 ml-20">
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
               className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Chọn sắp xếp</option>
+              <option value="">Không sắp xếp</option>
               {!selectedDate && <option value="Theo ngày">Theo ngày</option>}
               {selectedDate && <option value="Theo giờ">Theo giờ</option>}
             </select>
