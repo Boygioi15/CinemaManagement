@@ -1,21 +1,18 @@
 import { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import axios from "axios";
-import { FaPrint } from "react-icons/fa6";
-import { FiSearch } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
-import slugify from "slugify";
 import TicketDetailModal from "../../components/Modal/TicketDetailModal";
 import TicketCancelModal from "../../components/Modal/TicketCancelModal";
 import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
 import RefreshLoader from "../../components/Loading";
-import formatCurrencyNumber from "../../ulitilities/formatCurrencyNumber";
 
 const UserAccountManagementPage = () => {
   const [users, setUsers] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [reason, setReason] = useState("");
 
   const [cusEmailQuery, setCusEmailQuery] = useState("");
@@ -28,127 +25,88 @@ const UserAccountManagementPage = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
-  const [title, setTitle] = useState("");
-  const [view, setView] = useState(true);
+  const [mode, setMode] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  //Mở modal chi tiết vé
-  const handlePrintClick = (order) => {
-    setSelectedOrder(order);
-    setIsTicketModalOpen(true);
-    setView(true);
-  };
-
-  //Mở modal xem thông tin vé ( ko có nút in)
-  const handleViewClick = (order) => {
-    setSelectedOrder(order);
-    setIsTicketModalOpen(true);
-    setView(false);
-  };
-
-  //Mở modal nhập lý do hủy vé
+  //nhấn nút chặn
   const handleCancelClick = (order) => {
-    setSelectedOrder(order);
-    setTitle("Lý do từ chối vé");
-    setIsCancelModalOpen(true);
+    setSelectedUser(order);
+    if (order.blocked) {
+      setMode("unblock");
+      setDialogData({
+        title: "Xác nhận",
+        message: "Bạn chắc chắn muốn mở chặn tài khoản này này ?",
+      });
+    } else {
+      setMode("block");
+      setDialogData({
+        title: "Xác nhận",
+        message: "Bạn chắc chắn muốn chặn tài khoản này này ?",
+      });
+    }
+    setIsConfirmModalOpen(true);
   };
 
-  //Nhấn nút xác nhận hủy vé
-  const handleReason = (reason) => {
-    setReason(reason);
-    console.log("Nhấn xác nhận hủy vé");
-    console.log("Thông tin đơn: " + JSON.stringify(selectedOrder));
-    console.log("Lý do: " + reason);
-    setIsConfirmModalOpen(true);
-
+  //nhấn nút xóa
+  const handleDeleteClick = (order) => {
+    setSelectedUser(order);
+    setMode("delete");
     setDialogData({
       title: "Xác nhận",
-      message: "Bạn chắc chắn muốn hủy vé này ?",
+      message: "Bạn chắc chắn muốn xóa tài khoản này này ?",
     });
-  };
-  useEffect(() => {
-    console.log("Modal open: " + isConfirmModalOpen);
-  }, [isConfirmModalOpen]);
-  //Đóng modal
-  const handleCloseModal = () => {
-    setIsTicketModalOpen(false);
-    setIsCancelModalOpen(false);
-    setIsConfirmModalOpen(false);
-    setIsSuccessModalOpen(false);
-
-    setSelectedOrder(null);
-  };
-
-  //Nhấn nút in vé
-  const handleConfirmModal = (order) => {
     setIsConfirmModalOpen(true);
-    setSelectedOrder(order);
-    setDialogData({
-      title: "Xác nhận",
-      message: "Bạn chắc chắn muốn in vé này ?",
-    });
   };
 
   const handleRefresh = async () => {
     setLoading(true);
-    //fetchOrder();
+    fetchUser();
     setTimeout(() => {
       setLoading(false);
     }, 2000);
   };
 
-  //Xác nhận hủy vé
-  const handleCancelConfirmClick = async () => {
-    try {
-      const response = await axios.put(
-        `http://localhost:8000/api/orders/${selectedOrder._id}/disapprove-print`,
-        { reason }
-      );
-      if (response.status === 200) {
-        console.log("thành công");
-      }
-    } catch (error) {
-      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
-    }
-
-    handleRefresh();
-    setDialogData({
-      title: "Thành công",
-      message: "Hủy vé thành công",
-    });
-    setIsCancelModalOpen(false);
-    setIsConfirmModalOpen(false);
-  };
-
   //Xác nhận in vé
   const handleConfirmClick = async () => {
-    console.log(selectedOrder._id);
-    if (
-      dialogData.title === "Xác nhận" &&
-      dialogData.message.includes("Bạn chắc chắn muốn hủy vé này ?")
-    ) {
-      await handleCancelConfirmClick();
-    } else {
-      try {
-        const response = await axios.put(
-          `http://localhost:8000/api/orders/${selectedOrder._id}/print`
+    setIsConfirmModalOpen(false);
+    try {
+      if (mode === "block") {
+        await axios.post(
+          `http://localhost:8000/api/user/user/${selectedUser._id}/block`
         );
-        if (response.status === 200) {
-          console.log("thành công");
-        }
-      } catch (error) {
-        alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+        setDialogData({
+          title: "Thành công",
+          message: "Chặn tài khoản thành công",
+        });
+      } else if (mode === "delete") {
+        await axios.delete(
+          `http://localhost:8000/api/user/user/${selectedUser._id}`
+        );
+        setDialogData({
+          title: "Thành công",
+          message: "Xóa tài khoản thành công",
+        });
+      } else if (mode === "unblock") {
+        await axios.post(
+          `http://localhost:8000/api/user/user/${selectedUser._id}/unblock`
+        );
+        setDialogData({
+          title: "Thành công",
+          message: "Mở chặn tài khoản thành công",
+        });
       }
 
-      handleRefresh();
-      setDialogData({
-        title: "Thành công",
-        message: "In vé thành công",
-      });
-      setIsTicketModalOpen(false);
-      setIsConfirmModalOpen(false);
+      await handleRefresh();
+
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.log("Error response:", error.response); // Để kiểm tra xem error có phản hồi hay không
+      alert(
+        "Thao tác thất bại, lỗi: " +
+          (error.response ? error.response.success : error.message)
+      );
     }
   };
 
@@ -156,7 +114,7 @@ const UserAccountManagementPage = () => {
     try {
       const response = await axios.get("http://localhost:8000/api/user/user");
       // Lọc những order có printed === false
-      setUsers(response.data);
+      setUsers(response.data.msg);
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
@@ -170,23 +128,15 @@ const UserAccountManagementPage = () => {
     return;
   }
 
-  const userss = [
-    { id: 1, name: "North", email: "dat1@gmail.com", phone: 24334530 },
-    { id: 2, name: "South", email: "dat2@gmail.com", phone: 18533334 },
-    { id: 3, name: "East", email: "dat3@gmail.com", phone: 27534534 },
-    { id: 4, name: "West", email: "dat4@gmail.com", phone: 21345340 },
-    { id: 5, name: "Central", email: "dat5@gmail.com", phone: 23434545 },
-    { id: 6, name: "Northwest", email: "dat6@gmail.com", phone: 19433455 },
-  ];
-
   console.log(users);
 
   const itemsPerPage = 7;
-  const filteredData = userss.filter((order) => {
+  const filteredData = users.filter((order) => {
     const matchesName = cusNameQuery
-      ? order.customerInfo.name
+      ? order.name
           .toLowerCase()
-          .includes(cusNameQuery.toLowerCase())
+          .normalize("NFC")
+          .includes(cusNameQuery.toLowerCase().normalize("NFC"))
       : true;
 
     // Lọc theo mã code
@@ -197,8 +147,17 @@ const UserAccountManagementPage = () => {
       ? order.phone.toLowerCase().includes(cusPhoneQuery.toLowerCase())
       : true;
 
+    const matchesStatus =
+      statusQuery === "all"
+        ? true // Trả về tất cả khi status là "All"
+        : statusQuery === "Chặn"
+        ? order.blocked === true // Lọc theo Chặn
+        : statusQuery === "Không chặn"
+        ? order.blocked === false // Lọc theo Không chặn
+        : true;
+
     // Kết hợp cả hai điều kiện
-    return matchesPhone && matchesEmail && matchesName;
+    return matchesPhone && matchesEmail && matchesName && matchesStatus;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -220,21 +179,9 @@ const UserAccountManagementPage = () => {
         let statusText = "";
         let statusClass = "";
 
-        if (row.invalidReason_Printed) {
-          statusText = "Từ chối in vé";
+        if (row.blocked) {
+          statusText = "Bị chặn";
           statusClass = "bg-red-100 text-red-800";
-        } else if (row.invalidReason_Served) {
-          statusText = "Từ chối phục vụ";
-          statusClass = "bg-red-100 text-red-800";
-        } else if (!row.printed) {
-          statusText = "Hoạt động";
-          statusClass = "bg-green-100 text-green-800";
-        } else if (row.served) {
-          statusText = "Đã phục vụ";
-          statusClass = "bg-green-100 text-green-800";
-        } else if (row.printed) {
-          statusText = "Đã in";
-          statusClass = "bg-blue-100 text-blue-800";
         }
 
         return (
@@ -254,6 +201,12 @@ const UserAccountManagementPage = () => {
               className="w-5 h-5"
               onClick={() => handleCancelClick(row)}
             />
+          </button>
+          <button
+            className="text-red-600 hover:text-red-800"
+            onClick={() => handleDeleteClick(row)}
+          >
+            <FiTrash2 className="w-4 h-4" /> {/* Delete icon */}
           </button>
         </div>
       ),
@@ -354,33 +307,23 @@ const UserAccountManagementPage = () => {
         )}
       </div>
 
-      <TicketDetailModal
-        order={selectedOrder}
-        isOpen={isTicketModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmModal}
-        view={view}
-      />
-      <TicketCancelModal
-        isOpen={isCancelModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleReason}
-        title={title}
-      />
-
       <Dialog
         isOpen={isConfirmModalOpen}
         title={dialogData.title}
         message={dialogData.message}
-        onClose={handleCloseModal}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+        }}
         onConfirm={handleConfirmClick}
       />
 
       <SuccessDialog
-        isOpen={isSuccessModalOpen}
+        isOpen={!loading && isSuccessModalOpen}
         title={dialogData.title}
         message={dialogData.message}
-        onClose={handleCloseModal}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+        }}
       />
 
       <RefreshLoader isOpen={loading} />
