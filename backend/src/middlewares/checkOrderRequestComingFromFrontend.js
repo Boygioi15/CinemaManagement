@@ -120,7 +120,6 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     }
 
     if (pointUsage) {
-
       const param = await ParamService.getParams();
       const loyalPoint_PointToReducedPriceRatio = param.loyalPoint_PointToReducedPriceRatio;
 

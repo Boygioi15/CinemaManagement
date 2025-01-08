@@ -157,12 +157,23 @@ export class OrderService {
     if (promotionIDs) {
       await OrderHelper.createPromotionDecorator({
         orderRef: newOrder._id,
-        promotion: await PromotionService.getDetailPromotionByIds(promotionIDs)
+        promotions: await PromotionService.getDetailPromotionByIds(promotionIDs)
       })
+    }
+
+    if (pointUsage) {
+      const param = await ParamService.getParams()
+      await OrderHelper.createPointUsageDecorator({
+        orderRef: newOrder._id,
+        pointUsed: pointUsage,
+        param_PointToMoneyRatio: param.loyalPoint_PointToReducedPriceRatio
+      })
+
     }
 
     // clear point
     if (pointUsage) {
+      console.log("🚀 ~ OrderService ~ pointUsage:", pointUsage)
       await LoyalPointService.addLoyalPoint(user._id, -pointUsage)
     }
 
@@ -170,7 +181,7 @@ export class OrderService {
     // earn point
     const param = await ParamService.getParams();
     const loyalPoint_OrderToPointRatio = param.loyalPoint_OrderToPointRatio;
-    let accPoint = (totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio;
+    let accPoint = (totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio / 100;
     await LoyalPointService.addLoyalPoint(user._id, accPoint)
 
     return await newOrder.save();

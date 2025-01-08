@@ -982,7 +982,7 @@ function BottomBar({
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const [param, setParam] = useState(null);
   const [pointUsage, setPointUsage] = useState(null);
-
+  const [priceAfterAll, setPriceAfterAll] = useState(0);
   const navigate = useNavigate();
 
   const handleCreatePayment = async () => {
@@ -1035,8 +1035,10 @@ function BottomBar({
         100 /
         param.loyalPoint_PointToReducedPriceRatio;
 
-    const pointUsage = Math.min(data, loyalPoint);
-    console.log("🚀 ~ useEffect ~ pointUsage:", pointUsage);
+    const pointUsage = Math.min(
+      param.loyalPoint_MaxiumPointUseInOneGo,
+      loyalPoint
+    );
 
     setPointUsage(pointUsage);
   }, [usePoints]);
@@ -1047,8 +1049,19 @@ function BottomBar({
       calculateTotalPrice() < param.loyalPoint_MiniumValueToUseLoyalPoint
     ) {
       alert(
-        `Để có thể sử dụng điểm tích lũy, đơn hàng tối thiếu phải là: ${param.loyalPoint_MiniumValueToUseLoyalPoint.toLocaleString()} VNĐ`
+        `Bạn có thể sử dụng điểm cho hóa hóa đơn từ : ${param.loyalPoint_MiniumValueToUseLoyalPoint.toLocaleString()} VNĐ`
       );
+      return;
+    }
+
+    if (
+      usePoints === false &&
+      loyalPoint > param.loyalPoint_MaxiumPointUseInOneGo
+    ) {
+      alert(
+        `Điểm sử dụng tối đa trong một lần là ${param.loyalPoint_MaxiumPointUseInOneGo}. Phần dư ra có thể được sử dụng lại cho lần sau.`
+      );
+      setUsePoints(!usePoints);
       return;
     }
     setUsePoints(!usePoints);
@@ -1095,6 +1108,20 @@ function BottomBar({
     return total;
   };
 
+  useEffect(() => {
+    const price = !usePoints
+      ? calculateTotalPrice() - (calculateTotalPrice() * totalDiscount) / 100
+      : calculateTotalPrice() -
+          (calculateTotalPrice() * totalDiscount) / 100 -
+          (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100 <
+        0
+      ? 0
+      : calculateTotalPrice() -
+        (calculateTotalPrice() * totalDiscount) / 100 -
+        (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100;
+
+    setPriceAfterAll(price);
+  }, [usePoints, seatSelections, totalDiscount, param]);
   return (
     <div
       style={{ zIndex: 5, width: "-webkit-fill-available" }}
@@ -1238,23 +1265,18 @@ function BottomBar({
           <div className="flex justify-between">
             <p className="text-lg">Tổng tiền</p>
             <p className="text-xl font-bold">
-              {!usePoints
-                ? (
-                    calculateTotalPrice() -
-                    (calculateTotalPrice() * totalDiscount) / 100
-                  ).toLocaleString()
-                : (calculateTotalPrice() -
-                    (calculateTotalPrice() * totalDiscount) / 100 -
-                    (loyalPoint * param.loyalPoint_PointToReducedPriceRatio) /
-                      100 <
-                  0
-                    ? 0
-                    : calculateTotalPrice() -
-                      (calculateTotalPrice() * totalDiscount) / 100 -
-                      (loyalPoint * param.loyalPoint_PointToReducedPriceRatio) /
-                        100
-                  ).toLocaleString()}
+              {priceAfterAll.toLocaleString()}
               VNĐ
+            </p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-lg">Điểm tích được </p>
+            <p className="text-xl font-bold">
+              +{" "}
+              {(
+                (priceAfterAll * param?.loyalPoint_OrderToPointRatio) /
+                100
+              ).toLocaleString()}
             </p>
           </div>
           <div className="flex justify-between items-center">
@@ -1282,6 +1304,15 @@ function BottomBar({
               </span>
             </label>
           </div>
+          {usePoints && (
+            <div className="flex justify-between">
+              <p className="text-lg">Đã sử dụng </p>
+              <p className="text-xl font-bold">
+                {" "}
+                {pointUsage?.toLocaleString()}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="w-full mt-2">
