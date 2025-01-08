@@ -27,6 +27,8 @@ import whiteScreen from "../../assets/whiteScreen.png";
 import CustomButton from "../../Components/button/index"; // Giả sử bạn đã có CustomButton component
 import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 import { createPayment } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
+import PromotionList from "../../Components/PromotionList"; // Import PromotionList
+import { FaArrowLeft } from "react-icons/fa"; // Import biểu tượng mũi tên
 
 const seatWidth = 50;
 const seatHeight = 40;
@@ -41,6 +43,9 @@ const FilmDetailPage = () => {
 
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
+  const [isPromotionListOpen, setIsPromotionListOpen] = useState(false); // Trạng thái PromotionList
+  const [appliedPromotions, setAppliedPromotions] = useState([]); // Danh sách khuyến mãi đã chọn
+
   useEffect(() => {
     setSelectedFilmShowID(null);
   }, [selectedDate]);
@@ -697,6 +702,24 @@ const FilmDetailPage = () => {
           additionalItemSelections={additionalItemSelections}
           selectedFilmShowId={selectedFilmShowID}
         />
+      )}
+      <PromotionList
+        isOpen={isPromotionListOpen}
+        setIsOpen={setIsPromotionListOpen}
+        onApplyPromotions={(selectedPromotions) => {
+          console.log("Các khuyến mãi đã chọn:", selectedPromotions);
+          setAppliedPromotions(selectedPromotions); // Lưu danh sách khuyến mãi đã chọn
+        }}
+      />
+
+      {/* Nút mở sidebar PromotionList */}
+      {!isPromotionListOpen && (
+        <button
+          onClick={() => setIsPromotionListOpen(true)}
+          className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg flex items-center justify-center"
+        >
+          <FaArrowLeft size={20} />
+        </button>
       )}
     </div>
   );
