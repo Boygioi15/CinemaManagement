@@ -50,7 +50,7 @@ const Header = () => {
     }
   };
   return (
-    <div style={{position:"fixed",top:"0px",width:"100%",zIndex:"100",display:"flex", height:"70px", padding: "0px 50px", justifyContent:"space-between",background:"#0d1831",  borderBottom: "1px solid #34373c"}}className=" p-2.5 flex items-center justify-between  text-2xl">
+    <div style={{position:"fixed",top:"0px",width:"100%",zIndex:"40",display:"flex", height:"70px", padding: "0px 50px", justifyContent:"space-between",background:"#0d1831",  borderBottom: "1px solid #34373c"}}className=" p-2.5 flex items-center justify-between  text-2xl">
         <div  className="flex items-center space-x-6">
           <div style={{gap:"5px"}}className="flex items-center space-x-2">
             <img
