@@ -239,7 +239,24 @@ const UserTransHistory = () => {
                         </tr>
                       ))}
 
-                      <tr className="bg-gray-100 font-bold">
+                      {transaction?.totalPriceAfterDiscount !== null && (
+                        <tr className="bg-gray-100 font-bold ">
+                          <td
+                            colSpan={4}
+                            className="p-2 text-right text-gray-700"
+                          >
+                            Tổng khuyến mãi (VND)
+                          </td>
+                          <td className="p-2 text-right text-gray-700">
+                            {(
+                              transaction?.totalPrice -
+                              transaction?.totalPriceAfterDiscount
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      )}
+
+                      <tr className="bg-gray-100 font-bold ">
                         <td
                           colSpan={4}
                           className="p-2 text-right text-gray-700"
@@ -247,7 +264,8 @@ const UserTransHistory = () => {
                           Tổng tiền (VND)
                         </td>
                         <td className="p-2 text-right text-gray-700">
-                          {transaction?.totalPrice.toLocaleString()}
+                          {transaction?.totalPriceAfterDiscount?.toLocaleString() ||
+                            transaction?.totalPrice.toLocaleString()}
                         </td>
                       </tr>
                     </tbody>

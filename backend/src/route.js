@@ -14,6 +14,8 @@ import promotionRouter from "./promotion/promotion.route.js";
 import additionalItemRouter from "./additionalItem/additionalItem.route.js";
 import paymentRouter from "./payment/payment.route.js";
 import permissionRouter from "./permission/permission.route.js";
+import loyalPointRouter from "./loyalpoint/loyalPoint.route.js";
+
 
 const router = express.Router();
 
@@ -32,8 +34,13 @@ router.use("/api/debug", debugRouter);
 router.use("/api/statistics", statisticRouter);
 router.use("/api/promotion", promotionRouter);
 router.use("/api/permission", permissionRouter);
+router.use("/api/loyalpoint", loyalPointRouter);
+
 router.use((req, res) => {
-  res.status(404).json({ success: false, message: "Not found route" });
+  res.status(404).json({
+    success: false,
+    message: "Not found route"
+  });
 });
 
 export default router;

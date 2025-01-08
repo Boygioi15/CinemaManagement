@@ -113,15 +113,28 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
 
-    if (pointUsage) {
-      const param = await ParamService.getParams();
-      const loyalPoint_PointToReducedPriceRatio = param.loyalPoint_PointToReducedPriceRatio;
-      req.body.totalPriceAfterDiscount = totalPrice - loyalPoint_PointToReducedPriceRatio * pointUsage;
-    }
 
-    if (promotionIDs) {
+    if (promotionIDs && promotionIDs.length > 0) {
       const discountAmount = await PromotionService.getPromotionDiscountAmount(totalPrice, promotionIDs);
       req.body.totalPriceAfterDiscount = totalPrice - discountAmount;
+    }
+
+    if (pointUsage) {
+
+      const param = await ParamService.getParams();
+      const loyalPoint_PointToReducedPriceRatio = param.loyalPoint_PointToReducedPriceRatio;
+
+      const discountFromPoints = (loyalPoint_PointToReducedPriceRatio * pointUsage) / 100;
+
+      let totalPriceAfterDiscount = 0;
+      if (promotionIDs && promotionIDs.length > 0) {
+        totalPriceAfterDiscount = Math.max(0, req.body.totalPriceAfterDiscount - discountFromPoints);
+
+      } else {
+        totalPriceAfterDiscount = Math.max(0, totalPrice - discountFromPoints);
+      }
+
+      req.body.totalPriceAfterDiscount = totalPriceAfterDiscount;
     }
 
     next();

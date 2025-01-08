@@ -85,6 +85,7 @@ export const createPayment = async ({
   promotionIDs = null,
   ticketSelections = null,
   additionalItemSelections = null,
+  pointUsage = null,
 }) => {
   return await axios.post(`/payment`, {
     totalPrice,
@@ -93,6 +94,7 @@ export const createPayment = async ({
     promotionIDs,
     ticketSelections,
     additionalItemSelections,
+    pointUsage,
   });
 };
 
@@ -119,4 +121,14 @@ export const getAllOrderByUserId = async () => {
 
 export const getAllPromotion = async () => {
   return await axios.get(`/promotion/active`);
+};
+
+// point
+
+export const getCurrentPoint = async () => {
+  return await axios.get(`/loyalpoint`);
+};
+
+export const getParam = async () => {
+  return await axios.get(`/param`);
 };

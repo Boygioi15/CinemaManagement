@@ -5,9 +5,9 @@ import LoyalPointService from "./loyalPoint.service.js";
 class LoyalPointController {
   getLoyalPoint = expressAsyncHandler(async (req, res) => {
     const {
-      customerId
-    } = req.params;
-    const response = await LoyalPointService.getLoyalPoint(customerId);
+      _id
+    } = req.user;
+    const response = await LoyalPointService.getLoyalPoint(_id);
     return res.status(200).json({
       msg: "Get loyal points successfully!",
       success: true,
