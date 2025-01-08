@@ -1,7 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
-import {
-  ParamService
-} from "./param.service.js";
+import { ParamService } from "./param.service.js";
 
 class ParamController {
   CreateAgeRestriction = expressAsyncHandler(async (req, res, next) => {
@@ -24,9 +22,7 @@ class ParamController {
   });
 
   DeleteAgeRestriction = expressAsyncHandler(async (req, res, next) => {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
     const response = await ParamService.deleteAgeRestriction(id);
     return res.status(200).json({
       success: true,
@@ -44,9 +40,7 @@ class ParamController {
   });
 
   UpdateTicketType = expressAsyncHandler(async (req, res, next) => {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
     const response = await ParamService.updateTicketType(id, req.body);
     return res.status(200).json({
       msg: "Update age restriction successfully!",
@@ -64,9 +58,7 @@ class ParamController {
   });
 
   DeleteTicketType = expressAsyncHandler(async (req, res, next) => {
-    const {
-      id
-    } = req.params;
+    const { id } = req.params;
     const response = await ParamService.deleteTicketType(id);
     return res.status(200).json({
       success: true,
@@ -86,7 +78,6 @@ class ParamController {
     const {
       promotion_PointToReducedPriceRatio,
       promotion_PriceToPointRatio,
-      addedPriceForCenterSeat,
       addedPriceForVIPSeat,
     } = req.body;
 
@@ -112,17 +103,6 @@ class ParamController {
         message: "Tỷ lệ tích điểm phải là số và không được âm",
       });
     }
-
-    if (
-      !isValidNumber(addedPriceForCenterSeat) &&
-      addedPriceForCenterSeat !== undefined
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Gí thêm cho ghế trung tâm phải là số và không được âm",
-      });
-    }
-
     if (
       !isValidNumber(addedPriceForVIPSeat) &&
       addedPriceForVIPSeat !== undefined
@@ -141,8 +121,6 @@ class ParamController {
       data: response,
     });
   });
-
-
 }
 
 export default new ParamController();
