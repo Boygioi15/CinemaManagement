@@ -6,13 +6,11 @@ import {
   ordersDecoratorsPromotionsModel,
   ordersDataItemsModel,
   ordersDecoratorsOfflineModel,
+  ordersDataOthersModel,
 } from "./order.schema.js";
 import {
   generateRandomVerifyCode
 } from "../ulitilities/ultilitiesFunction.js";
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
 
 import filmModel from "../film/film.schema.js";
 import roomModel from "../room/room.schema.js";
@@ -20,11 +18,14 @@ import {
   TicketTypeModel
 } from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
-import promotionModel from "../promotion/promotion.schema.js";
 import mongoose from "mongoose";
 import {
   PromotionService
 } from "../promotion/promotion.service.js";
+import LoyalPointService from "../loyalpoint/loyalPoint.service.js";
+import {
+  ParamService
+} from "../param/param.service.js";
 export class OrderService {
   // static getAllOrders = async () => {
   //   return await orderModel.find().sort({
@@ -53,13 +54,17 @@ export class OrderService {
     promotionIDs = null,
     totalPriceAfterDiscount,
     user,
+    otherDatas,
+    pointUsage
   }) => {
+
     let filmShow = {};
     let film = {};
     let roomName = null;
     let nItems = [];
     let nTickets = [];
     let seatNames = [];
+
     if (filmShowId) {
       filmShow = await filmShowModel.findById(filmShowId).populate("film");
       if (!filmShow) throw new Error("Film Show not found");
@@ -118,6 +123,7 @@ export class OrderService {
 
     newOrder.verifyCode = generateRandomVerifyCode();
 
+
     // create
     if (filmShowId) {
       await OrderHelper.createFilmShowOrder({
@@ -130,6 +136,10 @@ export class OrderService {
       });
     }
 
+    await OrderHelper.createOfflineServiceOrder({
+      orderRef: newOrder._id,
+    });
+
     if (additionalItemSelections.length > 0) {
       await OrderHelper.createItemsOrder({
         orderRef: newOrder._id,
@@ -137,9 +147,12 @@ export class OrderService {
       });
     }
 
-    await OrderHelper.createOfflineServiceOrder({
-      orderRef: newOrder._id,
-    });
+    if (otherDatas) {
+      await OrderHelper.createOrdersDataOthers({
+        orderRef: newOrder._id,
+        items: otherDatas,
+      })
+    }
 
     if (promotionIDs) {
       await OrderHelper.createPromotionDecorator({
@@ -148,8 +161,18 @@ export class OrderService {
       })
     }
 
+    // clear point
+    if (pointUsage) {
+      await LoyalPointService.addLoyalPoint(user._id, -pointUsage)
+    }
 
-    //  accumulated point ...
+
+    // earn point
+    const param = await ParamService.getParams();
+    const loyalPoint_OrderToPointRatio = param.loyalPoint_OrderToPointRatio;
+    console.log("🚀 ~ OrderService ~ loyalPoint_OrderToPointRatio:", loyalPoint_OrderToPointRatio)
+    let accPoint = (totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio;
+    await LoyalPointService.addLoyalPoint(user._id, accPoint)
 
     return await newOrder.save();
   };
@@ -175,6 +198,10 @@ export class OrderService {
 
       // Get promotions
       const promotionsData = await ordersDecoratorsPromotionsModel.findOne({
+        orderRef: orderObjectId,
+      });
+
+      const otherDatas = await ordersDataOthersModel.findOne({
         orderRef: orderObjectId,
       });
 
@@ -215,7 +242,7 @@ export class OrderService {
           seatNames: filmShowData.seatNames,
           tickets: filmShowData.tickets,
         } : null,
-
+        otherDatas: otherDatas?.items,
         // Items if exists
         items: itemsData?.items || [],
 
@@ -474,6 +501,16 @@ export class OrderHelper {
   static async createFilmShowOrder(data) {
     try {
       const order = new ordersDataFilmShowModel(data);
+      return await order.save();
+    } catch (error) {
+      console.error(`Error creating Film Show order: ${error.message}`);
+      throw new Error("Failed to create Film Show order.");
+    }
+  }
+
+  static async createOrdersDataOthers(data) {
+    try {
+      const order = new ordersDataOthersModel(data);
       return await order.save();
     } catch (error) {
       console.error(`Error creating Film Show order: ${error.message}`);

@@ -9,6 +9,9 @@ import {
 import {
   PromotionService
 } from "../promotion/promotion.service.js";
+import {
+  ParamService
+} from "../param/param.service.js";
 
 export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
   async (req, res, next) => {
@@ -20,6 +23,7 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
       totalPrice,
       seatSelections,
       promotionIDs,
+      pointUsage
     } = req.body;
     req.body.user = req.user
 
@@ -80,25 +84,46 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
 
     if (seatSelections) {
       let vCount = 0;
+
+      const params = await ParamService.getParams();
+      const addedPriceForVIP = params.addedPriceForVIPSeat;
+
+      const otherDatas = [];
+
       for (let i = 0; i < seatSelections.length; i++) {
         for (let j = 0; j < seatSelections[i].length; j++) {
           if (seatSelections[i][j].selected) {
             if (seatSelections[i][j].seatType === "V") {
               vCount++;
+              otherDatas.push({
+                name: seatSelections[i][j].seatName,
+                price: addedPriceForVIP,
+                quantity: 1
+              })
             }
           }
         }
       }
-      totalPriceByServer += vCount * 20000;
+      totalPriceByServer += vCount * addedPriceForVIP;
 
+      req.body.otherDatas = otherDatas;
     }
 
 
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
 
-    const discountAmount = await PromotionService.getPromotionDiscountAmount(totalPrice, promotionIDs);
-    req.body.totalPriceAfterDiscount = totalPrice - discountAmount;
+    if (pointUsage) {
+      const param = await ParamService.getParams();
+      const loyalPoint_PointToReducedPriceRatio = param.loyalPoint_PointToReducedPriceRatio;
+      req.body.totalPriceAfterDiscount = totalPrice - loyalPoint_PointToReducedPriceRatio * pointUsage;
+    }
+
+    if (promotionIDs) {
+      const discountAmount = await PromotionService.getPromotionDiscountAmount(totalPrice, promotionIDs);
+      req.body.totalPriceAfterDiscount = totalPrice - discountAmount;
+    }
+
 
 
     next();

@@ -1,6 +1,8 @@
 import express from "express";
 import OrderController from "./order.controller.js";
-import { validateToken } from "../middlewares/verifyToken.js";
+import {
+  validateToken
+} from "../middlewares/verifyToken.js";
 
 const router = express.Router();
 
@@ -12,7 +14,7 @@ router.get(
   validateToken,
   OrderController.getAllOrdersByUserId
 );
-router.get("/:_id", validateToken, OrderController.getOrderById);
+router.get("/:_id", OrderController.getOrderById);
 router.put("/:_id/disapprove-print", OrderController.disapprovePrinted);
 router.put("/:_id/disapprove-serve", OrderController.disapproveServed);
 

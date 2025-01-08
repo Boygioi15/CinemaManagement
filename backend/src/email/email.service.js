@@ -112,55 +112,67 @@ export class EmailService {
              }
           </table>
       
-          ${
-            ticket.items.length > 0 || ticket?.filmShow?.tickets.length > 0
-              ? (() => {
-                  let currentIndex = 0;
-                  return `
-                    <table class="tableSeat" style="margin-top: 50px;">
-                      <tr>
-                        <th>STT</th>
-                        <th>MẶT HÀNG</th>
-                        <th>SỐ LƯỢNG</th>
-                        <th>ĐƠN GIÁ (VND)</th>
-                        <th>THÀNH TIỀN (VND)</th>
-                      </tr>
-                      ${ticket.items
-                        .map(
-                          (item, index) => `
-                          <tr>
-                            <td>${currentIndex + index + 1}</td>
-                            <td>${item.name}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>${item.quantity * item.price}</td>
-                          </tr>`
-                        )
-                        .join("")}
-                      ${(() => {
-                        currentIndex += ticket.items.length;
-                        return ticket?.filmShow?.tickets
-                          .map(
-                            (item, index) => `
-                            <tr>
-                              <td>${currentIndex + index + 1}</td>
-                              <td>${item.name}</td>
-                              <td>${item.quantity}</td>
-                              <td>${item.price}</td>
-                              <td>${item.quantity * item.price}</td>
-                            </tr>`
-                          )
-                          .join("");
-                      })()}
-                      <tr style="background-color: #6b3fa4; color: white">
-                        <td colspan="4">TỔNG TIỀN (VND)</td>
-                        <td>${ticket.totalPrice}</td>
-                      </tr>
-                    </table>`;
-                })()
-              : ""
-          }
-      
+      ${
+  ticket.items.length > 0 || ticket?.filmShow?.tickets.length > 0 || ticket?.otherDatas?.length > 0
+    ? (() => {
+        let currentIndex = 0;
+        return `
+          <table class="tableSeat" style="margin-top: 50px;">
+            <tr>
+              <th>STT</th>
+              <th>MẶT HÀNG</th>
+              <th>SỐ LƯỢNG</th>
+              <th>ĐƠN GIÁ (VND)</th>
+              <th>THÀNH TIỀN (VND)</th>
+            </tr>
+            ${ticket.items
+              .map(
+                (item, index) => `
+                <tr>
+                  <td>${currentIndex + index + 1}</td>
+                  <td>${item.name}</td>
+                  <td>${item.quantity}</td>
+                  <td>${item.price}</td>
+                  <td>${item.quantity * item.price}</td>
+                </tr>`
+              )
+              .join("")}
+            ${(() => {
+              currentIndex += ticket.items.length;
+              return ticket?.filmShow?.tickets
+                .map(
+                  (item, index) => `
+                  <tr>
+                    <td>${currentIndex + index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price}</td>
+                    <td>${item.quantity * item.price}</td>
+                  </tr>`
+                )
+                .join("");
+            })()}
+            ${(() => {
+              currentIndex += ticket?.filmShow?.tickets?.length || 0;
+              return ticket?.otherDatas?.map(
+                (item, index) => `
+                <tr>
+                  <td>${currentIndex + index + 1}</td>
+                  <td>${item.name} (VIP)</td>
+                  <td>${item.quantity}</td>
+                  <td>${item.price}</td>
+                  <td>${item.quantity * item.price}</td>
+                </tr>`
+              ).join("") || "";
+            })()}
+            <tr style="background-color: #6b3fa4; color: white">
+              <td colspan="4">TỔNG TIỀN (VND)</td>
+              <td>${ticket.totalPrice}</td>
+            </tr>
+          </table>`;
+      })()
+    : ""
+}
           <p>
             Cảm ơn Quý khách đã xem phim tại Cinestar. Chúc Quý khách một buổi xem phim vui vẻ!
           </p>

@@ -123,7 +123,6 @@ const orderSchemaV2 = new mongoose.Schema({
   },
   totalPriceAfterDiscount: {
     type: Number,
-    required: true,
   },
   customerInfo: {
     customerRef: {
@@ -243,6 +242,30 @@ const Orders_Data_Items = new mongoose.Schema({
   timestamps: true,
 });
 
+const Orders_Data_Others = new mongoose.Schema({
+  orderRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  items: [{
+    name: {
+      type: String,
+      required: false,
+    },
+    quantity: {
+      type: String,
+      required: false,
+    },
+    price: {
+      type: String,
+      required: false,
+    },
+  }, ],
+
+}, {
+  timestamps: true,
+});
+
 const Orders_Decorators_Promotions = new mongoose.Schema({
   orderRef: {
     type: mongoose.Schema.Types.ObjectId,
@@ -284,4 +307,5 @@ export const ordersDataFilmShowModel = mongoose.model("ordersData_FilmShow", Ord
 export const ordersDecoratorsPointUsageModel = mongoose.model("orders_Decorators_PointUsage", Orders_Decorators_PointUsage);
 export const ordersDecoratorsPromotionsModel = mongoose.model("orders_Decorators_Promotions", Orders_Decorators_Promotions);
 export const ordersDataItemsModel = mongoose.model("orders_Data_Items", Orders_Data_Items);
+export const ordersDataOthersModel = mongoose.model("orders_Data_Others", Orders_Data_Others);
 export const ordersDecoratorsOfflineModel = mongoose.model("orders_Decorators_Offline", Orders_Decorators_Offline);
