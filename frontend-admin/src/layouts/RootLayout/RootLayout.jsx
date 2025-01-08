@@ -137,6 +137,9 @@ const RootLayout = () => {
       if (roleList.includes("additional_item")) {
         updatedTab.push(otherProductTab);
       }
+      if (roleList.includes("user_account")) {
+        updatedTab.push(accountTab);
+      }
       if (roleList.includes("admin_param")) {
         updatedTab.push(otherRuleTab);
       }
