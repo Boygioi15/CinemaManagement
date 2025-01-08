@@ -184,7 +184,11 @@ const AdditionalItemManagementPage = () => {
 
   const columns = [
     { header: "Tên sản phẩm", key: "name" },
-    { header: "Giá", key: "price" },
+    {
+      header: "Giá",
+      key: "price",
+      render: (_, row) => row.price.toLocaleString(),
+    },
     { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Hành động",
@@ -265,6 +269,12 @@ const AdditionalItemManagementPage = () => {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
+            <button
+              className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+              onClick={() => handleDeleteFilter()}
+            >
+              Xóa lọc
+            </button>
           </div>
           <div className="flex items-center gap-4 ml-20">
             <span className="text-xl font-bold text-gray-800">Sắp xếp:</span>
@@ -285,12 +295,6 @@ const AdditionalItemManagementPage = () => {
           </div>
         </div>
         <div>
-          <button
-            className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
-            onClick={() => handleDeleteFilter()}
-          >
-            Xóa lọc
-          </button>
           <button
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             onClick={() => handleAddClick()}

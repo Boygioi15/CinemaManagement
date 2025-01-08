@@ -55,7 +55,11 @@ const AdminParamPage = () => {
 
   const ticketTypeColumns = [
     { header: "Tên loại vé", key: "title" },
-    { header: "Giá", key: "price" },
+    {
+      header: "Giá",
+      key: "price",
+      render: (_, row) => row.price.toLocaleString(),
+    },
     { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Ghế Đôi",
