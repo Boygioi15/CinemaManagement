@@ -24,14 +24,18 @@ export class ParamService {
   };
 
   static createTicketType = async (ticketTypeData) => {
-    const { price } = ticketTypeData;
+    const {
+      price
+    } = ticketTypeData;
     if (price <= 0) {
       throw customError("Giá cho loại vé phải là một số nguyên không âm", 400);
     }
     return await TicketTypeModel.create(ticketTypeData);
   };
   static updateTicketType = async (id, ticketTypeData) => {
-    const { price } = ticketTypeData;
+    const {
+      price
+    } = ticketTypeData;
     if (price <= 0) {
       throw customError("Giá cho loại vé phải là một số nguyên không âm", 400);
     }
