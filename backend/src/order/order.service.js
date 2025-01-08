@@ -7,15 +7,24 @@ import {
   ordersDataItemsModel,
   ordersDecoratorsOfflineModel,
 } from "./order.schema.js";
-import { generateRandomVerifyCode } from "../ulitilities/ultilitiesFunction.js";
-import { customError } from "../middlewares/errorHandlers.js";
+import {
+  generateRandomVerifyCode
+} from "../ulitilities/ultilitiesFunction.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
 
 import filmModel from "../film/film.schema.js";
 import roomModel from "../room/room.schema.js";
-import { TicketTypeModel } from "../param/param.schema.js";
+import {
+  TicketTypeModel
+} from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
 import mongoose from "mongoose";
+import {
+  PromotionService
+} from "../promotion/promotion.service.js";
 export class OrderService {
   // static getAllOrders = async () => {
   //   return await orderModel.find().sort({
@@ -41,7 +50,8 @@ export class OrderService {
     filmShowId = null,
     totalPrice,
     seatSelections = null,
-    promotionId = null,
+    promotionIDs = null,
+    totalPriceAfterDiscount,
     user,
   }) => {
     let filmShow = {};
@@ -91,24 +101,13 @@ export class OrderService {
       );
     }
 
-    let discountRate = 0;
-    if (promotionId) {
-      const promotion = await promotionModel.findById(promotionId);
-      if (promotion) {
-        discountRate = promotion.discountRate || 0;
-      }
-    }
-
-    const totalMoneyAfterDiscount =
-      totalPrice - (totalPrice * discountRate) / 100;
-
     const vietnamTime = new Date();
     vietnamTime.setHours(vietnamTime.getHours() + 7); // Vietnam is UTC+7
 
     const newOrder = await orderModel.create({
       createdDate: vietnamTime,
       totalPrice: totalPrice,
-      totalPriceAfterDiscount: totalMoneyAfterDiscount || null,
+      totalPriceAfterDiscount: totalPriceAfterDiscount || null,
       customerInfo: {
         customerRef: user._id,
         name: user.name,
@@ -116,7 +115,6 @@ export class OrderService {
         phone: user.phone,
       },
     });
-    console.log("🚀 ~ OrderService ~ newOrder:", newOrder);
 
     newOrder.verifyCode = generateRandomVerifyCode();
 
@@ -143,7 +141,15 @@ export class OrderService {
       orderRef: newOrder._id,
     });
 
-    // create promotion accumulated point ...
+    if (promotionIDs) {
+      await OrderHelper.createPromotionDecorator({
+        orderRef: newOrder._id,
+        promotion: await PromotionService.getDetailPromotionByIds(promotionIDs)
+      })
+    }
+
+
+    //  accumulated point ...
 
     return await newOrder.save();
   };
@@ -200,17 +206,15 @@ export class OrderService {
           invalidReason_Served: offlineService.invalidReason_Served,
         },
         // Film show details if exists
-        filmShow: filmShowData
-          ? {
-              filmName: filmShowData.filmName,
-              ageRestriction: filmShowData.ageRestriction,
-              showDate: filmShowData.showDate,
-              showTime: filmShowData.showTime,
-              roomName: filmShowData.roomName,
-              seatNames: filmShowData.seatNames,
-              tickets: filmShowData.tickets,
-            }
-          : null,
+        filmShow: filmShowData ? {
+          filmName: filmShowData.filmName,
+          ageRestriction: filmShowData.ageRestriction,
+          showDate: filmShowData.showDate,
+          showTime: filmShowData.showTime,
+          roomName: filmShowData.roomName,
+          seatNames: filmShowData.seatNames,
+          tickets: filmShowData.tickets,
+        } : null,
 
         // Items if exists
         items: itemsData?.items || [],
@@ -219,12 +223,10 @@ export class OrderService {
         promotions: promotionsData?.promotions || [],
 
         // Point usage if exists
-        pointUsage: pointUsageData
-          ? {
-              pointUsed: pointUsageData.pointUsed,
-              pointToMoneyRatio: pointUsageData.param_PointToMoneyRatio,
-            }
-          : null,
+        pointUsage: pointUsageData ? {
+          pointUsed: pointUsageData.pointUsed,
+          pointToMoneyRatio: pointUsageData.param_PointToMoneyRatio,
+        } : null,
 
         // Add timestamps
         createdAt: order.createdAt,
@@ -246,12 +248,11 @@ export class OrderService {
   // Function to get all orders with details
   static getAllOrders = async (query = {}, userId = null) => {
     try {
-      const searchQuery = userId
-        ? {
-            ...query,
-            "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
-          }
-        : query;
+      const searchQuery = userId ? {
+          ...query,
+          "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
+        } :
+        query;
 
       const orders = await orderModel.find(searchQuery);
 
@@ -280,7 +281,9 @@ export class OrderService {
         .find({
           "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
         })
-        .sort({ createdAt: 1 });
+        .sort({
+          createdAt: 1
+        });
 
       const ordersWithDetails = await Promise.all(
         orders.map(async (order) => {
@@ -326,18 +329,14 @@ export class OrderHelper {
         throw new Error("Invalid order reference");
       }
 
-      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate(
-        {
-          orderRef,
-        },
-        {
-          printed: false,
-          invalidReason_Printed: reason,
-        },
-        {
-          new: true,
-        }
-      );
+      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate({
+        orderRef,
+      }, {
+        printed: false,
+        invalidReason_Printed: reason,
+      }, {
+        new: true,
+      });
 
       return {
         success: true,
@@ -358,18 +357,14 @@ export class OrderHelper {
         throw new Error("Invalid order reference");
       }
 
-      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate(
-        {
-          orderRef,
-        },
-        {
-          served: false,
-          invalidReason_Served: reason,
-        },
-        {
-          new: true,
-        }
-      );
+      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate({
+        orderRef,
+      }, {
+        served: false,
+        invalidReason_Served: reason,
+      }, {
+        new: true,
+      });
 
       return {
         success: true,
@@ -408,18 +403,14 @@ export class OrderHelper {
         };
       }
 
-      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate(
-        {
-          orderRef,
-        },
-        {
-          printed: true,
-          invalidReason_Printed: "", // Clear any previous invalid reason
-        },
-        {
-          new: true,
-        }
-      );
+      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate({
+        orderRef,
+      }, {
+        printed: true,
+        invalidReason_Printed: "", // Clear any previous invalid reason
+      }, {
+        new: true,
+      });
 
       return {
         success: true,
@@ -458,18 +449,14 @@ export class OrderHelper {
         };
       }
 
-      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate(
-        {
-          orderRef,
-        },
-        {
-          served: true,
-          invalidReason_Served: "",
-        },
-        {
-          new: true,
-        }
-      );
+      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate({
+        orderRef,
+      }, {
+        served: true,
+        invalidReason_Served: "",
+      }, {
+        new: true,
+      });
 
       return {
         success: true,

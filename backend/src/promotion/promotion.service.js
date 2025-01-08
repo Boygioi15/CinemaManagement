@@ -1,6 +1,16 @@
-import { customError } from "../middlewares/errorHandlers.js";
+import {
+  customError
+} from "../middlewares/errorHandlers.js";
 import promotionModel from "./promotion.schema.js";
-import { handleDestroyCloudinary } from "../ulitilities/cloudinary.js";
+import {
+  handleDestroyCloudinary
+} from "../ulitilities/cloudinary.js";
+import {
+  ParamModel
+} from "../param/param.schema.js";
+import {
+  ParamService
+} from "../param/param.service.js";
 export class PromotionService {
   // Hàm tạo phòng và tạo ghế liên kết
   static createPromotion = async ({
@@ -35,11 +45,9 @@ export class PromotionService {
 
   static pausePromotion = async (id) => {
     const promotion = await promotionModel.findByIdAndUpdate(
-      id,
-      {
+      id, {
         paused: true,
-      },
-      {
+      }, {
         new: true,
       }
     );
@@ -51,11 +59,9 @@ export class PromotionService {
 
   static resumePromotion = async (id) => {
     const promotion = await promotionModel.findByIdAndUpdate(
-      id,
-      {
+      id, {
         paused: false,
-      },
-      {
+      }, {
         new: true,
       }
     );
@@ -97,4 +103,37 @@ export class PromotionService {
 
     return activePromotions;
   };
+
+  static getPromotionDiscountAmount = async (totalPrice, promotionIDs) => {
+    if (promotionIDs.length > 0) return 0;
+
+    let totalDiscountRate = 0;
+
+    await Promise.all(promotionIDs.map(async (id) => {
+      const promotion = await promotionModel.findById(id)
+      totalDiscountRate += promotion.discountRate
+    }))
+
+    const param = await ParamService.getParams();
+
+    totalDiscountRate = param.maximumDiscountRate > totalDiscountRate ? totalDiscountRate : param.maximumDiscountRate;
+
+    return totalPrice * totalDiscountRate
+  }
+
+  static getDetailPromotionByIds = async (promotionIDs) => {
+
+    const data = await Promise.all(promotionIDs.map(async (id) => {
+      const promotion = await promotionModel.findById(id)
+      if (!promotion) throw customError("Not found promotion")
+
+      return {
+        name: promotion.name,
+        discountRate: promotion.discountRate
+      }
+    }))
+
+    return data
+
+  }
 }
