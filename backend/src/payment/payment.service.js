@@ -22,16 +22,6 @@ import promotionModel from "../promotion/promotion.schema.js";
 export class PaymentService {
   static createPayment = async (req, res) => {
     try {
-      const totalPrice = req.body.totalPrice || 0;
-      // let priceAfterDiscount = totalPrice;
-      // if (req.body.promotionId) {
-      //   const promotion = await promotionModel.findById(req.body.promotionId);
-      //   priceAfterDiscount =
-      //     (totalPrice * (100 - +promotion.discountRate)) / 100.0;
-      //   console.log(priceAfterDiscount);
-      // }
-
-
       const {
         accessKey,
         secretKey,
@@ -59,7 +49,7 @@ export class PaymentService {
         transactionData.seatSelections = filteredSeat;
       }
 
-      let amount = totalPrice
+      let amount = req.body.totalPriceAfterDiscount || req.body.totalPrice;
 
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
