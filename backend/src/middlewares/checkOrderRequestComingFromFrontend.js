@@ -90,20 +90,6 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
 
     }
 
-    if (seatSelections) {
-      let vCount = 0;
-      for (let i = 0; i < seatSelections.length; i++) {
-        for (let j = 0; j < seatSelections[i].length; j++) {
-          if (seatSelections[i][j].selected) {
-            if (seatSelections[i][j].seatType === "V") {
-              vCount++;
-            }
-          }
-        }
-      }
-      totalPriceByServer += vCount * 20000;
-    }
-
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
 

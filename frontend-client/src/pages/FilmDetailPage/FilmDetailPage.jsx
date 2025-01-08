@@ -993,7 +993,7 @@ function BottomBar({
         setPaymentUrl(response.payUrl);
         window.location.href = response.payUrl;
       } else {
-        alert("Không có URL thanh toán, vui lòng thử lại.");
+        alert(response.message);
       }
     } catch (error) {
       console.error("Lỗi khi tạo thanh toán:", error);

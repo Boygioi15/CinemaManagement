@@ -125,6 +125,8 @@ export class PaymentService {
         filmShowId,
         seatSelections
       } = req.body;
+      console.log("🚀 ~ PaymentService ~ createPayment= ~ seatSelections:", seatSelections)
+
       if (filmShowId && seatSelections) {
         await FilmShowService.appendLockedSeats(filmShowId, seatSelections);
       }
@@ -174,23 +176,22 @@ export class PaymentService {
 
         return res.status(204).json(newOrder);
       } catch (error) {
-        console.log("🚀 ~ PaymentService ~ callbackService= ~ error:", error);
         const {
           filmShowId,
-          seats
+          seatSelections
         } = extraDataObj;
-        if (filmShowId && seats) {
-          await FilmShowService.releaseLockedSeats(filmShowId, seats);
+        if (filmShowId && seatSelections) {
+          await FilmShowService.releaseLockedSeats(filmShowId, seatSelections);
         }
       }
     } else {
       // fail
       const {
         filmShowId,
-        seats
+        seatSelections
       } = extraDataObj;
-      if (filmShowId && seats) {
-        await FilmShowService.releaseLockedSeats(filmShowId, seats);
+      if (filmShowId && seatSelections) {
+        await FilmShowService.releaseLockedSeats(filmShowId, seatSelections);
       }
     }
 
