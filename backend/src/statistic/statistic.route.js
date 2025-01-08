@@ -13,5 +13,7 @@ router.get("/ticket-rate-by-film", statisticController.getTicketRateByFilm);
 router.get("/monthly-statistic", statisticController.getMonthlyStatistics);
 router.get("/daily-statistic", statisticController.getDailyStatistics);
 router.get("/film-statistic", statisticController.getFilmStatisticsByDate);
+router.get("/hot-movie",statisticController.getHotMovieOfDay);
+router.get("/best-seller", statisticController.getBestSellingProductOfDay);
 
 export default router;

@@ -317,11 +317,9 @@ export class EmployeeService {
       (age === 16 &&
         (today.getMonth() > birth.getMonth() ||
           (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
-
     if (!isOver16) {
       throw customError("Nhân viên phải trên 16 tuổi!", 400);
     }
-
 
     // Kiểm tra lương
     if (isNaN(salary) || salary <= 0) {
@@ -334,7 +332,6 @@ export class EmployeeService {
     if (startTime >= endTime) {
       throw customError("Thời gian bắt đầu làm phải trước khi thời gian kết thúc", 400);
     }
-
 
     // Kiểm tra định dạng email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -380,7 +377,6 @@ export class EmployeeService {
           (age === 16 &&
             (today.getMonth() > birth.getMonth() ||
               (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
-
         if (!isOver16) {
           return {
             error: "Nhân viên phải trên 16 tuổi!",
