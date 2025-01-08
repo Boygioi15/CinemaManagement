@@ -29,19 +29,19 @@ const TicketModal = forwardRef(
                 </div>
                 <div className="ml-10 no-print">
                   <p className="text-sm text-gray-500">Trạng thái</p>
-                  {order.invalidReason_Printed ? (
+                  {order.offlineService.invalidReason_Printed ? (
                     <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
                       Từ chối in vé
                     </span>
-                  ) : order.invalidReason_Served ? (
+                  ) : order.offlineService.invalidReason_Served ? (
                     <span className="inline-block px-2 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded">
                       Từ chối phục vụ
                     </span>
-                  ) : order.served ? (
+                  ) : order.offlineService.served ? (
                     <span className="inline-block px-2 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded">
                       Đã phục vụ
                     </span>
-                  ) : order.printed ? (
+                  ) : order.offlineService.printed ? (
                     <span className="inline-block px-2 py-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded">
                       Đã in
                     </span>
@@ -52,21 +52,21 @@ const TicketModal = forwardRef(
                   )}
                 </div>
                 <div>
-                  {order.invalidReason_Printed && (
+                  {order.offlineService.invalidReason_Printed && (
                     <>
                       <p className="text-sm text-gray-500">Lý do từ chối in</p>
                       <p className="font-semibold">
-                        {order.invalidReason_Printed}
+                        {order.offlineService.invalidReason_Printed}
                       </p>
                     </>
                   )}
-                  {order.invalidReason_Served && (
+                  {order.offlineService.invalidReason_Served && (
                     <>
                       <p className="text-sm text-gray-500">
                         Lý do từ chối phục vụ
                       </p>
                       <p className="font-semibold">
-                        {order.invalidReason_Served}
+                        {order.offlineService.invalidReason_Served}
                       </p>
                     </>
                   )}

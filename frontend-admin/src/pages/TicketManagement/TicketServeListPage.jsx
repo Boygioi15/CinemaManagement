@@ -104,7 +104,7 @@ export default function TicketServeListPage() {
   const handleCancelConfirmClick = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/orders/${selectedOrder._id}/disapprove-serve`,
+        `http://localhost:8000/api/orders/${selectedOrder.orderId}/disapprove-serve`,
         { reason }
       );
       if (response.status === 200) {
@@ -125,7 +125,7 @@ export default function TicketServeListPage() {
 
   //Confirm modal hiện ra và bấm xác nhận
   const handleConfirmClick = async () => {
-    console.log(selectedOrder._id);
+    console.log(selectedOrder.orderId);
     if (
       dialogData.title === "Xác nhận" &&
       dialogData.message.includes("Bạn chắc chắn muốn hủy vé này ?")
@@ -134,7 +134,7 @@ export default function TicketServeListPage() {
     } else {
       try {
         const response = await axios.put(
-          `http://localhost:8000/api/orders/${selectedOrder._id}/serve`
+          `http://localhost:8000/api/orders/${selectedOrder.orderId}/serve`
         );
         if (response.status === 200) {
           console.log("thành công");
@@ -159,7 +159,7 @@ export default function TicketServeListPage() {
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
       const filteredOrders = response.data.data.filter(
-        (order) => order.printed === true
+        (order) => order.offlineService.printed === true
       );
       setOrders(filteredOrders);
     } catch (error) {
@@ -194,11 +194,12 @@ export default function TicketServeListPage() {
     // Lọc theo trạng thái
     const matchesStatus =
       statusQuery === "all" ||
-      (order.invalidReason_Served && statusQuery === "Từ chối phục vụ") ||
-      (!order.served &&
+      (order.offlineService.invalidReason_Served &&
+        statusQuery === "Từ chối phục vụ") ||
+      (!order.offlineService.served &&
         statusQuery === "Chưa phục vụ" &&
-        !order.invalidReason_Served) ||
-      (order.served && statusQuery === "Đã phục vụ");
+        !order.offlineService.invalidReason_Served) ||
+      (order.offlineService.served && statusQuery === "Đã phục vụ");
 
     // Kết hợp cả ba điều kiện
     return matchesCode && matchesStatus && matchesName;
@@ -236,18 +237,16 @@ export default function TicketServeListPage() {
         let statusText = "";
         let statusClass = "";
 
-        if (row.invalidReason_Served) {
+        if (row.offlineService.invalidReason_Served) {
           statusText = "Từ chối phục vụ";
           statusClass = "bg-red-100 text-red-800";
-        } else if (row.served) {
+        } else if (row.offlineService.served) {
           statusText = "Đã phục vụ";
           statusClass = "bg-green-100 text-green-800";
         } else {
           statusText = "Chưa phục vụ";
           statusClass = "bg-yellow-100 text-yellow-800";
         }
-
-        if (row.verifyCode === "CJKKGEDN") console.log(statusText);
 
         return (
           <span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>
@@ -269,7 +268,10 @@ export default function TicketServeListPage() {
           </button>
           <button
             className="text-blue-600 hover:text-blue-800"
-            disabled={row.served || row.invalidReason_Served}
+            disabled={
+              row.offlineService.served ||
+              row.offlineService.invalidReason_Served
+            }
           >
             <FaPrint
               className="w-4 h-4"
@@ -278,7 +280,10 @@ export default function TicketServeListPage() {
           </button>
           <button
             className="text-red-600 hover:text-red-800"
-            disabled={row.served || row.invalidReason_Served}
+            disabled={
+              row.offlineService.served ||
+              row.offlineService.invalidReason_Served
+            }
           >
             <TbCancel
               className="w-5 h-5"

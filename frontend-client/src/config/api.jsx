@@ -117,3 +117,7 @@ export const getProById = async (id) => {
 export const getAllOrderByUserId = async () => {
   return await axios.get(`/orders/all-order-by-userId`);
 };
+
+export const getAllPromotion = async () => {
+  return await axios.get(`/promotion/active`);
+};

@@ -316,12 +316,11 @@ export class EmployeeService {
       age > 16 ||
       (age === 16 &&
         (today.getMonth() > birth.getMonth() ||
-          (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
-
+          (today.getMonth() === birth.getMonth() &&
+            today.getDate() >= birth.getDate())));
     if (!isOver16) {
       throw customError("Nhân viên phải trên 16 tuổi!", 400);
     }
-
 
     // Kiểm tra lương
     if (isNaN(salary) || salary <= 0) {
@@ -332,9 +331,11 @@ export class EmployeeService {
     const startTime = shiftStart.hour * 60 + shiftStart.minute;
     const endTime = shiftEnd.hour * 60 + shiftEnd.minute;
     if (startTime >= endTime) {
-      throw customError("Thời gian bắt đầu làm phải trước khi thời gian kết thúc", 400);
+      throw customError(
+        "Thời gian bắt đầu làm phải trước khi thời gian kết thúc",
+        400
+      );
     }
-
 
     // Kiểm tra định dạng email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -368,7 +369,8 @@ export class EmployeeService {
 
   static updateEmployeeById = async (id, updatedata) => {
     try {
-      const { email, phone, salary, shiftStart, shiftEnd, birthDate } = updatedata;
+      const { email, phone, salary, shiftStart, shiftEnd, birthDate } =
+        updatedata;
 
       // Kiểm tra tuổi trên 16 (nếu có cập nhật birthDate)
       if (birthDate) {
@@ -379,8 +381,8 @@ export class EmployeeService {
           age > 16 ||
           (age === 16 &&
             (today.getMonth() > birth.getMonth() ||
-              (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
-
+              (today.getMonth() === birth.getMonth() &&
+                today.getDate() >= birth.getDate())));
         if (!isOver16) {
           return {
             error: "Nhân viên phải trên 16 tuổi!",

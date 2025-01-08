@@ -21,6 +21,29 @@ export class PromotionService {
     beginDate,
     endDate,
   }) => {
+    // Kiểm tra tên sự kiện duy nhất
+    const existingPromotion = await promotionModel.findOne({ name });
+    if (existingPromotion) {
+      throw customError("Đã có chương trình sự kiện khác có tên này", 400);
+    }
+    //Kiểm tra tỉ lệ giảm giá
+    if (discountRate <= 0 || discountRate > 100) {
+      throw customError("Tỉ lệ giảm giá phải lớn hơn 0 và nhỏ hơn 100", 400);
+    }
+    //Kiểm tra ngày bắt đầu
+    const releaseDate = new Date(beginDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (releaseDate < today) {
+      throw customError("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại", 400);
+    }
+    // Kiểm tra ngày bắt đầu và ngày kết thúc
+    const beginDateTemp = new Date(beginDate);
+    const endDateTemp = new Date(endDate);
+    if (beginDateTemp > endDateTemp) {
+      throw customError("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc", 400);
+    }
+
     const newPromotion = await promotionModel.create({
       name,
       thumbnailURL,
@@ -33,6 +56,32 @@ export class PromotionService {
   };
 
   static updatePromotion = async (id, updateData) => {
+    const { name, beginDate, endDate, discountRate } = updateData;
+    //Kiểm tra tên sự kiện
+    if (name) {
+      const existingPromotion = await promotionModel.findOne({ name, _id: { $ne: id } });
+      if (existingPromotion) {
+        throw customError("Đã có chương trình sự kiện khác có tên này", 400);
+      }
+    }
+    //Kiểm tra tỉ lệ giảm giá
+    if (discountRate <= 0 || discountRate > 100) {
+      throw customError("Tỉ lệ giảm giá phải lớn hơn 0 và nhỏ hơn 100", 400);
+    }
+    //Kiểm tra ngày bắt đầu
+    const releaseDate = new Date(beginDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (releaseDate < today) {
+      throw customError("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại", 400);
+    }
+    // Kiểm tra ngày bắt đầu và ngày kết thúc
+    const beginDateTemp = new Date(beginDate);
+    const endDateTemp = new Date(endDate);
+    if (beginDateTemp > endDateTemp) {
+      throw customError("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc", 400);
+    }
+
     const promotion = await promotionModel.findByIdAndUpdate(id, updateData, {
       new: true,
     });
