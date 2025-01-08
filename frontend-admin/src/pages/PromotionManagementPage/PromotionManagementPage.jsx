@@ -5,6 +5,7 @@ import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
 import { useState, useEffect, useMemo } from "react";
 import { BsSortDown } from "react-icons/bs";
+import { VscDebugContinue , VscDebugPause } from "react-icons/vsc";
 import axios from "axios";
 import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
@@ -87,9 +88,9 @@ const PromotionManagementPage = () => {
         }
         return "Tạm ngưng sự kiện thành công"; // Nếu sự kiện chưa tạm ngưng
       case "add":
-        return "Thêm nhân viên thành công";
+        return "Thêm sự kiện thành công";
       case "edit":
-        return "Cập nhật nhân viên thành công";
+        return "Cập nhật sự kiện thành công";
       default:
         return "Thao tác thành công";
     }
@@ -137,15 +138,17 @@ const PromotionManagementPage = () => {
         );
       } else if (actionType === "add") {
         console.log("haha: ", selectedPromotion);
-        // const formData = new FormData();
-        // formData.append("name", selectedPromotion.name);
-        // formData.append("discountRate", selectedPromotion.discountRate);
-        // formData.append("beginDate", selectedPromotion.beginDate);
-        // formData.append("endDate", selectedPromotion.endDate);
-
+        const formData = new FormData();
+        formData.append("name", selectedPromotion.name);
+        formData.append("discountRate", selectedPromotion.discountRate);
+        formData.append("beginDate", selectedPromotion.beginDate);
+        formData.append("endDate", selectedPromotion.endDate);
+        formData.append("thumbnailFile", selectedPromotion.thumbnailFile);
+        formData.append("thumbnailURL", selectedPromotion.thumbnailURL || "");
+        console.log(selectedPromotion)
         await axios.post(
           "http://localhost:8000/api/promotion",
-          selectedPromotion
+          formData
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
@@ -230,11 +233,16 @@ const PromotionManagementPage = () => {
             className="text-red-600 hover:text-red-800"
             onClick={() => handleDelete(row)}
           >
-            <TbCancel className="w-4 h-4" />
+            {row.paused ? (
+              <VscDebugPause className="w-4 h-4" />
+            ) : (
+              <VscDebugContinue style={{color: "green"}}className="w-4 h-4" />
+            )}
           </button>
         </div>
       ),
-    },
+    }
+    
   ];
 
   const handleRefresh = async () => {

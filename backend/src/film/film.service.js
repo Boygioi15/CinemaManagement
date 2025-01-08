@@ -88,7 +88,7 @@ export class FilmService {
     if (filmDuration > 1000) {
       throw customError("Thời lượng phim phải không được vượt quá 1000!", 400);
     }
-    
+
     return await filmModel.create({
       ...rest,
       filmDuration,
@@ -153,7 +153,8 @@ export class FilmService {
 
   // Cập nhật 1 bộ phim
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } = updateData;
+    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } =
+      updateData;
     const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);
@@ -172,6 +173,7 @@ export class FilmService {
 
     const oldFilm = await filmModel.findByIdAndUpdate(filmId, {
       ...rest,
+      filmDuration: filmDuration,
       tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,

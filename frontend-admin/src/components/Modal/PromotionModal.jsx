@@ -25,6 +25,7 @@ const PromotionModal = ({ isOpen, onClose, promotion, onSave, mode }) => {
     beginDate: formatDate(promotion?.beginDate) || "",
     endDate: formatDate(promotion?.endDate) || "",
     thumbnailURL: promotion?.thumbnailURL || "",
+    thumbnailFile: null,
     file: null,
   });
 
@@ -34,10 +35,12 @@ const PromotionModal = ({ isOpen, onClose, promotion, onSave, mode }) => {
       "discountRate",
       "beginDate",
       "endDate",
-      "thumbnailURL",
     ];
 
-    return requiredFields.every((field) => !!formData[field]);
+    return (
+      requiredFields.every((field) => !!formData[field]) &&
+      (formData.thumbnailFile || formData.thumbnailURL)
+    ); // Chuyển đổi giá trị thành Boolean
   }, [formData]);
 
   const handleSubmit = () => {
@@ -131,9 +134,13 @@ const PromotionModal = ({ isOpen, onClose, promotion, onSave, mode }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ảnh
               </label>
-              {formData.thumbnailURL && (
+              {(formData.thumbnailFile || formData.thumbnailURL) && (
                 <img
-                  src={formData.thumbnailURL}
+                  src={
+                    formData.thumbnailFile
+                      ? URL.createObjectURL(formData.thumbnailFile)
+                      : formData.thumbnailURL
+                  }
                   alt="Film"
                   className="w-full h-4/5 object-cover rounded-lg mb-2"
                 />
@@ -146,11 +153,10 @@ const PromotionModal = ({ isOpen, onClose, promotion, onSave, mode }) => {
                   const file = e.target.files[0];
                   if (file) {
                     // Tạo URL tạm thời từ file và cập nhật formData.image
-                    const imageUrl = URL.createObjectURL(file);
                     setFormData((prev) => ({
                       ...prev,
                       file: file,
-                      thumbnailURL: imageUrl,
+                      thumbnailFile: file,
                     }));
                   }
                   console.log("File selected:", e.target.files[0]);
