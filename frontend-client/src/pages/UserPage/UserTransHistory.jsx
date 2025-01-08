@@ -239,6 +239,24 @@ const UserTransHistory = () => {
                         </tr>
                       ))}
 
+                      {transaction?.pointUsage !== null && (
+                        <tr className="bg-gray-100 font-bold ">
+                          <td
+                            colSpan={4}
+                            className="p-2 text-right text-gray-700"
+                          >
+                            Tổng điểm sử dụng (VND)
+                          </td>
+                          <td className="p-2 text-right text-gray-700">
+                            {(
+                              (transaction?.pointUsage?.pointUsed *
+                                transaction?.pointUsage?.pointToMoneyRatio) /
+                              100
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      )}
+
                       {transaction?.totalPriceAfterDiscount !== null && (
                         <tr className="bg-gray-100 font-bold ">
                           <td
@@ -249,8 +267,12 @@ const UserTransHistory = () => {
                           </td>
                           <td className="p-2 text-right text-gray-700">
                             {(
-                              transaction?.totalPrice -
-                              transaction?.totalPriceAfterDiscount
+                              (transaction?.totalPrice || 0) -
+                              (transaction?.totalPriceAfterDiscount || 0) -
+                              ((transaction?.pointUsage?.pointUsed || 0) *
+                                (transaction?.pointUsage?.pointToMoneyRatio ||
+                                  0)) /
+                                100
                             ).toLocaleString()}
                           </td>
                         </tr>
