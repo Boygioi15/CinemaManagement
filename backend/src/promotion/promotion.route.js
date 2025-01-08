@@ -3,14 +3,12 @@ import promotionController from "./promotion.controller.js";
 
 const router = express.Router();
 
-router.post("/", promotionController.createPromotion);
-
-router.get("/", promotionController.getPromotionByDate);
-
-router.get("/:id", promotionController.getPromotionById);
-
-router.patch("/:id", promotionController.updatePromotion);
-
-router.delete("/:id", promotionController.deletePromotion);
+router.post('/', promotionController.createPromotion);
+router.put('/:id', promotionController.updatePromotion);
+router.patch('/:id/pause', promotionController.pausePromotion);
+router.patch('/:id/resume', promotionController.resumePromotion);
+router.get('/', promotionController.getAllPromotions);
+router.get('/active', promotionController.getActivePromotion);
+router.get('/:id', promotionController.getPromotionById);
 
 export default router;
