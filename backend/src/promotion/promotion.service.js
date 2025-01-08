@@ -22,7 +22,9 @@ export class PromotionService {
     endDate,
   }) => {
     // Kiểm tra tên sự kiện duy nhất
-    const existingPromotion = await promotionModel.findOne({ name });
+    const existingPromotion = await promotionModel.findOne({
+      name
+    });
     if (existingPromotion) {
       throw customError("Đã có chương trình sự kiện khác có tên này", 400);
     }
@@ -56,10 +58,20 @@ export class PromotionService {
   };
 
   static updatePromotion = async (id, updateData) => {
-    const { name, beginDate, endDate, discountRate } = updateData;
+    const {
+      name,
+      beginDate,
+      endDate,
+      discountRate
+    } = updateData;
     //Kiểm tra tên sự kiện
     if (name) {
-      const existingPromotion = await promotionModel.findOne({ name, _id: { $ne: id } });
+      const existingPromotion = await promotionModel.findOne({
+        name,
+        _id: {
+          $ne: id
+        }
+      });
       if (existingPromotion) {
         throw customError("Đã có chương trình sự kiện khác có tên này", 400);
       }
@@ -154,20 +166,20 @@ export class PromotionService {
   };
 
   static getPromotionDiscountAmount = async (totalPrice, promotionIDs) => {
-    if (promotionIDs.length > 0) return 0;
+    if (promotionIDs.length === 0) return 0;
 
     let totalDiscountRate = 0;
 
     await Promise.all(promotionIDs.map(async (id) => {
       const promotion = await promotionModel.findById(id)
-      totalDiscountRate += promotion.discountRate
+      totalDiscountRate += +promotion.discountRate
     }))
 
     const param = await ParamService.getParams();
 
-    totalDiscountRate = param.maximumDiscountRate > totalDiscountRate ? totalDiscountRate : param.maximumDiscountRate;
+    totalDiscountRate = +param.maximumDiscountRate > totalDiscountRate ? totalDiscountRate : param.maximumDiscountRate;
 
-    return totalPrice * totalDiscountRate
+    return totalPrice * (totalDiscountRate / 100)
   }
 
   static getDetailPromotionByIds = async (promotionIDs) => {

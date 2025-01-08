@@ -124,8 +124,6 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
       req.body.totalPriceAfterDiscount = totalPrice - discountAmount;
     }
 
-
-
     next();
   }
 );

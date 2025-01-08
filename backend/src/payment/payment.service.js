@@ -50,6 +50,7 @@ export class PaymentService {
       }
 
       let amount = req.body.totalPriceAfterDiscount || req.body.totalPrice;
+      console.log("🚀 ~ PaymentService ~ createPayment= ~ amount:", amount)
 
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
