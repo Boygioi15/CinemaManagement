@@ -1,6 +1,7 @@
 import React from "react";
 import Table from "../../components/Table";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2 } from "react-icons/fi";
+import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
 import { useState, useEffect, useMemo } from "react";
 import { BsSortDown } from "react-icons/bs";
@@ -18,10 +19,11 @@ const PromotionManagementPage = () => {
   const [sortOption, setSortOption] = useState("");
 
   const [NameQuery, setNameQuery] = useState("");
-  const [jobQuery, setJobQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -34,7 +36,11 @@ const PromotionManagementPage = () => {
   const fetchPromotion = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/promotion");
-      setPromotions(response.data.data); // Lưu dữ liệu vào state
+      const processedData = response.data.data.map((item) => ({
+        ...item,
+        status: getStatus(item.paused, item.beginDate, item.endDate), // Tính trạng thái
+      }));
+      setPromotions(processedData); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -45,97 +51,108 @@ const PromotionManagementPage = () => {
     fetchPromotion();
   }, []);
 
-  // const openConfirmDialog = (action, item = null) => {
-  //   setActionType(action); // Xác định loại hành động
-  //   setSelectedEmployee(item); // Gán item được chọn nếu có
-  //   setDialogData({
-  //     title: "Xác nhận",
-  //     message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
-  //   });
-  //   setIsConfirmModalOpen(true);
-  // };
+  const openConfirmDialog = (action, item = null) => {
+    setActionType(action); // Xác định loại hành động
+    setSelectedPromotion(item); // Gán item được chọn nếu có
+    setDialogData({
+      title: "Xác nhận",
+      message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
+    });
+    setIsConfirmModalOpen(true);
+  };
 
-  // //lấy message
-  // const getDialogMessage = (action, item) => {
-  //   switch (action) {
-  //     case "delete":
-  //       return `Bạn chắc chắn muốn xóa nhân viên này ?`;
-  //     case "add":
-  //       return "Bạn chắc chắn muốn thêm nhân viên này ?";
-  //     case "edit":
-  //       return `Bạn chắc chắn muốn cập nhật nhân viên này ?`;
-  //     default:
-  //       return "Xác nhận hành động?";
-  //   }
-  // };
+  //lấy message
+  const getDialogMessage = (action, item) => {
+    switch (action) {
+      case "delete":
+        if (item.paused) {
+          return `Bạn chắc chắn muốn tiếp tục sự kiện này?`; // Nếu sự kiện đã tạm ngưng, hiển thị thông báo tiếp tục
+        }
+        return `Bạn chắc chắn muốn tạm ngưng sự kiện này?`; // Nếu sự kiện chưa tạm ngưng, hiển thị thông báo tạm ngưng
+      case "add":
+        return "Bạn chắc chắn muốn thêm sự kiện này ?";
+      case "edit":
+        return `Bạn chắc chắn muốn cập nhật sự kiện này ?`;
+      default:
+        return "Xác nhận hành động?";
+    }
+  };
 
-  // //lấy message thành công
-  // const getSuccessMessage = (action) => {
-  //   switch (action) {
-  //     case "delete":
-  //       return "Xóa nhân viên thành công";
-  //     case "add":
-  //       return "Thêm nhân viên thành công";
-  //     case "edit":
-  //       return "Cập nhật nhân viên thành công";
-  //     default:
-  //       return "Thao tác thành công";
-  //   }
-  // };
+  //lấy message thành công
+  const getSuccessMessage = (action, item = null) => {
+    switch (action) {
+      case "delete":
+        if (item && item.paused) {
+          return "Tiếp tục sự kiện thành công"; // Nếu sự kiện đã tạm ngưng và người dùng tiếp tục
+        }
+        return "Tạm ngưng sự kiện thành công"; // Nếu sự kiện chưa tạm ngưng
+      case "add":
+        return "Thêm nhân viên thành công";
+      case "edit":
+        return "Cập nhật nhân viên thành công";
+      default:
+        return "Thao tác thành công";
+    }
+  };
 
-  // //Chọn cập nhật item
-  // const handleEditClick = (item) => {
-  //   setSelectedEmployee(item);
-  //   setMode("edit");
-  //   setIsDetailModalOpen(true);
-  // };
+  //Chọn cập nhật item
+  const handleEditClick = (item) => {
+    setSelectedPromotion(item);
+    setMode("edit");
+    setIsDetailModalOpen(true);
+  };
 
-  // //thêm mới item
-  // const handleAddClick = () => {
-  //   setMode("add");
-  //   setSelectedEmployee(null);
-  //   setIsDetailModalOpen(true);
-  // };
+  //thêm mới item
+  const handleAddClick = () => {
+    setMode("add");
+    setSelectedPromotion(null);
+    setIsDetailModalOpen(true);
+  };
 
-  // //chọn xóa item
-  // const handleDelete = (item) => {
-  //   openConfirmDialog("delete", item);
-  // };
+  //chọn xóa item
+  const handleDelete = (item) => {
+    openConfirmDialog("delete", item);
+  };
 
   const handleConfirmClick = async () => {
     setLoading(true);
 
     try {
       if (actionType === "delete") {
-        await axios.delete(
-          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`
-        );
+        if (selectedPromotion.paused) {
+          // Nếu sự kiện đã tạm ngưng, thực hiện tiếp tục sự kiện
+          await axios.patch(
+            `http://localhost:8000/api/promotion/${selectedPromotion._id}/resume`
+          );
+        } else {
+          // Nếu sự kiện chưa tạm ngưng, thực hiện xóa
+          await axios.patch(
+            `http://localhost:8000/api/promotion/${selectedPromotion._id}/pause`
+          );
+        }
       } else if (actionType === "edit") {
         const res = await axios.put(
-          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`,
-          selectedEmployee
+          `http://localhost:8000/api/promotion/${selectedPromotion._id}`,
+          selectedPromotion
         );
       } else if (actionType === "add") {
-        console.log("haha: ", selectedEmployee);
-        const formData = new FormData();
-        formData.append("name", selectedEmployee.name);
-        formData.append("birthDate", selectedEmployee.birthDate);
-        formData.append("email", selectedEmployee.email);
-        formData.append("phone", selectedEmployee.phone);
-        formData.append("jobTitle", selectedEmployee.jobTitle);
-        formData.append("salary", selectedEmployee.salary);
-        formData.append("shiftStart", selectedEmployee.shiftStart);
-        formData.append("shiftEnd", selectedEmployee.shiftEnd);
+        console.log("haha: ", selectedPromotion);
+        // const formData = new FormData();
+        // formData.append("name", selectedPromotion.name);
+        // formData.append("discountRate", selectedPromotion.discountRate);
+        // formData.append("beginDate", selectedPromotion.beginDate);
+        // formData.append("endDate", selectedPromotion.endDate);
+
         await axios.post(
-          "http://localhost:8000/api/user/employee",
-          selectedEmployee
+          "http://localhost:8000/api/promotion",
+          selectedPromotion
         );
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
       // Hiển thị thông báo thành công
       setDialogData({
         title: "Thành công",
-        message: getSuccessMessage(actionType),
+        message: getSuccessMessage(actionType, selectedPromotion),
       });
       setIsSuccessModalOpen(true);
     } catch (error) {
@@ -150,7 +167,7 @@ const PromotionManagementPage = () => {
   };
 
   const handleEditConfirm = (item) => {
-    setSelectedEmployee(item);
+    setSelectedPromotion(item);
     console.log("item: ", item);
 
     // Xác định loại hành động dựa trên chế độ hiện tại
@@ -169,6 +186,18 @@ const PromotionManagementPage = () => {
     return `${day}/${month}/${year}`;
   };
 
+  const getStatus = (paused, beginDate, endDate) => {
+    if (paused) return "Đã ngừng";
+
+    const today = new Date();
+    const begin = new Date(beginDate);
+    const end = new Date(endDate);
+
+    if (today < begin) return "Chưa bắt đầu";
+    if (today > end) return "Đã kết thúc";
+    return "Đang diễn ra";
+  };
+
   const columns = [
     { header: "Tên sự kiện", key: "name" },
     { header: "Khuyến mãi (%)", key: "discountRate" },
@@ -184,7 +213,7 @@ const PromotionManagementPage = () => {
     },
     {
       header: "Trạng thái",
-      key: "paused",
+      key: "status",
     },
     {
       header: "Hành động",
@@ -201,7 +230,7 @@ const PromotionManagementPage = () => {
             className="text-red-600 hover:text-red-800"
             onClick={() => handleDelete(row)}
           >
-            <FiTrash2 className="w-4 h-4" />
+            <TbCancel className="w-4 h-4" />
           </button>
         </div>
       ),
@@ -210,7 +239,7 @@ const PromotionManagementPage = () => {
 
   const handleRefresh = async () => {
     setLoading(true);
-    fetchemployee();
+    fetchPromotion();
 
     setTimeout(() => {
       setLoading(false);
@@ -229,27 +258,45 @@ const PromotionManagementPage = () => {
             .includes(NameQuery.toLowerCase().normalize("NFC"))
         : true;
 
-      const matchesJob = jobQuery
-        ? item.jobTitle
-            .toLowerCase()
-            .normalize("NFC")
-            .includes(jobQuery.toLowerCase().normalize("NFC"))
-        : true;
+      const matchesStatus =
+        statusQuery === "" ||
+        statusQuery === "all" ||
+        item.status === statusQuery;
 
-      return matchesName && matchesJob;
+      const matchesDate =
+        !selectedDate ||
+        (new Date(item.beginDate) <= new Date(selectedDate) &&
+          new Date(item.endDate) >= new Date(selectedDate));
+
+      return matchesName && matchesStatus && matchesDate;
     });
 
     // Sắp xếp dữ liệu sau khi lọc
-    if (sortOption === "Asc") {
-      console.log("Sắp xếp lương tăng dần");
-      filtered = filtered.sort((a, b) => a.salary - b.salary); // Sắp xếp lương tăng dần
-    } else if (sortOption === "Des") {
-      console.log("Sắp xếp lương giảm dần");
-      filtered = filtered.sort((a, b) => b.salary - a.salary); // Sắp xếp lương giảm dần
+
+    if (sortOption === "BeginDateAsc") {
+      console.log("Sắp xếp ngày bắt đầu từ cũ đến mới");
+      filtered = filtered.sort(
+        (a, b) => new Date(a.beginDate) - new Date(b.beginDate) // Từ cũ đến mới
+      );
+    } else if (sortOption === "BeginDateDes") {
+      console.log("Sắp xếp ngày bắt đầu từ mới đến cũ");
+      filtered = filtered.sort(
+        (a, b) => new Date(b.beginDate) - new Date(a.beginDate) // Từ mới đến cũ
+      );
+    } else if (sortOption === "EndDateAsc") {
+      console.log("Sắp xếp ngày kết thúc từ cũ đến mới");
+      filtered = filtered.sort(
+        (a, b) => new Date(a.endDate) - new Date(b.endDate) // Từ cũ đến mới
+      );
+    } else if (sortOption === "EndDateDes") {
+      console.log("Sắp xếp ngày kết thúc từ mới đến cũ");
+      filtered = filtered.sort(
+        (a, b) => new Date(b.endDate) - new Date(a.endDate) // Từ mới đến cũ
+      );
     }
 
     return filtered;
-  }, [promotions, NameQuery, jobQuery, sortOption]);
+  }, [promotions, NameQuery, selectedDate, statusQuery, sortOption]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -263,7 +310,7 @@ const PromotionManagementPage = () => {
       <div className="mb-6 flex justify-between items-center pr-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Thông tin nhân viên
+            Thông tin sự kiện
           </h2>
 
           <div className="flex items-center gap-4 ">
@@ -284,20 +331,37 @@ const PromotionManagementPage = () => {
             <div className="flex items-center w-[300px]">
               <input
                 type="text"
-                placeholder="Tên nhân viên...."
+                placeholder="Tên sự kiện...."
                 value={NameQuery}
                 onChange={(e) => setNameQuery(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
-            <div className="flex items-center w-[300px]">
-              <input
-                type="text"
-                placeholder="Tên công việc...."
-                value={jobQuery}
-                onChange={(e) => setJobQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg focus:outline-none border"
-              />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => {
+                const localDate = e.target.value; // Lấy trực tiếp giá trị yyyy-mm-dd
+                setSelectedDate(localDate); // Cập nhật state
+              }}
+              className="p-2 border rounded-md"
+            />
+            <div className="flex items-center w-[200px]">
+              <select
+                name="age"
+                value={statusQuery}
+                onChange={(e) => setStatusQuery(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  <span className="text-gray-400">Trạng thái</span>
+                </option>
+                <option value="all">Tất cả</option>
+                <option value="Đã ngưng">Đã ngưng</option>
+                <option value="Chưa bắt đầu">Chưa bắt đầu</option>
+                <option value="Đang diễn ra">Đang diễn ra</option>
+                <option value="Đã kết thúc">Đã kết thúc</option>
+              </select>
             </div>
           </div>
           <div className="flex items-center gap-4 ml-20">
@@ -309,8 +373,10 @@ const PromotionManagementPage = () => {
                 className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Không sắp xếp</option>
-                <option value="Asc">Tăng dần lương</option>
-                <option value="Des">Giảm dần lương</option>
+                <option value="BeginDateAsc">Ngày bắt đầu: Cũ đến mới</option>
+                <option value="BeginDateDes">Ngày bắt đầu: Mới đến cũ</option>
+                <option value="EndDateAsc">Ngày kết thúc: Cũ đến mới</option>
+                <option value="EndDateDes">Ngày kết thúc: Mới đến cũ</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <BsSortDown className="h-4 w-4" />
@@ -322,7 +388,7 @@ const PromotionManagementPage = () => {
           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
           onClick={() => handleAddClick()}
         >
-          Thêm nhân viên +
+          Thêm sự kiện +
         </button>
       </div>
 
@@ -354,7 +420,7 @@ const PromotionManagementPage = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onSave={handleEditConfirm}
-        employee={selectedEmployee}
+        promotion={selectedPromotion}
         mode={mode}
       />
       <Dialog
