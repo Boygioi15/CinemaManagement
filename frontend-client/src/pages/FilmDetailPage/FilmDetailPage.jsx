@@ -712,6 +712,8 @@ const FilmDetailPage = () => {
           ticketSelections={ticketSelection}
           additionalItemSelections={additionalItemSelections}
           selectedFilmShowId={selectedFilmShowID}
+          totalDiscount={totalDiscount} // Truyền tổng khuyến mãi
+          selectedPromotions={selectedPromotions} // Truyền danh sách khuyến mãi
         />
       )}
       <PromotionList
@@ -964,16 +966,9 @@ function BottomBar({
   ticketSelections,
   additionalItemSelections,
   selectedFilmShowId,
+  totalDiscount, // Thêm prop
+  selectedPromotions, // Thêm prop
 }) {
-  const [pro, setPro] = useState();
-  useEffect(() => {
-    handleGetPro();
-  }, []);
-  const handleGetPro = async () => {
-    const response = await getCurrentPro(Date.now());
-    setPro(response.data[0]);
-    console.log("123", response);
-  };
   const [usePoints, setUsePoints] = useState(false);
 
   const handleTogglePoints = () => {
@@ -1008,10 +1003,18 @@ function BottomBar({
   const navigate = useNavigate();
   const handleCreatePayment = async () => {
     if (!localStorage.getItem("accessToken")) {
-      alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
+      alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
       navigate("/auth");
+      return;
     }
+
     try {
+      // Lấy danh sách promotionId từ selectedPromotions
+      const promotionIds = selectedPromotions.map((promo) => promo._id);
+
+      // Log danh sách promotionIds để kiểm tra
+      console.log("Danh sách promotionIds:", promotionIds);
+
       const response = await createPayment({
         ticketSelections: ticketSelections.filter(
           (element) => element.quantity !== 0
@@ -1022,9 +1025,11 @@ function BottomBar({
         ),
         totalPrice: calculateTotalPrice(),
         filmShowId: selectedFilmShowId,
-        promotionId: pro?._id,
+        promotionIds: promotionIds, // Thêm danh sách promotionId vào payload
       });
-      console.log(response);
+
+      console.log("Response từ API createPayment:", response);
+
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
         window.location.href = response.payUrl;
@@ -1175,14 +1180,14 @@ function BottomBar({
           </div>
           <div className="flex justify-between">
             <p className="text-lg">Khuyến mãi</p>
-            <p className="text-xl font-bold">{pro?.discountRate}%</p>
+            <p className="text-xl font-bold">{totalDiscount}%</p>
           </div>
           <div className="flex justify-between">
             <p className="text-lg">Tổng tiền</p>
             <p className="text-xl font-bold">
               {(
                 calculateTotalPrice() -
-                (calculateTotalPrice() * +pro?.discountRate) / 100
+                (calculateTotalPrice() * +totalDiscount) / 100
               ).toLocaleString()}{" "}
               VNĐ
             </p>
