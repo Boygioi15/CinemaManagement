@@ -1,135 +1,184 @@
-import axios from "axios";
-import { create } from "lodash";
 import React from "react";
-import { useState } from "react";
-import { createPromotion } from "../../../../frontend-client/src/config/api";
+import { FiX } from "react-icons/fi";
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import SuccessDialog from "../Dialog/SuccessDialog";
+import Dialog from "../Dialog/ConfirmDialog";
+import RefreshLoader from "../Loading";
 
-const convertToISOWithLocalTime = (dateString) => {
-  const date = new Date(dateString);
-  const isoString = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60000
-  ).toISOString();
-  return isoString;
-};
+const PromotionModal = ({ isOpen, onClose, promotion, onSave, mode }) => {
+  if (!isOpen) return null;
+  const isEditMode = mode === "edit";
+  const title = isEditMode ? "Cập nhật thông tin sự kiện" : "Thêm mới sự kiện";
+  console.log(promotion);
 
-const convertToLocalDateTime = (isoString) => {
-  const date = new Date(isoString);
-  return date.toISOString().slice(0, 16);
-};
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0]; // Trả về định dạng YYYY-MM-DD
+  };
 
-const PromotionModal = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    beginDate: "",
-    endDate: "",
-    discountRate: "",
+    _id: promotion?._id || "",
+    name: promotion?.name || "",
+    discountRate: promotion?.discountRate,
+    beginDate: formatDate(promotion?.beginDate) || "",
+    endDate: formatDate(promotion?.endDate) || "",
+    thumbnailURL: promotion?.thumbnailURL || "",
+    file: null,
   });
-  const handleSubmit = async () => {
-    // Hàm chuyển đổi sang múi giờ Việt Nam (GMT+7)
-    const toVietnamTime = (date) => {
-      const vnOffset = 7 * 60; // 7 giờ x 60 phút
-      const localDate = new Date(date);
-      localDate.setMinutes(localDate.getMinutes() + vnOffset); // Cộng thêm offset
-      return localDate.toISOString(); // Trả về ISO string
-    };
 
-    // Định dạng ngày về múi giờ Việt Nam
-    const formattedStart = toVietnamTime(formData.beginDate);
-    formData.beginDate = formattedStart;
-    const formattedEnd = toVietnamTime(formData.endDate);
-    formData.endDate = formattedEnd;
+  const isFormValid = useMemo(() => {
+    const requiredFields = [
+      "name",
+      "discountRate",
+      "beginDate",
+      "endDate",
+      "thumbnailURL",
+    ];
 
-    console.log(formData);
+    return requiredFields.every((field) => !!formData[field]);
+  }, [formData]);
 
-    // Gửi dữ liệu lên server
-    const response = await axios.post(
-      "http://localhost:8000/api/promotion",
-      formData
-    );
-    console.log(response);
-  };
-
-  const handleStartTimeChange = (value) => {
-    // Chuyển đổi thời gian sang định dạng ISO với múi giờ địa phương và lưu vào flashSaleData
-    const isoStartTime = convertToISOWithLocalTime(value);
-
-    setFormData((prev) => ({ ...prev, start: value.split("T")[0] }));
-  };
-
-  const handleEndTimeChange = (value) => {
-    // Chuyển đổi thời gian sang định dạng ISO với múi giờ địa phương và lưu vào flashSaleData
-    const isoEndTime = convertToISOWithLocalTime(value);
-    const newFlashSaleData = { ...flashSaleData, endTime: isoEndTime };
-    setFlashSaleData(newFlashSaleData);
+  const handleSubmit = () => {
+    onSave(formData);
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-lg font-bold mb-4">Thông tin cơ bản</h2>
-      <div className="mb-6"></div>
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khung thời gian bắt đầu
-          </label>
-          <input
-            type="datetime-local"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, beginDate: e.target.value }))
-            }
-            value={formData.beginDate}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khung thời gian kết thúc
-          </label>
-          <input
-            type="datetime-local"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-            }
-            value={formData.endDate}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khuyến mãi (%)
-          </label>
-          <input
-            type="number"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, discountRate: e.target.value }))
-            }
-            value={formData.discountRate}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Tên sự kiện
-          </label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            value={formData.name}
-          />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="flex gap-6">
+            <div className="flex-1 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tên sự kiện
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Khuyến mãi (%)
+                </label>
+                <input
+                  type="text"
+                  name="discountRate"
+                  value={formData.discountRate}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      discountRate: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày bắt đầu
+                </label>
+                <input
+                  type="date"
+                  name="beginDate"
+                  value={formData.beginDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      beginDate: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày kết thúc
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      endDate: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="w-1/3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ảnh
+              </label>
+              {formData.thumbnailURL && (
+                <img
+                  src={formData.thumbnailURL}
+                  alt="Film"
+                  className="w-full h-4/5 object-cover rounded-lg mb-2"
+                />
+              )}
+              <input
+                type="file"
+                className="w-full"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    // Tạo URL tạm thời từ file và cập nhật formData.image
+                    const imageUrl = URL.createObjectURL(file);
+                    setFormData((prev) => ({
+                      ...prev,
+                      file: file,
+                      thumbnailURL: imageUrl,
+                    }));
+                  }
+                  console.log("File selected:", e.target.files[0]);
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-4 mt-6">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!isFormValid}
+              className={`px-4 py-2 rounded-lg  ${
+                isFormValid
+                  ? "bg-blue-500 hover:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              } text-white`}
+            >
+              {isEditMode ? "Lưu thay đổi" : "Thêm mới"}
+            </button>
+          </div>
         </div>
       </div>
-      <button
-        onClick={() => {
-          handleSubmit();
-        }}
-        className={`px-4 py-2 rounded-lg  ${"bg-blue-500 hover:bg-blue-700"} text-white`}
-      >
-        Thêm
-      </button>
-      {/* Tích hợp ThumbnailUpload */}
     </div>
   );
 };
