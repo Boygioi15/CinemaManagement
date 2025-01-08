@@ -51,7 +51,7 @@ class PromotionController {
       id
     } = req.params;
 
-    const promotion = await PromotionService.resumePromotion()
+    const promotion = await PromotionService.resumePromotion(id)
 
     return res.status(200).json({
       msg: "Promotions resumed successfully",
@@ -85,7 +85,7 @@ class PromotionController {
   });
 
   getActivePromotion = expressAsyncHandler(async (req, res) => {
-    const promotion = await PromotionService.getAllPromotions()
+    const promotion = await PromotionService.getActivePromotion()
     return res.status(200).json({
       msg: " Get promotions successfully",
       success: true,

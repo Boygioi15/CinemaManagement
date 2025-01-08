@@ -22,7 +22,6 @@ export class PromotionService {
       endDate: new Date(endDate)
     });
     return newPromotion
-
   };
 
   static updatePromotion = async (id, updateData) => {
@@ -79,20 +78,22 @@ export class PromotionService {
     return await promotionModel.find({});
   }
 
-  getAllPromotions = async () => {
+  static getActivePromotion = async () => {
     const currentDate = new Date();
+    const vietnamTime = new Date(currentDate.getTime() + 7 * 60 * 60 * 1000);
+    console.log("🚀 ~ PromotionService ~ getActivePromotion= ~ vietnamTime:", vietnamTime)
 
     const activePromotions = await promotionModel.find({
       paused: false,
       beginDate: {
-        $lte: currentDate
+        $lte: vietnamTime
       },
       endDate: {
-        $gte: currentDate
+        $gte: vietnamTime
       }
     });
 
-    return activePromotions
+    return activePromotions;
   }
 
 };
