@@ -233,7 +233,7 @@ const PromotionManagementPage = () => {
             className="text-red-600 hover:text-red-800"
             onClick={() => handleDelete(row)}
           >
-            {row.paused ? (
+            {!row.paused ? (
               <VscDebugPause className="w-4 h-4" />
             ) : (
               <VscDebugContinue style={{color: "green"}}className="w-4 h-4" />
