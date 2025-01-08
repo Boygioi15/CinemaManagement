@@ -8,17 +8,25 @@ const AgeRestrictionSchema = new mongoose.Schema({
 });
 
 const ParamSchema = new mongoose.Schema({
-  promotion_PointToReducedPriceRatio: {
+  loyalPoint_OrderToPointRatio: {
     type: Number,
     default: 10,
   },
-  promotion_PriceToPointRatio: {
+  loyalPoint_PointToReducedPriceRatio: {
     type: Number,
-    default: 10,
+    default: 50,
   },
-  addedPriceForCenterSeat: {
+  loyalPoint_MiniumValueToUseLoyalPoint: {
     type: Number,
-    default: 10,
+    default: 200000,
+  },
+  loyalPoint_MaxiumPointUseInOneGo: {
+    type: Number,
+    default: 50000,
+  },
+  maximumDiscountRate: {
+    type: Number,
+    default: 40,
   },
   addedPriceForVIPSeat: {
     type: Number,
