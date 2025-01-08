@@ -14,30 +14,43 @@ import { useEffect, useState } from "react";
 
 const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
   const [availableYears, setAvailableYears] = useState([]);
+  const [hasData, setHasData] = useState(true);
 
   useEffect(() => {
     const fetchYears = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/orders");
         const years = extractYears(response.data);
-        console.log(years);
-
-        setAvailableYears(years);
+        setAvailableYears(
+          years.length > 0 ? years : [new Date().getFullYear()]
+        );
       } catch (error) {
         console.error("Failed to fetch years:", error);
+        setAvailableYears([new Date().getFullYear()]);
       }
     };
 
     fetchYears();
   }, []);
 
+  useEffect(() => {
+    if (
+      !revenueDataByYear[selectedYear] ||
+      revenueDataByYear[selectedYear].length === 0
+    ) {
+      setHasData(false);
+    } else {
+      setHasData(true);
+    }
+  }, [selectedYear, revenueDataByYear]);
+
   const extractYears = (orders) => {
     const years = orders.map((order) => {
       const date = new Date(order.createdAt);
-      return date.getFullYear(); // Lấy năm từ trường `createAt`
+      return date.getFullYear();
     });
 
-    // Loại bỏ các giá trị trùng lặp và sắp xếp theo thứ tự giảm dần
+    // Loại bỏ trùng lặp và sắp xếp giảm dần
     return [...new Set(years)].sort((a, b) => b - a);
   };
 
@@ -61,7 +74,7 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-semibold">Revenue Overview</h3>
+        <h3 className="text-2xl font-semibold">Doanh thu năm</h3>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
@@ -74,17 +87,23 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
           ))}
         </select>
       </div>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={revenueDataByYear[selectedYear]}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Bar dataKey="vé" fill="#8884d8" />
-          <Bar dataKey="sảnphẩmkhác" fill="#82ca9d" />
-        </BarChart>
-      </ResponsiveContainer>
+      {hasData ? (
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={revenueDataByYear[selectedYear]}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Bar dataKey="vé" fill="#8884d8" />
+            <Bar dataKey="sảnphẩmkhác" fill="#82ca9d" />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="text-xl text-center text-gray-700">
+          Không có dữ liệu
+        </div>
+      )}
     </div>
   );
 };

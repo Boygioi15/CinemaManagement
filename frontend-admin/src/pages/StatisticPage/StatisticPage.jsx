@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ColumnChart from "../../components/Statistic/ColumnChart";
 import PieCharts from "../../components/Statistic/PieChart";
 import axios from "axios";
 
@@ -19,6 +20,8 @@ const StatisticPage = () => {
   const [ticketTypeData, setTicketTypeData] = useState([]);
   const [ticketMovieData, setTicketMovieData] = useState([]);
   const [itemData, setItemData] = useState([]);
+
+  const [revenueDataByYear, setRevenueDataByYear] = useState({});
 
   const [statistics, setStatistics] = useState({
     totalTicket: 0,
@@ -114,14 +117,52 @@ const StatisticPage = () => {
     }
   };
 
+  const fetchData = async (year) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/statistics/monthly-statistic?year=${year}`
+      );
+      const transformedData = transformApiDataToRevenueData(
+        response.data,
+        year
+      );
+      setRevenueDataByYear((prev) => ({
+        ...prev,
+        [year]: transformedData,
+      }));
+    } catch (error) {
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    }
+  };
+
   useEffect(() => {
     fetchView(selectedDate);
     fetchTicket(selectedDate);
     fetchticketType(selectedDate);
     fetchticketMovie(selectedDate);
     fetchadditionalItem(selectedDate);
-  }, [selectedDate]);
+    fetchData(selectedYear);
+  }, [selectedDate, selectedYear]);
 
+  const transformApiDataToRevenueData = (apiData, year) => {
+    return apiData.map((item) => {
+      const {
+        month,
+        totalTicketRevenue,
+        totalPopcornRevenue,
+        totalDrinksRevenue,
+      } = item;
+      const monthName = new Date(0, month - 1).toLocaleString("en-US", {
+        month: "2-digit",
+      });
+
+      return {
+        month: monthName,
+        vé: totalTicketRevenue,
+        sảnphẩmkhác: totalPopcornRevenue + totalDrinksRevenue,
+      };
+    });
+  };
   const handleExport = () => {
     const csvData = revenueDataByYear[selectedYear];
     const csvString = [
@@ -152,7 +193,7 @@ const StatisticPage = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Daily Report</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Báo cáo hằng ngày</h1>
         <div className="flex items-center space-x-4">
           <input
             type="date"
@@ -231,6 +272,11 @@ const StatisticPage = () => {
         movieData={ticketMovieData}
         ticketStatusData={itemData}
         ticketTypeData={ticketTypeData}
+      />
+      <ColumnChart
+        revenueDataByYear={revenueDataByYear}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
       />
     </div>
   );

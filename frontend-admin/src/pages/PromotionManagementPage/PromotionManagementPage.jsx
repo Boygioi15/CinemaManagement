@@ -5,7 +5,7 @@ import { TbCancel } from "react-icons/tb";
 import { BiRefresh } from "react-icons/bi";
 import { useState, useEffect, useMemo } from "react";
 import { BsSortDown } from "react-icons/bs";
-import { VscDebugContinue , VscDebugPause } from "react-icons/vsc";
+import { VscDebugContinue, VscDebugPause } from "react-icons/vsc";
 import axios from "axios";
 import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
@@ -34,8 +34,15 @@ const PromotionManagementPage = () => {
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [loading, setLoading] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setNameQuery("");
+    setStatusQuery("");
+    setSelectedDate("");
+  };
+
   const fetchPromotion = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8000/api/promotion");
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -44,6 +51,8 @@ const PromotionManagementPage = () => {
       setPromotions(processedData); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Error fetching films:", error);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -145,11 +154,8 @@ const PromotionManagementPage = () => {
         formData.append("endDate", selectedPromotion.endDate);
         formData.append("thumbnailFile", selectedPromotion.thumbnailFile);
         formData.append("thumbnailURL", selectedPromotion.thumbnailURL || "");
-        console.log(selectedPromotion)
-        await axios.post(
-          "http://localhost:8000/api/promotion",
-          formData
-        );
+        console.log(selectedPromotion);
+        await axios.post("http://localhost:8000/api/promotion", formData);
       }
       await handleRefresh(); // Làm mới dữ liệu sau khi thành công
       // Hiển thị thông báo thành công
@@ -217,6 +223,37 @@ const PromotionManagementPage = () => {
     {
       header: "Trạng thái",
       key: "status",
+      render: (_, row) => {
+        let statusClass = "";
+        let statusText = row.status; // Đảm bảo `rowData.status` có giá trị hợp lệ
+
+        // Kiểm tra giá trị status và gán class tương ứng
+        switch (row.status) {
+          case "Chưa bắt đầu":
+            statusClass = "bg-yellow-100 text-yellow-800"; // Màu vàng
+            break;
+          case "Đã ngừng":
+            statusClass = "bg-red-100 text-red-800"; // Màu đỏ
+            break;
+          case "Đã kết thúc":
+            statusClass = "bg-green-100 text-green-800"; // Màu xanh
+            break;
+          case "Đang diễn ra":
+            statusClass = "bg-blue-100 text-blue-800"; // Màu xanh dương
+            break;
+          default:
+            statusClass = "bg-gray-100 text-gray-800"; // Màu mặc định
+            break;
+        }
+
+        return (
+          <span
+            className={`inline-block px-3 py-1 rounded-full ${statusClass}`}
+          >
+            {statusText}
+          </span>
+        );
+      },
     },
     {
       header: "Hành động",
@@ -236,13 +273,15 @@ const PromotionManagementPage = () => {
             {row.paused ? (
               <VscDebugPause className="w-4 h-4" />
             ) : (
-              <VscDebugContinue style={{color: "green"}}className="w-4 h-4" />
+              <VscDebugContinue
+                style={{ color: "green" }}
+                className="w-4 h-4"
+              />
             )}
           </button>
         </div>
       ),
-    }
-    
+    },
   ];
 
   const handleRefresh = async () => {
@@ -392,36 +431,46 @@ const PromotionManagementPage = () => {
             </div>
           </div>
         </div>
-        <button
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          onClick={() => handleAddClick()}
-        >
-          Thêm sự kiện +
-        </button>
+        <div>
+          <button
+            className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+            onClick={() => handleDeleteFilter()}
+          >
+            Xóa lọc
+          </button>
+          <button
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={() => handleAddClick()}
+          >
+            Thêm sự kiện +
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {promotions.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
 
       <PromotionModal
