@@ -33,10 +33,8 @@ const PromotionManagementPage = () => {
 
   const fetchPromotion = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/promotion/employee"
-      );
-      setEmployees(response.data.data); // Lưu dữ liệu vào state
+      const response = await axios.get("http://localhost:8000/api/promotion");
+      setPromotions(response.data.data); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Error fetching films:", error);
     }
@@ -44,65 +42,65 @@ const PromotionManagementPage = () => {
 
   // Gọi API khi component được render lần đầu
   useEffect(() => {
-    fetchemployee();
+    fetchPromotion();
   }, []);
 
-  const openConfirmDialog = (action, item = null) => {
-    setActionType(action); // Xác định loại hành động
-    setSelectedEmployee(item); // Gán item được chọn nếu có
-    setDialogData({
-      title: "Xác nhận",
-      message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
-    });
-    setIsConfirmModalOpen(true);
-  };
+  // const openConfirmDialog = (action, item = null) => {
+  //   setActionType(action); // Xác định loại hành động
+  //   setSelectedEmployee(item); // Gán item được chọn nếu có
+  //   setDialogData({
+  //     title: "Xác nhận",
+  //     message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
+  //   });
+  //   setIsConfirmModalOpen(true);
+  // };
 
-  //lấy message
-  const getDialogMessage = (action, item) => {
-    switch (action) {
-      case "delete":
-        return `Bạn chắc chắn muốn xóa nhân viên này ?`;
-      case "add":
-        return "Bạn chắc chắn muốn thêm nhân viên này ?";
-      case "edit":
-        return `Bạn chắc chắn muốn cập nhật nhân viên này ?`;
-      default:
-        return "Xác nhận hành động?";
-    }
-  };
+  // //lấy message
+  // const getDialogMessage = (action, item) => {
+  //   switch (action) {
+  //     case "delete":
+  //       return `Bạn chắc chắn muốn xóa nhân viên này ?`;
+  //     case "add":
+  //       return "Bạn chắc chắn muốn thêm nhân viên này ?";
+  //     case "edit":
+  //       return `Bạn chắc chắn muốn cập nhật nhân viên này ?`;
+  //     default:
+  //       return "Xác nhận hành động?";
+  //   }
+  // };
 
-  //lấy message thành công
-  const getSuccessMessage = (action) => {
-    switch (action) {
-      case "delete":
-        return "Xóa nhân viên thành công";
-      case "add":
-        return "Thêm nhân viên thành công";
-      case "edit":
-        return "Cập nhật nhân viên thành công";
-      default:
-        return "Thao tác thành công";
-    }
-  };
+  // //lấy message thành công
+  // const getSuccessMessage = (action) => {
+  //   switch (action) {
+  //     case "delete":
+  //       return "Xóa nhân viên thành công";
+  //     case "add":
+  //       return "Thêm nhân viên thành công";
+  //     case "edit":
+  //       return "Cập nhật nhân viên thành công";
+  //     default:
+  //       return "Thao tác thành công";
+  //   }
+  // };
 
-  //Chọn cập nhật item
-  const handleEditClick = (item) => {
-    setSelectedEmployee(item);
-    setMode("edit");
-    setIsDetailModalOpen(true);
-  };
+  // //Chọn cập nhật item
+  // const handleEditClick = (item) => {
+  //   setSelectedEmployee(item);
+  //   setMode("edit");
+  //   setIsDetailModalOpen(true);
+  // };
 
-  //thêm mới item
-  const handleAddClick = () => {
-    setMode("add");
-    setSelectedEmployee(null);
-    setIsDetailModalOpen(true);
-  };
+  // //thêm mới item
+  // const handleAddClick = () => {
+  //   setMode("add");
+  //   setSelectedEmployee(null);
+  //   setIsDetailModalOpen(true);
+  // };
 
-  //chọn xóa item
-  const handleDelete = (item) => {
-    openConfirmDialog("delete", item);
-  };
+  // //chọn xóa item
+  // const handleDelete = (item) => {
+  //   openConfirmDialog("delete", item);
+  // };
 
   const handleConfirmClick = async () => {
     setLoading(true);
@@ -162,41 +160,31 @@ const PromotionManagementPage = () => {
     openConfirmDialog(action, item);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return ""; // Kiểm tra nếu ngày không tồn tại
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const columns = [
-    { header: "Tên nhân viên", key: "name" },
+    { header: "Tên sự kiện", key: "name" },
+    { header: "Khuyến mãi (%)", key: "discountRate" },
     {
-      header: "Lương",
-      key: "salary",
-      render: (_, row) => row.salary.toLocaleString(), // Hiển thị lương dạng 000,000
-    },
-    { header: "Công việc", key: "jobTitle" },
-    {
-      header: "Giờ bắt đầu",
-      key: "shiftStart",
-      render: (_, row) => {
-        // Lấy giờ và phút
-        const { hour, minute } = row.shiftStart;
-
-        // Định dạng thành HH:mm
-        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
-          minute
-        ).padStart(2, "0")}`;
-        return formattedTime;
-      },
+      header: "Ngày bắt đầu",
+      key: "beginDate",
+      render: (_, row) => formatDate(row.beginDate),
     },
     {
-      header: "Giờ kết thúc",
-      key: "shiftEnd",
-      render: (_, row) => {
-        // Lấy giờ và phút
-        const { hour, minute } = row.shiftEnd;
-
-        // Định dạng thành HH:mm
-        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
-          minute
-        ).padStart(2, "0")}`;
-        return formattedTime;
-      },
+      header: "Ngày kết thúc",
+      key: "endDate",
+      render: (_, row) => formatDate(row.endDate),
+    },
+    {
+      header: "Trạng thái",
+      key: "paused",
     },
     {
       header: "Hành động",
@@ -233,7 +221,7 @@ const PromotionManagementPage = () => {
 
   const filteredData = useMemo(() => {
     // Lọc dữ liệu theo tên và chức vụ
-    let filtered = employee.filter((item) => {
+    let filtered = promotions.filter((item) => {
       const matchesName = NameQuery
         ? item.name
             .toLowerCase()
@@ -261,7 +249,7 @@ const PromotionManagementPage = () => {
     }
 
     return filtered;
-  }, [employee, NameQuery, jobQuery, sortOption]);
+  }, [promotions, NameQuery, jobQuery, sortOption]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
