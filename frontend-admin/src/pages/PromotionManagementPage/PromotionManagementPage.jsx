@@ -1,148 +1,399 @@
-import axios from "axios";
-import { create } from "lodash";
 import React from "react";
-import { useState } from "react";
-import { createPromotion } from "../../../../frontend-client/src/config/api";
-
-// Hàm format lại thời gian khi cần
-const formatDate = (dateString) => {
-  // Định dạng theo kiểu dd/MM/yyyy HH:mm
-  const formattedDate = date.toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return formattedDate;
-};
-
-const convertToISOWithLocalTime = (dateString) => {
-  const date = new Date(dateString);
-  const isoString = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60000
-  ).toISOString();
-  return isoString;
-};
-
-const convertToLocalDateTime = (isoString) => {
-  const date = new Date(isoString);
-  return date.toISOString().slice(0, 16);
-};
+import Table from "../../components/Table";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { BiRefresh } from "react-icons/bi";
+import { useState, useEffect, useMemo } from "react";
+import { BsSortDown } from "react-icons/bs";
+import axios from "axios";
+import Dialog from "../../components/Dialog/ConfirmDialog";
+import SuccessDialog from "../../components/Dialog/SuccessDialog";
+import RefreshLoader from "../../components/Loading";
+import FailedDialog from "../../components/Dialog/FailedDialog";
+import PromotionModal from "../../components/Modal/PromotionModal";
 
 const PromotionManagementPage = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    beginDate: "",
-    endDate: "",
-    discountRate: "",
-  });
-  const handleSubmit = async () => {
-    // Hàm chuyển đổi sang múi giờ Việt Nam (GMT+7)
-    const toVietnamTime = (date) => {
-      const vnOffset = 7 * 60; // 7 giờ x 60 phút
-      const localDate = new Date(date);
-      localDate.setMinutes(localDate.getMinutes() + vnOffset); // Cộng thêm offset
-      return localDate.toISOString(); // Trả về ISO string
-    };
+  const [promotions, setPromotions] = useState([]);
+  const [mode, setMode] = useState("add");
+  const [actionType, setActionType] = useState("");
+  const [sortOption, setSortOption] = useState("");
 
-    // Định dạng ngày về múi giờ Việt Nam
-    const formattedStart = toVietnamTime(formData.beginDate);
-    formData.beginDate = formattedStart;
-    const formattedEnd = toVietnamTime(formData.endDate);
-    formData.endDate = formattedEnd;
+  const [NameQuery, setNameQuery] = useState("");
+  const [jobQuery, setJobQuery] = useState("");
 
-    console.log(formData);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-    // Gửi dữ liệu lên server
-    const response = await axios.post(
-      "http://localhost:8000/api/promotion",
-      formData
-    );
-    console.log(response);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isFailModalOpen, setIsFailModalOpen] = useState(false);
+
+  const [dialogData, setDialogData] = useState({ title: "", message: "" });
+  const [loading, setLoading] = useState(false);
+
+  const fetchPromotion = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/promotion/employee"
+      );
+      setEmployees(response.data.data); // Lưu dữ liệu vào state
+    } catch (error) {
+      console.error("Error fetching films:", error);
+    }
   };
 
-  const handleStartTimeChange = (value) => {
-    // Chuyển đổi thời gian sang định dạng ISO với múi giờ địa phương và lưu vào flashSaleData
-    const isoStartTime = convertToISOWithLocalTime(value);
+  // Gọi API khi component được render lần đầu
+  useEffect(() => {
+    fetchemployee();
+  }, []);
 
-    setFormData((prev) => ({ ...prev, start: value.split("T")[0] }));
+  const openConfirmDialog = (action, item = null) => {
+    setActionType(action); // Xác định loại hành động
+    setSelectedEmployee(item); // Gán item được chọn nếu có
+    setDialogData({
+      title: "Xác nhận",
+      message: getDialogMessage(action, item), // Lấy nội dung message phù hợp
+    });
+    setIsConfirmModalOpen(true);
   };
 
-  const handleEndTimeChange = (value) => {
-    // Chuyển đổi thời gian sang định dạng ISO với múi giờ địa phương và lưu vào flashSaleData
-    const isoEndTime = convertToISOWithLocalTime(value);
-    const newFlashSaleData = { ...flashSaleData, endTime: isoEndTime };
-    setFlashSaleData(newFlashSaleData);
+  //lấy message
+  const getDialogMessage = (action, item) => {
+    switch (action) {
+      case "delete":
+        return `Bạn chắc chắn muốn xóa nhân viên này ?`;
+      case "add":
+        return "Bạn chắc chắn muốn thêm nhân viên này ?";
+      case "edit":
+        return `Bạn chắc chắn muốn cập nhật nhân viên này ?`;
+      default:
+        return "Xác nhận hành động?";
+    }
   };
+
+  //lấy message thành công
+  const getSuccessMessage = (action) => {
+    switch (action) {
+      case "delete":
+        return "Xóa nhân viên thành công";
+      case "add":
+        return "Thêm nhân viên thành công";
+      case "edit":
+        return "Cập nhật nhân viên thành công";
+      default:
+        return "Thao tác thành công";
+    }
+  };
+
+  //Chọn cập nhật item
+  const handleEditClick = (item) => {
+    setSelectedEmployee(item);
+    setMode("edit");
+    setIsDetailModalOpen(true);
+  };
+
+  //thêm mới item
+  const handleAddClick = () => {
+    setMode("add");
+    setSelectedEmployee(null);
+    setIsDetailModalOpen(true);
+  };
+
+  //chọn xóa item
+  const handleDelete = (item) => {
+    openConfirmDialog("delete", item);
+  };
+
+  const handleConfirmClick = async () => {
+    setLoading(true);
+
+    try {
+      if (actionType === "delete") {
+        await axios.delete(
+          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`
+        );
+      } else if (actionType === "edit") {
+        const res = await axios.put(
+          `http://localhost:8000/api/user/employee/${selectedEmployee._id}`,
+          selectedEmployee
+        );
+      } else if (actionType === "add") {
+        console.log("haha: ", selectedEmployee);
+        const formData = new FormData();
+        formData.append("name", selectedEmployee.name);
+        formData.append("birthDate", selectedEmployee.birthDate);
+        formData.append("email", selectedEmployee.email);
+        formData.append("phone", selectedEmployee.phone);
+        formData.append("jobTitle", selectedEmployee.jobTitle);
+        formData.append("salary", selectedEmployee.salary);
+        formData.append("shiftStart", selectedEmployee.shiftStart);
+        formData.append("shiftEnd", selectedEmployee.shiftEnd);
+        await axios.post(
+          "http://localhost:8000/api/user/employee",
+          selectedEmployee
+        );
+      }
+      await handleRefresh(); // Làm mới dữ liệu sau khi thành công
+      // Hiển thị thông báo thành công
+      setDialogData({
+        title: "Thành công",
+        message: getSuccessMessage(actionType),
+      });
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+      setIsConfirmModalOpen(false);
+    }
+  };
+
+  const handleEditConfirm = (item) => {
+    setSelectedEmployee(item);
+    console.log("item: ", item);
+
+    // Xác định loại hành động dựa trên chế độ hiện tại
+    const action = mode === "add" ? "add" : "edit";
+
+    // Gọi dialog xác nhận với loại hành động tương ứng
+    openConfirmDialog(action, item);
+  };
+
+  const columns = [
+    { header: "Tên nhân viên", key: "name" },
+    {
+      header: "Lương",
+      key: "salary",
+      render: (_, row) => row.salary.toLocaleString(), // Hiển thị lương dạng 000,000
+    },
+    { header: "Công việc", key: "jobTitle" },
+    {
+      header: "Giờ bắt đầu",
+      key: "shiftStart",
+      render: (_, row) => {
+        // Lấy giờ và phút
+        const { hour, minute } = row.shiftStart;
+
+        // Định dạng thành HH:mm
+        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
+          minute
+        ).padStart(2, "0")}`;
+        return formattedTime;
+      },
+    },
+    {
+      header: "Giờ kết thúc",
+      key: "shiftEnd",
+      render: (_, row) => {
+        // Lấy giờ và phút
+        const { hour, minute } = row.shiftEnd;
+
+        // Định dạng thành HH:mm
+        const formattedTime = `${String(hour).padStart(2, "0")}:${String(
+          minute
+        ).padStart(2, "0")}`;
+        return formattedTime;
+      },
+    },
+    {
+      header: "Hành động",
+      key: "actions",
+      render: (_, row) => (
+        <div className="flex space-x-3">
+          <button
+            className="text-blue-600 hover:text-blue-800"
+            onClick={() => handleEditClick(row)}
+          >
+            <FiEdit2 className="w-4 h-4" />
+          </button>
+          <button
+            className="text-red-600 hover:text-red-800"
+            onClick={() => handleDelete(row)}
+          >
+            <FiTrash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    fetchemployee();
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
+
+  const itemsPerPage = 7;
+
+  const filteredData = useMemo(() => {
+    // Lọc dữ liệu theo tên và chức vụ
+    let filtered = employee.filter((item) => {
+      const matchesName = NameQuery
+        ? item.name
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(NameQuery.toLowerCase().normalize("NFC"))
+        : true;
+
+      const matchesJob = jobQuery
+        ? item.jobTitle
+            .toLowerCase()
+            .normalize("NFC")
+            .includes(jobQuery.toLowerCase().normalize("NFC"))
+        : true;
+
+      return matchesName && matchesJob;
+    });
+
+    // Sắp xếp dữ liệu sau khi lọc
+    if (sortOption === "Asc") {
+      console.log("Sắp xếp lương tăng dần");
+      filtered = filtered.sort((a, b) => a.salary - b.salary); // Sắp xếp lương tăng dần
+    } else if (sortOption === "Des") {
+      console.log("Sắp xếp lương giảm dần");
+      filtered = filtered.sort((a, b) => b.salary - a.salary); // Sắp xếp lương giảm dần
+    }
+
+    return filtered;
+  }, [employee, NameQuery, jobQuery, sortOption]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-lg font-bold mb-4">Thông tin cơ bản</h2>
-      <div className="mb-6"></div>
-      <div className="grid grid-cols-2 gap-6">
+    <div>
+      <div className="mb-6 flex justify-between items-center pr-10">
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khung thời gian bắt đầu
-          </label>
-          <input
-            type="datetime-local"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, beginDate: e.target.value }))
-            }
-            value={formData.beginDate}
-          />
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Thông tin nhân viên
+          </h2>
+
+          <div className="flex items-center gap-4 ">
+            <button
+              onClick={handleRefresh}
+              className="r p-4 rounded-full hover:bg-gray-100 transition-all duration-300"
+              disabled={loading}
+            >
+              <BiRefresh
+                className={`text-4xl text-black hover:text-black ${
+                  loading
+                    ? "animate-spin"
+                    : "hover:rotate-180 transition-transform duration-300"
+                }`}
+              />
+            </button>
+            <h1 className="text-xl font-bold text-gray-800 ">Lọc:</h1>
+            <div className="flex items-center w-[300px]">
+              <input
+                type="text"
+                placeholder="Tên nhân viên...."
+                value={NameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+              />
+            </div>
+            <div className="flex items-center w-[300px]">
+              <input
+                type="text"
+                placeholder="Tên công việc...."
+                value={jobQuery}
+                onChange={(e) => setJobQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none border"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 ml-20">
+            <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
+            <div className="relative inline-block w-64">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Không sắp xếp</option>
+                <option value="Asc">Tăng dần lương</option>
+                <option value="Des">Giảm dần lương</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <BsSortDown className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khung thời gian kết thúc
-          </label>
-          <input
-            type="datetime-local"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-            }
-            value={formData.endDate}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Khuyến mãi (%)
-          </label>
-          <input
-            type="number"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, discountRate: e.target.value }))
-            }
-            value={formData.discountRate}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 block mb-2">
-            Tên sự kiện
-          </label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-mainColor"
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            value={formData.name}
-          />
+        <button
+          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          onClick={() => handleAddClick()}
+        >
+          Thêm nhân viên +
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+        <Table columns={columns} data={paginatedData} />
+
+        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+          >
+            Trước
+          </button>
+          <span className="text-sm text-gray-600">
+            Trang {currentPage} trên {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+          >
+            Tiếp
+          </button>
         </div>
       </div>
-      <button
-        onClick={() => {
-          handleSubmit();
+
+      <PromotionModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onSave={handleEditConfirm}
+        employee={selectedEmployee}
+        mode={mode}
+      />
+      <Dialog
+        isOpen={isConfirmModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmClick}
+      />
+      <SuccessDialog
+        isOpen={isSuccessModalOpen && !loading}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setIsSuccessModalOpen(false);
         }}
-        className={`px-4 py-2 rounded-lg  ${"bg-blue-500 hover:bg-blue-700"} text-white`}
-      >
-        Thêm
-      </button>
-      {/* Tích hợp ThumbnailUpload */}
+      />
+      <FailedDialog
+        isOpen={isFailModalOpen}
+        title={dialogData.title}
+        message={dialogData.message}
+        onClose={() => {
+          setIsFailModalOpen(false);
+        }}
+      />
+      <RefreshLoader isOpen={loading} />
     </div>
   );
 };
