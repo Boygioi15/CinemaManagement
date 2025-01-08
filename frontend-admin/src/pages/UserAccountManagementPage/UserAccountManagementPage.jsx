@@ -9,6 +9,8 @@ import TicketCancelModal from "../../components/Modal/TicketCancelModal";
 import Dialog from "../../components/Dialog/ConfirmDialog";
 import SuccessDialog from "../../components/Dialog/SuccessDialog";
 import RefreshLoader from "../../components/Loading";
+import { FaLock, FaLockOpen } from "react-icons/fa";
+import { FaL } from "react-icons/fa6";
 
 const UserAccountManagementPage = () => {
   const [users, setUsers] = useState([]);
@@ -196,12 +198,24 @@ const UserAccountManagementPage = () => {
       key: "actions",
       render: (_, row) => (
         <div className="flex space-x-3">
-          <button className="text-red-600 hover:text-red-800">
-            <TbCancel
-              className="w-5 h-5"
-              onClick={() => handleCancelClick(row)}
-            />
-          </button>
+          {!row.blocked ? 
+            (
+              <button className="text-red-600 hover:text-red-800">
+                <FaLock
+                  className="w-5 h-5"
+                  onClick={() => handleCancelClick(row)} />
+              </button>
+            )
+            :
+            (
+              <button className="text-green-600 hover:text-green-800">
+                <FaLockOpen
+                  className="w-5 h-5"
+                  onClick={() => handleCancelClick(row)} />
+              </button>
+            )
+          }
+          
           <button
             className="text-red-600 hover:text-red-800"
             onClick={() => handleDeleteClick(row)}
