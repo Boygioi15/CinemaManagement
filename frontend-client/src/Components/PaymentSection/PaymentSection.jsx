@@ -179,7 +179,11 @@ const PaymentSection = ({
                   <p className="text-xl font-bold">{+totalDiscount} %</p>
                   <p className="text-lg">Điểm tích được</p>
                   <p className="text-xl font-bold">
-                    {+(totalPrice * param.loyalPoint_OrderToPointRatio) / 100}
+                    {
+                      +Math.floor(
+                        (totalPrice * param.loyalPoint_OrderToPointRatio) / 100
+                      )
+                    }
                   </p>
                 </div>
               </div>

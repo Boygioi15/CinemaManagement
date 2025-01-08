@@ -181,8 +181,9 @@ export class OrderService {
     // earn point
     const param = await ParamService.getParams();
     const loyalPoint_OrderToPointRatio = param.loyalPoint_OrderToPointRatio;
-    let accPoint = (totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio / 100;
-    await LoyalPointService.addLoyalPoint(user._id, accPoint)
+    let accPoint = Math.floor((totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio / 100);
+    await LoyalPointService.addLoyalPoint(user._id, accPoint);
+
 
     return await newOrder.save();
   };

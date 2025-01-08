@@ -1027,13 +1027,7 @@ function BottomBar({
 
   useEffect(() => {
     if (!param) return;
-    if (!usePoints) setPointUsage(null);
-
-    const data =
-      calculateTotalPrice() -
-      (calculateTotalPrice() * totalDiscount) /
-        100 /
-        param.loyalPoint_PointToReducedPriceRatio;
+    if (usePoints === false) setPointUsage(null);
 
     const pointUsage = Math.min(
       param.loyalPoint_MaxiumPointUseInOneGo,
@@ -1109,6 +1103,16 @@ function BottomBar({
   };
 
   useEffect(() => {
+    if (!param) return;
+    if (usePoints === false) setPointUsage(null);
+
+    const pointUsage = Math.min(
+      param.loyalPoint_MaxiumPointUseInOneGo,
+      loyalPoint
+    );
+
+    setPointUsage(pointUsage);
+
     const price = !usePoints
       ? calculateTotalPrice() - (calculateTotalPrice() * totalDiscount) / 100
       : calculateTotalPrice() -
@@ -1122,6 +1126,7 @@ function BottomBar({
 
     setPriceAfterAll(price);
   }, [usePoints, seatSelections, totalDiscount, param]);
+
   return (
     <div
       style={{ zIndex: 5, width: "-webkit-fill-available" }}
@@ -1273,9 +1278,8 @@ function BottomBar({
             <p className="text-lg">Điểm tích được </p>
             <p className="text-xl font-bold">
               +{" "}
-              {(
-                (priceAfterAll * param?.loyalPoint_OrderToPointRatio) /
-                100
+              {Math.floor(
+                (priceAfterAll * param?.loyalPoint_OrderToPointRatio) / 100
               ).toLocaleString()}
             </p>
           </div>
