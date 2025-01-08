@@ -45,7 +45,8 @@ const FilmDetailPage = () => {
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
   const [isPromotionListOpen, setIsPromotionListOpen] = useState(false); // Trạng thái PromotionList
-  const [appliedPromotions, setAppliedPromotions] = useState([]); // Danh sách khuyến mãi đã chọn
+  const [selectedPromotions, setSelectedPromotions] = useState([]);
+  const [totalDiscount, setTotalDiscount] = useState(0);
 
   useEffect(() => {
     setSelectedFilmShowID(null);
@@ -716,9 +717,11 @@ const FilmDetailPage = () => {
       <PromotionList
         isOpen={isPromotionListOpen}
         setIsOpen={setIsPromotionListOpen}
-        onApplyPromotions={(selectedPromotions) => {
+        onApplyPromotions={(selectedPromotions, totalDiscount) => {
+          setSelectedPromotions(selectedPromotions); // Lưu danh sách khuyến mãi
+          setTotalDiscount(totalDiscount); // Lưu tổng khuyến mãi
           console.log("Các khuyến mãi đã chọn:", selectedPromotions);
-          setAppliedPromotions(selectedPromotions); // Lưu danh sách khuyến mãi đã chọn
+          console.log("Tổng khuyến mãi:", totalDiscount, "%");
         }}
       />
 
