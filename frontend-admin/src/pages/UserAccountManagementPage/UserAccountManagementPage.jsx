@@ -154,11 +154,14 @@ const UserAccountManagementPage = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/user/user");
+      setLoading(true);
+      const response = await axios.get("http://localhost:8000/api/user");
       // Lọc những order có printed === false
       setUsers(response.data);
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -214,7 +217,7 @@ const UserAccountManagementPage = () => {
     { header: "Email", key: "email" },
     { header: "Số điện thoại", key: "phone" },
     {
-      header: "Bị chặn",
+      header: "Trạng thái",
       key: "status",
       render: (_, row) => {
         let statusText = "";
@@ -331,25 +334,27 @@ const UserAccountManagementPage = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {users.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
 
       <TicketDetailModal

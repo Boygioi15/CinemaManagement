@@ -45,6 +45,14 @@ const TicketPrintListPage = () => {
   const ticketModalRef = useRef();
   const [isPrintPdf, setIsPrintPdf] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setFilmNameQuery("");
+    setCusNameQuery("");
+    setSelectedDate("");
+    setTableSearchQuery("");
+    setStatusQuery("");
+  };
+
   // Hàm in
   const handlePrint = useReactToPrint({
     contentRef: printContentRef, // Dùng contentRef
@@ -199,6 +207,7 @@ const TicketPrintListPage = () => {
 
   const fetchOrder = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
       setOrders(
@@ -209,6 +218,8 @@ const TicketPrintListPage = () => {
       );
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -503,6 +514,12 @@ const TicketPrintListPage = () => {
               ))}
             </select>
           </div>
+          <button
+            className="ml-4 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+            onClick={() => handleDeleteFilter()}
+          >
+            Xóa lọc
+          </button>
         </div>
         <div className="ml-20 flex items-center gap-4">
           <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
@@ -526,25 +543,27 @@ const TicketPrintListPage = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {orders.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
 
       <TicketDetailModal
