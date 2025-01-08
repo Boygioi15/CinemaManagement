@@ -1,142 +1,97 @@
 import expressAsyncHandler from "express-async-handler";
 import promotionModel from "./promotion.schema.js";
+import { PromotionService } from "./promotion.service.js";
+import { handleUploadCloudinary } from "../ulitilities/cloudinary.js";
 
 class PromotionController {
   // Create a new promotion
   createPromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { discountRate, name, beginDate, endDate } = req.body;
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    const cldRes = await handleUploadCloudinary(dataURI);
 
-      const promotion = await promotionModel.create({
-        discountRate,
-        name,
-        beginDate: new Date(beginDate),
-        endDate: new Date(endDate),
-      });
-
-      return res.status(201).json({
-        msg: "Promotion created successfully",
-        success: true,
-        data: promotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+    req.body.thumbnailURL = cldRes.url;
+    req.body.public_ID = cldRes.public_id;
+    //console.log(cldRes);
+    const response = await PromotionService.createPromotion(req.body);
+    return res.status(200).json({
+      msg: "Create promotion successfully!",
+      success: true,
+      data: response,
+    });
   });
-
-  // Get promotions by date
-  getPromotionByDate = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { date } = req.query;
-
-      // Chuyển đổi ngày từ FE sang múi giờ Việt Nam (GMT+7)
-      const inputDate = new Date(Number(date));
-      const vnDate = new Date(inputDate.getTime() + 7 * 60 * 60 * 1000); // Thêm 7 giờ
-      console.log("inputDate (VN timezone)", vnDate);
-
-      // Truy vấn dữ liệu khuyến mãi
-      const promotions = await promotionModel.find({
-        beginDate: { $lte: vnDate },
-        endDate: { $gte: vnDate },
-      });
-
-      const promotionss = await promotionModel.find();
-      console.log(promotionss);
-      console.log(promotions);
-      // Phản hồi kết quả
-      return res.status(200).json({
-        msg: "Promotions retrieved successfully",
-        success: true,
-        data: promotions,
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  // Get a promotion by ID
-  getPromotionById = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
-
-      const promotion = await promotionModel.findById(id);
-
-      if (!promotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
-
-      return res.status(200).json({
-        msg: "Promotion retrieved successfully",
-        success: true,
-        data: promotion,
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  // Update a promotion by ID
   updatePromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const { discountRate, name, beginDate, endDate } = req.body;
-
-      const updatedPromotion = await promotionModel.findByIdAndUpdate(
-        id,
-        {
-          discountRate,
-          name,
-          beginDate,
-          endDate,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-
-      if (!updatedPromotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
-
-      return res.status(200).json({
-        msg: "Promotion updated successfully",
-        success: true,
-        data: updatedPromotion,
-      });
-    } catch (error) {
-      next(error);
+    const { id } = req.params;
+    if (req.file) {
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+      const cldRes = await handleUploadCloudinary(dataURI);
+      req.body.thumbnailURL = cldRes.url;
+      req.body.public_ID = cldRes.public_id;
     }
+
+    const response = await PromotionService.updatePromotion(id, req.body);
+
+    return res.status(200).json({
+      msg: "Update promotion successfully!",
+      success: true,
+      data: response,
+    });
   });
 
-  // Delete a promotion by ID
-  deletePromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
+  pausePromotion = expressAsyncHandler(async (req, res) => {
+    const { id } = req.params;
 
-      const deletedPromotion = await promotionModel.findByIdAndDelete(id);
+    const promotion = await PromotionService.pausePromotion(id);
 
-      if (!deletedPromotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
+    return res.status(200).json({
+      msg: "Promotions updated successfully",
+      success: true,
+      data: promotion,
+    });
+  });
 
-      return res.status(200).json({
-        msg: "Promotion deleted successfully",
-        success: true,
-        data: deletedPromotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+  resumePromotion = expressAsyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const promotion = await PromotionService.resumePromotion(id);
+
+    return res.status(200).json({
+      msg: "Promotions resumed successfully",
+      success: true,
+      data: promotion,
+    });
+  });
+
+  getPromotionById = expressAsyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const promotion = await PromotionService.getPromotionById(id);
+
+    return res.status(200).json({
+      msg: " Get promotions by id successfully",
+      success: true,
+      data: promotion,
+    });
+  });
+
+  getAllPromotions = expressAsyncHandler(async (req, res) => {
+    const promotion = await PromotionService.getAllPromotions();
+
+    return res.status(200).json({
+      msg: " Get promotions successfully",
+      success: true,
+      data: promotion,
+    });
+  });
+
+  getActivePromotion = expressAsyncHandler(async (req, res) => {
+    const promotion = await PromotionService.getActivePromotion();
+    return res.status(200).json({
+      msg: " Get promotions successfully",
+      success: true,
+      data: promotion,
+    });
   });
 }
 

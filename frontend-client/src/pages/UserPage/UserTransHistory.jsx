@@ -1,84 +1,89 @@
 import React, { useState, useEffect } from "react";
 import UserInfoLayout from "../../layouts/UserSpaceLayout";
 import { FaChevronDown } from "react-icons/fa";
+import { getAllOrderByUserId } from "../../config/api";
+import { FaSpinner } from "react-icons/fa";
+import CustomButton from "../../Components/button";
 
 const UserTransHistory = () => {
-  const [transactions, setTransactions] = useState([]); // Dữ liệu giao dịch hiện tại
-  const [originalTransactions, setOriginalTransactions] = useState([]); // Lưu dữ liệu gốc
-  const [activeCollapse, setActiveCollapse] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [originalTransactions, setOriginalTransactions] = useState([]);
+  const [activeCollapse, setActiveCollapse] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
+  const itemsPerPage = 3;
 
   useEffect(() => {
+    handleGetAllOrder();
     document.title = "Lịch sử giao dịch";
-
-    const sampleData = [
-      {
-        _id: "001",
-        movieName: "Phim A",
-        quantity: 2,
-        date: "2024-11-20",
-        total: "200,000₫",
-        details: [
-          {
-            item: "Poca Khoai Tây 54gr",
-            quantity: 1,
-            price: "28,000₫",
-            total: "28,000₫",
-          },
-          {
-            item: "Nước suối Dasani 500ml",
-            quantity: 1,
-            price: "20,000₫",
-            total: "20,000₫",
-          },
-          {
-            item: "HSSV-NGƯỜI CAO TUỔI",
-            quantity: 1,
-            price: "45,000₫",
-            total: "45,000₫",
-          },
-        ],
-      },
-      {
-        _id: "002",
-        movieName: "Phim B",
-        quantity: 1,
-        date: "2024-11-21",
-        total: "100,000₫",
-        details: [
-          {
-            item: "Combo A",
-            quantity: 1,
-            price: "100,000₫",
-            total: "100,000₫",
-          },
-        ],
-      },
-    ];
-
-    setTransactions(sampleData);
-    setOriginalTransactions(sampleData); // Lưu lại dữ liệu gốc
   }, []);
 
-  const toggleCollapse = (transactionId) => {
-    setActiveCollapse((prev) =>
-      prev === transactionId ? null : transactionId
-    );
+  const handleGetAllOrder = async () => {
+    setIsLoading(true); // Bắt đầu loading
+    const response = await getAllOrderByUserId();
+    setTransactions(response.data);
+    setOriginalTransactions(response.data);
+    setIsLoading(false); // Kết thúc loading
   };
 
-  const handleFilterChange = (formattedDate) => {
-    if (formattedDate) {
-      const filteredData = originalTransactions.filter(
-        (t) => t.date === formattedDate
-      );
-      setTransactions(filteredData);
-    } else {
-      setTransactions(originalTransactions); // Reset về danh sách gốc
+  const toggleCollapse = (transactionId) => {
+    setActiveCollapse((prev) => {
+      if (prev.includes(transactionId)) {
+        // Nếu đã mở, thì đóng lại
+        return prev.filter((id) => id !== transactionId);
+      } else {
+        // Nếu chưa mở, thêm vào
+        return [...prev, transactionId];
+      }
+    });
+  };
+
+  const handleFilterChange = () => {
+    const fromDate = document.getElementById("fromDateFilter").value;
+    const toDate = document.getElementById("toDateFilter").value;
+
+    // Kiểm tra nếu ngày bắt đầu lớn hơn ngày kết thúc
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      alert("Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+      return;
     }
+
+    // Chuyển đổi fromDate và toDate về định dạng local date (yyyy-mm-dd)
+    const formattedFromDate = fromDate
+      ? new Date(fromDate).toLocaleDateString()
+      : null;
+    const formattedToDate = toDate
+      ? new Date(toDate).toLocaleDateString()
+      : null;
+
+    const filteredData = originalTransactions.filter((t) => {
+      // Chuyển transactionDate về định dạng local (yyyy-mm-dd)
+      const transactionDate = new Date(t.createdDate).toLocaleDateString();
+
+      // So sánh chỉ phần ngày
+      return (
+        (!formattedFromDate || transactionDate >= formattedFromDate) &&
+        (!formattedToDate || transactionDate <= formattedToDate)
+      );
+    });
+
+    setTransactions(filteredData);
   };
 
   const resetFilter = () => {
     setTransactions(originalTransactions);
-    document.getElementById("dateFilter").value = ""; // Xóa giá trị trong ô lọc
+    document.getElementById("fromDateFilter").value = "";
+    document.getElementById("toDateFilter").value = "";
+  };
+
+  const paginateData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return transactions.slice(startIndex, endIndex);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   return (
@@ -87,72 +92,93 @@ const UserTransHistory = () => {
         <h1 className="text-xl font-bold text-white mb-6">Lịch sử giao dịch</h1>
 
         <div className="mb-4 flex items-center gap-4">
-          <label htmlFor="dateFilter" className="text-white">
-            Lọc theo ngày:
+          <label htmlFor="fromDateFilter" className="text-white">
+            Từ ngày:
           </label>
           <input
             type="date"
-            id="dateFilter"
+            id="fromDateFilter"
             className="p-2 rounded border text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
             onChange={(e) => {
-              const selectedDate = e.target.value;
-              if (selectedDate) {
-                const formattedDate = new Date(selectedDate).toLocaleDateString(
-                  "vi-VN",
-                  {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  }
-                ); // Định dạng dd/mm/yyyy
-                handleFilterChange(formattedDate);
-              }
+              const fromDate = e.target.value;
+              const toDateInput = document.getElementById("toDateFilter");
+
+              // Cập nhật thuộc tính min cho ngày kết thúc
+              toDateInput.min = fromDate;
+
+              handleFilterChange();
             }}
           />
-          <button
+
+          <label htmlFor="toDateFilter" className="text-white">
+            Đến ngày:
+          </label>
+          <input
+            type="date"
+            id="toDateFilter"
+            className="p-2 rounded border text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+            onChange={(e) => {
+              const toDate = e.target.value;
+              const fromDateInput = document.getElementById("fromDateFilter");
+
+              // Cập nhật thuộc tính max cho ngày bắt đầu
+              fromDateInput.max = toDate;
+
+              handleFilterChange();
+            }}
+          />
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Làm mới bộ lọc"
             onClick={resetFilter}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
-          >
-            Reset bộ lọc
-          </button>
+          />
         </div>
 
-        {transactions.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center h-32">
+            <FaSpinner className="text-white text-3xl animate-spin" />
+          </div>
+        ) : transactions.length === 0 ? (
           <p className="text-white">Không tìm thấy giao dịch nào.</p>
         ) : (
-          transactions.map((transaction) => (
+          paginateData().map((transaction) => (
             <div
-              key={transaction._id}
+              key={transaction.orderId}
               className="bg-white rounded-lg mb-4 p-4 overflow-hidden transition-all duration-500 ease-in-out"
               style={{
-                maxHeight:
-                  activeCollapse === transaction._id ? "1000px" : "120px",
+                maxHeight: activeCollapse.includes(transaction.orderId)
+                  ? "1000px"
+                  : "120px",
               }}
             >
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-lg text-gray-700">
-                    Mã đơn: {transaction._id}
+                    Mã đơn: {transaction?.verifyCode}
                   </p>
+
                   <p className="text-sm text-gray-500">
-                    Tên phim: {transaction.movieName}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Ngày: {transaction.date}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Tổng cộng: {transaction.total}
+                    Ngày:{" "}
+                    {new Date(transaction?.createdDate).toLocaleDateString()}
                   </p>
                 </div>
                 <FaChevronDown
                   className={`text-gray-500 cursor-pointer transition-transform duration-500 ease-in-out ${
-                    activeCollapse === transaction._id ? "rotate-180" : ""
+                    activeCollapse.includes(transaction.orderId)
+                      ? "rotate-180"
+                      : ""
                   }`}
-                  onClick={() => toggleCollapse(transaction._id)}
+                  onClick={() => toggleCollapse(transaction.orderId)}
                 />
               </div>
 
-              {activeCollapse === transaction._id && (
+              {activeCollapse.includes(transaction.orderId) && (
                 <div className="mt-2">
                   <table className="w-full table-auto border-collapse rounded-lg overflow-hidden text-sm">
                     <thead>
@@ -165,25 +191,54 @@ const UserTransHistory = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {transaction.details.map((detail, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
+                      {transaction?.filmShow?.tickets.map((ticket, index) => (
+                        <tr
+                          key={`ticket-${index}`}
+                          className="hover:bg-gray-50"
+                        >
                           <td className="p-2 border-b text-gray-700 text-center">
                             {index + 1}
                           </td>
                           <td className="p-2 border-b text-gray-700 text-left">
-                            {detail.item}
+                            {ticket?.name}
                           </td>
                           <td className="p-2 border-b text-gray-700 text-center">
-                            {detail.quantity}
+                            {ticket?.quantity}
                           </td>
                           <td className="p-2 border-b text-gray-700 text-right">
-                            {detail.price}
+                            {Number(ticket?.price).toLocaleString()}
                           </td>
+
                           <td className="p-2 border-b text-gray-700 text-right">
-                            {detail.total}
+                            {(ticket?.quantity * ticket.price).toLocaleString()}
                           </td>
                         </tr>
                       ))}
+
+                      {transaction?.items.map((detail, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="p-2 border-b text-gray-700 text-center">
+                            {index +
+                              1 +
+                              (transaction?.filmShow?.tickets?.length || 0)}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-left">
+                            {detail?.name}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-center">
+                            {detail?.quantity}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-right">
+                            {Number(detail?.price).toLocaleString()}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-right">
+                            {(
+                              detail?.quantity * detail?.price
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+
                       <tr className="bg-gray-100 font-bold">
                         <td
                           colSpan={4}
@@ -192,7 +247,7 @@ const UserTransHistory = () => {
                           Tổng tiền (VND)
                         </td>
                         <td className="p-2 text-right text-gray-700">
-                          {transaction.total}
+                          {transaction?.totalPrice.toLocaleString()}
                         </td>
                       </tr>
                     </tbody>
@@ -202,6 +257,35 @@ const UserTransHistory = () => {
             </div>
           ))
         )}
+
+        <div className="flex justify-center mt-4">
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Trang trước"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          />
+
+          <span className="mx-4 mt-2 text-white">Trang {currentPage}</span>
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Trang sau"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage * itemsPerPage >= transactions.length}
+          />
+        </div>
       </div>
     </UserInfoLayout>
   );

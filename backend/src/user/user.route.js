@@ -8,6 +8,9 @@ router.post("/user", userController.createUser);
 router.put("/user/:id", userController.updateUser);
 router.delete("/user/:id", userController.deleteUser);
 router.get("/user/", userController.getAllUsers);
+router.post("/user/:id/block", userController.blockUser);
+router.post("/user/:id/unblock", userController.unblockUser);
+
 // router.post("/user/reset-password", userController.resetPassword);
 router.post("/user/change-password/:id", userController.changePassword);
 

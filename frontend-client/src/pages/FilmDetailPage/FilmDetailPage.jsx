@@ -29,6 +29,7 @@ import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 import { createPayment } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
 import PromotionList from "../../Components/PromotionList"; // Import PromotionList
 import { FaArrowLeft } from "react-icons/fa"; // Import biểu tượng mũi tên
+import { ModalWhenBuyTicket } from "../../Components/Modal/ModalWhenBuyTicket";
 
 const seatWidth = 50;
 const seatHeight = 40;
@@ -37,10 +38,10 @@ const gapY = 5;
 
 const FilmDetailPage = () => {
   const { filmID } = useParams();
-
   const location = useLocation();
   const { initShowDate, initShowTime } = location.state || {};
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
   const [isPromotionListOpen, setIsPromotionListOpen] = useState(false); // Trạng thái PromotionList
@@ -109,6 +110,7 @@ const FilmDetailPage = () => {
         );
         if (response && response.data) {
           setFilmDetail(response.data.data);
+          setIsPopupOpen(true);
         }
       } catch (error) {
         console.error("Error fetching film details:", error);
@@ -118,6 +120,10 @@ const FilmDetailPage = () => {
     fetchFilmDetail();
     handleGetDateAndShowTime(filmID);
   }, []);
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false); // Đóng popup khi người dùng tắt
+  };
 
   useEffect(() => {
     document.title = filmDetail?.name || "Loading...";
@@ -423,6 +429,10 @@ const FilmDetailPage = () => {
   }
   return (
     <div className="p-6 space-y-12 md:space-y-40">
+      {isPopupOpen && (
+        <ModalWhenBuyTicket isOpen={isPopupOpen} onClose={handleClosePopup} />
+      )}
+
       <div className="grid items-start grid-cols-5 gap-6 md:gap-12 rounded-lg">
         <div className="col-span-2 w-full h-full top-0 text-center relative ">
           <div className="relative border border-gray-300 rounded-lg ">
@@ -522,6 +532,7 @@ const FilmDetailPage = () => {
           videoUrl={filmDetail.trailerURL}
         />
       </div>
+
       <FilmInfoSection
         className="block md:hidden mt-6"
         filmContent={filmDetail.filmContent}
@@ -645,7 +656,6 @@ const FilmDetailPage = () => {
           />
         )}
       </div>
-
       {selectedFilmShow && (
         <div className="flex flex-col justify-center items-center space-y-12">
           <h1 className="font-interExtraBold">CHỌN BẮP NƯỚC</h1>

@@ -35,13 +35,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verificationCode: String,
-    vFCodeExpirationTime: Date,
-    isConfirmed: {
-      type: Boolean,
-      default: false,
-    },
-
     ////////EMPLOYEE/////////////
     jobTitle: {
       type: String,

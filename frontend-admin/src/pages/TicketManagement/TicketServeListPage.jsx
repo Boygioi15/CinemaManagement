@@ -32,6 +32,12 @@ export default function TicketServeListPage() {
   const [view, setView] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setCusNameQuery("");
+    setTableSearchQuery("");
+    setStatusQuery("");
+  };
+
   //mở modal phục vụ
   const handlePrintClick = (order) => {
     setSelectedOrder(order);
@@ -149,14 +155,17 @@ export default function TicketServeListPage() {
 
   const fetchOrder = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
-      const filteredOrders = response.data.filter(
+      const filteredOrders = response.data.data.filter(
         (order) => order.printed === true
       );
       setOrders(filteredOrders);
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -212,8 +221,13 @@ export default function TicketServeListPage() {
     { header: "Verify Code", key: "verifyCode" },
     {
       header: "Ngày chiếu",
-      key: "date",
-      render: (value) => new Date(value).toLocaleDateString(),
+      key: "showDate",
+      render: (_, row) => {
+        const showDate = row.filmShow?.showDate; // Lấy giá trị ngày chiếu
+        return showDate
+          ? new Date(showDate).toLocaleDateString() // Hiển thị ngày nếu hợp lệ
+          : "Không có dữ liệu"; // Hiển thị chuỗi mặc định nếu không có dữ liệu
+      },
     },
     {
       header: "Trạng thái",
@@ -332,31 +346,39 @@ export default function TicketServeListPage() {
               ))}
             </select>
           </div>
+          <button
+            className="ml-4 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+            onClick={() => handleDeleteFilter()}
+          >
+            Xóa lọc
+          </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {orders.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
 
       <OrderDetailModal

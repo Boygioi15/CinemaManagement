@@ -23,6 +23,7 @@ const RoleDivisionPage = () => {
 
   const fetchRoles = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         "http://localhost:8000/api/permission/get-all-permission"
       );
@@ -35,11 +36,14 @@ const RoleDivisionPage = () => {
       setAllRoles(roles);
     } catch (error) {
       console.error("Error fetching roles:", error);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
   const fetchEmployees = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         "http://localhost:8000/api/user/employee"
       );
@@ -55,6 +59,8 @@ const RoleDivisionPage = () => {
       setAllEmployees(employees);
     } catch (error) {
       console.error("Error fetching roles:", error);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 

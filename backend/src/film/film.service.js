@@ -71,8 +71,14 @@ export class FilmService {
 
   // Tạo mới một bộ phim
   static createFilm = async (filmData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } =
-      filmData;
+    const {
+      tagsRef,
+      ageRestriction,
+      twoDthreeD,
+      filmDuration,
+      beginDate,
+      ...rest
+    } = filmData;
     const tagsArray = JSON.parse(tagsRef);
     //console.log(filmData);
     // Kiểm tra tuổi
@@ -82,19 +88,29 @@ export class FilmService {
     // Kiểm tra các thể loại phim (tags)
     await FilmService.validateTags(tagsArray);
 
+    //Kiểm tra thời lượng phim
     if (filmDuration < 0) {
       throw customError("Thời lượng phim phải là một số nguyên không âm", 400);
     }
     if (filmDuration > 1000) {
       throw customError("Thời lượng phim phải không được vượt quá 1000!", 400);
     }
-    
+
+    // Kiểm tra ngày khởi chiếu
+    const releaseDate = new Date(beginDate);
+    const today = new Date();
+    today.setHours(23, 59, 59, 59);
+    if (releaseDate <= today) {
+      throw customError("Ngày khởi chiếu phải lớn hơn ngày hiện tại", 400);
+    }
+
     return await filmModel.create({
       ...rest,
       filmDuration,
       tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,
+      beginDate: releaseDate,
     });
   };
 
@@ -153,7 +169,14 @@ export class FilmService {
 
   // Cập nhật 1 bộ phim
   static updateFilmById = async (filmId, updateData) => {
-    const { tagsRef, ageRestriction, twoDthreeD, filmDuration, ...rest } = updateData;
+    const {
+      tagsRef,
+      ageRestriction,
+      twoDthreeD,
+      filmDuration,
+      beginDate,
+      ...rest
+    } = updateData;
     const tagsArray = JSON.parse(tagsRef);
     // Kiểm tra tuổi
     await FilmService.validateAgeRestriction(ageRestriction);
@@ -162,19 +185,31 @@ export class FilmService {
     // Kiểm tra thể loại phim
     await FilmService.validateTags(tagsArray);
 
-    // Kiểm tra thời lượng phim
-    if (filmDuration < 0) {
+    //Kiểm tra thời lượng phim
+    let duration = Number(filmDuration);
+    if (duration < 0) {
       throw customError("Thời lượng phim phải là một số nguyên không âm", 400);
     }
-    if (filmDuration > 1000) {
-      throw customError("Thời lượng phim phải không được vượt quá 1000!", 400);
+    if (duration > 1000) {
+      throw customError("Thời lượng phim không được vượt quá 1000 phút", 400);
+    }
+
+    // Kiểm tra ngày khởi chiếu
+    const releaseDate = new Date(beginDate);
+    const today = new Date();
+    today.setHours(23, 59, 59, 59);
+    if (releaseDate <= today) {
+      throw customError("Ngày khởi chiếu phải lớn hơn ngày hiện tại", 400);
     }
 
     const oldFilm = await filmModel.findByIdAndUpdate(filmId, {
       ...rest,
+      filmDuration: filmDuration,
       tagsRef: tagsArray,
       ageRestriction,
       twoDthreeD: formattedTwoDthreeD,
+      filmDuration: duration,
+      beginDate: releaseDate,
     });
     //destroy old img
     handleDestroyCloudinary(oldFilm.public_ID);

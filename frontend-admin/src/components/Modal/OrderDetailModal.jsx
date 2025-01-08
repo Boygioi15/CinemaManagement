@@ -20,7 +20,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, view, onConfirm }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Mã giao dịch</p>
-                <p className="font-semibold">{order._id}</p>
+                <p className="font-semibold">{order.orderId}</p>
               </div>
               <div className="ml-10">
                 <p className="text-sm text-gray-500">Trạng thái</p>
@@ -76,48 +76,74 @@ const OrderDetailModal = ({ isOpen, onClose, order, view, onConfirm }) => {
             </div>
           </div>
 
-          <hr className="border-gray-400" />
-
+          {order.filmShow && <hr className="border-gray-200" />}
           {/* Payment Information */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               Thông tin thanh toán
             </h2>
 
-            {/* Tickets */}
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2">Danh sách vé đã mua</h3>
-              {order.tickets.map((ticket, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <span>
-                    {ticket.quantity}x {ticket.name}
-                  </span>
-                  <span>{ticket.quantity * ticket.unitPrice} VNĐ</span>
-                </div>
-              ))}
-            </div>
+            {order.filmShow && order.filmShow.tickets?.length > 0 ? (
+              // Tickets
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Danh sách vé đã mua</h3>
+                {order.filmShow.tickets.map((ticket, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span>
+                      {ticket.quantity}x {ticket.name}
+                    </span>
+                    <span>{ticket.quantity * ticket.price} VNĐ</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Hiển thị nếu không có vé
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Danh sách vé đã mua</h3>
+                <p className="text-sm text-gray-500">
+                  Không có vé nào được mua.
+                </p>
+              </div>
+            )}
 
-            {/* Products */}
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2">
-                Danh sách các sản phẩm mua kèm
-              </h3>
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <span>
-                    {item.quantity}x {item.name}
-                  </span>
-                  <span>{item.quantity * item.unitPrice} VNĐ</span>
-                </div>
-              ))}
-            </div>
+            {order.items?.length > 0 ? (
+              // Products
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">
+                  Danh sách các sản phẩm mua kèm
+                </h3>
+                {order.items.map((item, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span>
+                      {item.quantity}x {item.name}
+                    </span>
+                    <span>{item.quantity * item.price} VNĐ</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Hiển thị nếu không có sản phẩm
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">
+                  Danh sách các sản phẩm mua kèm
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Không có sản phẩm mua kèm.
+                </p>
+              </div>
+            )}
 
             <hr className="border-gray-400 my-4" />
 
             {/* Total */}
             <div className="flex justify-between items-center font-bold text-lg text-green-600">
               <span>Tổng thanh toán: </span>
-              <span>{formatCurrencyNumber(order.totalMoney)} VNĐ</span>
+              <span>
+                {order.totalPriceAfterDiscount
+                  ? order.totalPriceAfterDiscount.toLocaleString()
+                  : order.totalPrice.toLocaleString()}{" "}
+                VNĐ
+              </span>
             </div>
           </div>
 

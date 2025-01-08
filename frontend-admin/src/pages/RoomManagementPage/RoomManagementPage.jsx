@@ -23,6 +23,10 @@ const RoomManagementPage = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setTableSearchQuery("");
+  };
+
   const fetchRoom = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/rooms");
@@ -143,14 +147,22 @@ const RoomManagementPage = () => {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
+            <button
+              className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+              onClick={() => handleDeleteFilter()}
+            >
+              Xóa lọc
+            </button>
           </div>
         </div>
-        <button
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          onClick={() => handleAddRoom()}
-        >
-          Thêm phòng mới +
-        </button>
+        <div>
+          <button
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={() => handleAddRoom()}
+          >
+            Thêm phòng mới +
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">

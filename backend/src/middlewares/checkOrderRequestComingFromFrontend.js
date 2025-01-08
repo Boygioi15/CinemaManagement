@@ -6,6 +6,9 @@ import {
 import {
   customError
 } from "./errorHandlers.js";
+import {
+  PromotionService
+} from "../promotion/promotion.service.js";
 
 export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
   async (req, res, next) => {
@@ -16,7 +19,7 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
       filmShowId,
       totalPrice,
       seatSelections,
-      promotionId,
+      promotionIDs,
     } = req.body;
     req.body.user = req.user
 
@@ -90,8 +93,13 @@ export const checkOrderRequestComingFromFrontend = expressAsyncHandler(
 
     }
 
+
     if (totalPrice !== totalPriceByServer)
       throw customError("Tổng lượng tiền cần thanh toán không hợp lệ!");
+
+    const discountAmount = await PromotionService.getPromotionDiscountAmount(totalPrice, promotionIDs);
+    req.body.totalPriceAfterDiscount = totalPrice - discountAmount;
+
 
     next();
   }

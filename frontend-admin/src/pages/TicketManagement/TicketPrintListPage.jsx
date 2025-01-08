@@ -45,6 +45,14 @@ const TicketPrintListPage = () => {
   const ticketModalRef = useRef();
   const [isPrintPdf, setIsPrintPdf] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setFilmNameQuery("");
+    setCusNameQuery("");
+    setSelectedDate("");
+    setTableSearchQuery("");
+    setStatusQuery("");
+  };
+
   // Hàm in
   const handlePrint = useReactToPrint({
     contentRef: printContentRef, // Dùng contentRef
@@ -199,16 +207,19 @@ const TicketPrintListPage = () => {
 
   const fetchOrder = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
       setOrders(
-        response.data.map((item) => ({
+        response.data.data.map((item) => ({
           ...item,
           date: new Date(item.date).toLocaleDateString(), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
         }))
       );
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -219,6 +230,8 @@ const TicketPrintListPage = () => {
   if (!orders) {
     return;
   }
+
+  console.log(orders);
 
   const itemsPerPage = 7;
 
@@ -322,28 +335,49 @@ const TicketPrintListPage = () => {
       key: "customerName",
       render: (_, row) => row.customerInfo.name,
     },
-    { header: "Tên phim", key: "filmName" },
+    {
+      header: "Tên phim",
+      key: "filmName",
+      render: (_, row) => row.filmShow?.filmName || "Không có dữ liệu",
+    },
     { header: "Verify Code", key: "verifyCode" },
     {
       header: "Ngày chiếu",
-      key: "date",
-      render: (value) => new Date(value).toLocaleDateString(),
+      key: "showDate",
+      render: (_, row) => {
+        const showDate = row.filmShow?.showDate; // Lấy giá trị ngày chiếu
+        return showDate
+          ? new Date(showDate).toLocaleDateString() // Hiển thị ngày nếu hợp lệ
+          : "Không có dữ liệu"; // Hiển thị chuỗi mặc định nếu không có dữ liệu
+      },
     },
-    { header: "Giờ chiếu", key: "time" },
+    {
+      header: "Giờ chiếu",
+      key: "time",
+      render: (_, row) => row.filmShow?.showTime || "Không có dữ liệu",
+    },
     {
       header: "Tổng tiền trước thanh toán(VNĐ)",
-      key: "totalMoney",
-      render: (value) => formatCurrencyNumber(value),
-      style: { textAlign: "center" },
+      key: "totalPrice",
+      render: (_, row) => row.totalPrice.toLocaleString(),
     },
     {
       header: "Tổng tiền sau giảm giá(VNĐ)",
-      key: "totalMoneyAfterDiscount",
-      render: (value) => {
-        if (value) {
-          return formatCurrencyNumber(value);
+      key: "totalPriceAfterDiscount",
+      render: (_, row) => {
+        const totalPrice = row.totalPrice; // Lấy tổng tiền ban đầu
+        const totalPriceAfterDiscount = row.totalPriceAfterDiscount; // Lấy tổng tiền sau giảm giá
+
+        // Nếu không có giảm giá hoặc tổng tiền sau giảm bằng tổng tiền
+        if (
+          !totalPriceAfterDiscount ||
+          totalPriceAfterDiscount === totalPrice
+        ) {
+          return "Không được giảm giá";
         }
-        return "Không được giảm giá";
+
+        // Hiển thị giá trị giảm giá
+        return totalPriceAfterDiscount.toLocaleString();
       },
     },
     {
@@ -503,6 +537,12 @@ const TicketPrintListPage = () => {
               ))}
             </select>
           </div>
+          <button
+            className="ml-4 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+            onClick={() => handleDeleteFilter()}
+          >
+            Xóa lọc
+          </button>
         </div>
         <div className="ml-20 flex items-center gap-4">
           <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
@@ -526,25 +566,27 @@ const TicketPrintListPage = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {orders.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
 
       <TicketDetailModal

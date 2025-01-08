@@ -25,23 +25,41 @@ const AdminParamPage = () => {
 
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [selectedItem, setSelectedItem] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Lưu trang hiện tại của bảng
+  // const [currentPage, setCurrentPage] = useState(1); // Lưu trang hiện tại của bảng
+  const [currentPage, setCurrentPage] = useState({
+    ticketTypes: 1,
+    tags: 1,
+    accounts: 1,
+  });
   const itemsPerPage = 5;
+  const handlePageChange = (tableName, pageNumber) => {
+    setCurrentPage((prevPage) => ({
+      ...prevPage,
+      [tableName]: pageNumber,
+    }));
+  };
 
   const fetchTicketTypes = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         "http://localhost:8000/api/param/ticket-type"
       );
       setTicketTypes(response.data.data);
     } catch (error) {
       console.error("Error fetching items:", error);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
   const ticketTypeColumns = [
     { header: "Tên loại vé", key: "title" },
-    { header: "Giá", key: "price" },
+    {
+      header: "Giá",
+      key: "price",
+      render: (_, row) => row.price.toLocaleString(),
+    },
     { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Ghế Đôi",
@@ -274,12 +292,12 @@ const AdminParamPage = () => {
 
           // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
           const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage > totalPages && totalPages > 0) {
+          if (currentPage.ticketTypes > totalPages && totalPages > 0) {
             // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage(totalPages);
+            setCurrentPage((prev) => ({ ...prev, ticketTypes: totalPages }));
           } else if (updatedList.length === 0) {
             // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage(1);
+            setCurrentPage((prev) => ({ ...prev, ticketTypes: 1 }));
           }
 
           return updatedList;
@@ -297,14 +315,13 @@ const AdminParamPage = () => {
             (item) => item._id !== selectedItem._id
           );
 
-          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
           const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage > totalPages && totalPages > 0) {
+          if (currentPage.tags > totalPages && totalPages > 0) {
             // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage(totalPages);
+            setCurrentPage((prev) => ({ ...prev, tags: totalPages }));
           } else if (updatedList.length === 0) {
             // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage(1);
+            setCurrentPage((prev) => ({ ...prev, tags: 1 }));
           }
 
           return updatedList;
@@ -324,12 +341,12 @@ const AdminParamPage = () => {
 
           // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
           const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage > totalPages && totalPages > 0) {
+          if (currentPage.accounts > totalPages && totalPages > 0) {
             // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage(totalPages);
+            setCurrentPage((prev) => ({ ...prev, accounts: totalPages }));
           } else if (updatedList.length === 0) {
             // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage(1);
+            setCurrentPage((prev) => ({ ...prev, accounts: 1 }));
           }
 
           return updatedList;
@@ -440,30 +457,50 @@ const AdminParamPage = () => {
         </div>
       </div>
       <div className="flex flex-col gap-6">
-        <RuleTable
-          title="Loại vé"
-          data={ticketTypes}
-          columns={ticketTypeColumns}
-          onAddNew={handleAddNew}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
-        <RuleTable
-          title="Thể loại phim"
-          data={tags}
-          columns={typeColumns}
-          onAddNew={handleAddNew}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
-        <RuleTable
-          title="Tài khoản"
-          data={accounts}
-          columns={Accountcolumns}
-          onAddNew={handleAddNew}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
+        {ticketTypes.length > 0 ? (
+          <RuleTable
+            title="Loại vé"
+            data={ticketTypes}
+            columns={ticketTypeColumns}
+            onAddNew={handleAddNew}
+            currentPage={currentPage.ticketTypes}
+            setCurrentPage={(pageNumber) =>
+              handlePageChange("ticketTypes", pageNumber)
+            }
+          />
+        ) : (
+          <p className="text-center text-gray-500 py-4">Không có dữ liệu</p>
+        )}
+
+        {tags.length > 0 ? (
+          <RuleTable
+            title="Thể loại phim"
+            data={tags}
+            columns={typeColumns}
+            onAddNew={handleAddNew}
+            currentPage={currentPage.tags}
+            setCurrentPage={(pageNumber) =>
+              handlePageChange("tags", pageNumber)
+            }
+          />
+        ) : (
+          <p className="text-center text-gray-500 py-4">Không có dữ liệu</p>
+        )}
+
+        {accounts.length > 0 ? (
+          <RuleTable
+            title="Tài khoản"
+            data={accounts}
+            columns={Accountcolumns}
+            onAddNew={handleAddNew}
+            currentPage={currentPage.accounts}
+            setCurrentPage={(pageNumber) =>
+              handlePageChange("accounts", pageNumber)
+            }
+          />
+        ) : (
+          <p className="text-center text-gray-500 py-4">Không có dữ liệu</p>
+        )}
       </div>
 
       <div className="p-6 bg-white rounded-lg  max-w-lg">

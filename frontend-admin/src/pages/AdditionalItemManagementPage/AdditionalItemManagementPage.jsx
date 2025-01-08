@@ -28,14 +28,21 @@ const AdditionalItemManagementPage = () => {
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [loading, setLoading] = useState(false);
 
+  const handleDeleteFilter = () => {
+    setTableSearchQuery("");
+  };
+
   const fetchItems = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         "http://localhost:8000/api/additional-items"
       );
       setItems(response.data.data); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Error fetching items:", error);
+    } finally {
+      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -177,7 +184,11 @@ const AdditionalItemManagementPage = () => {
 
   const columns = [
     { header: "Tên sản phẩm", key: "name" },
-    { header: "Giá", key: "price" },
+    {
+      header: "Giá",
+      key: "price",
+      render: (_, row) => row.price.toLocaleString(),
+    },
     { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Hành động",
@@ -258,6 +269,12 @@ const AdditionalItemManagementPage = () => {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
+            <button
+              className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+              onClick={() => handleDeleteFilter()}
+            >
+              Xóa lọc
+            </button>
           </div>
           <div className="flex items-center gap-4 ml-20">
             <span className="text-xl font-bold text-gray-800">Sắp xếp:</span>
@@ -277,35 +294,38 @@ const AdditionalItemManagementPage = () => {
             </div>
           </div>
         </div>
-        <button
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          onClick={() => handleAddClick()}
-        >
-          Thêm sản phẩm +
-        </button>
+        <div>
+          <button
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={() => handleAddClick()}
+          >
+            Thêm sản phẩm +
+          </button>
+        </div>
       </div>
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
-
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Trước
-          </button>
-          <span className="text-sm text-gray-600">
-            Trang {currentPage} trên {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
-          >
-            Tiếp
-          </button>
-        </div>
+        {items.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-gray-600">
+              Trang {currentPage} trên {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm text-gray-600 bg-white rounded-lg shadow-sm disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        )}
       </div>
       <AdditionalItemModal
         isOpen={isDetailModalOpen}
