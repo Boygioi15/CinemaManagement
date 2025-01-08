@@ -27,6 +27,7 @@ import whiteScreen from "../../assets/whiteScreen.png";
 import CustomButton from "../../Components/button/index"; // Giả sử bạn đã có CustomButton component
 import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 import { createPayment } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
+import { ModalWhenBuyTicket } from "../../Components/Modal/ModalWhenBuyTicket";
 
 const seatWidth = 50;
 const seatHeight = 40;
@@ -38,7 +39,7 @@ const FilmDetailPage = () => {
 
   const location = useLocation();
   const { initShowDate, initShowTime } = location.state || {};
-
+  const [isPopupOpen, setIsPopupOpen] = useState(true);
   const [videoOpen, setVideoOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initShowDate || "");
   useEffect(() => {
@@ -97,6 +98,7 @@ const FilmDetailPage = () => {
 
   const [filmDetail, setFilmDetail] = useState();
   useEffect(() => {
+    setIsPopupOpen(true);
     const fetchFilmDetail = async () => {
       try {
         const response = await axios.get(
@@ -113,6 +115,10 @@ const FilmDetailPage = () => {
     fetchFilmDetail();
     handleGetDateAndShowTime(filmID);
   }, []);
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false); // Đóng popup khi người dùng tắt
+  };
 
   useEffect(() => {
     document.title = filmDetail?.name || "Loading...";
@@ -685,7 +691,11 @@ const FilmDetailPage = () => {
           </div>
         </div>
       )}
-
+      <div>
+        {isPopupOpen && (
+          <ModalWhenBuyTicket onClose={handleClosePopup} isOpen={isPopupOpen} />
+        )}
+      </div>
       {roomDetail && roomSeat && (
         <BottomBar
           filmName="Alibaba"
