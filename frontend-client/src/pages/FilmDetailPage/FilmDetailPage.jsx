@@ -714,19 +714,22 @@ const FilmDetailPage = () => {
           selectedFilmShowId={selectedFilmShowID}
         />
       )}
-      <PromotionList
-        isOpen={isPromotionListOpen}
-        setIsOpen={setIsPromotionListOpen}
-        onApplyPromotions={(selectedPromotions, totalDiscount) => {
-          setSelectedPromotions(selectedPromotions); // Lưu danh sách khuyến mãi
-          setTotalDiscount(totalDiscount); // Lưu tổng khuyến mãi
-          console.log("Các khuyến mãi đã chọn:", selectedPromotions);
-          console.log("Tổng khuyến mãi:", totalDiscount, "%");
-        }}
-      />
+      {selectedFilmShow && 
+        (<PromotionList
+          isOpen={isPromotionListOpen}
+          setIsOpen={setIsPromotionListOpen}
+          onApplyPromotions={(selectedPromotions, totalDiscount) => {
+            setSelectedPromotions(selectedPromotions); // Lưu danh sách khuyến mãi
+            setTotalDiscount(totalDiscount); // Lưu tổng khuyến mãi
+            console.log("Các khuyến mãi đã chọn:", selectedPromotions);
+            console.log("Tổng khuyến mãi:", totalDiscount, "%");
+          }}
+        />)
+      }
+      
 
       {/* Nút mở sidebar PromotionList */}
-      {!isPromotionListOpen && (
+      {selectedFilmShow &&  !isPromotionListOpen && (
         <button
           onClick={() => setIsPromotionListOpen(true)}
           className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg flex items-center justify-center"
