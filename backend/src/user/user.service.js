@@ -308,13 +308,28 @@ export class EmployeeService {
       throw customError("Chưa điền đầy đủ các trường. Vui lòng nhập lại!", 400);
     }
 
+    // Kiểm tra tuổi trên 16
+    const today = new Date();
+    const birth = new Date(birthDate);
+    const age = today.getFullYear() - birth.getFullYear();
+    const isOver16 =
+      age > 16 ||
+      (age === 16 &&
+        (today.getMonth() > birth.getMonth() ||
+          (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
+    if (!isOver16) {
+      throw customError("Nhân viên phải trên 16 tuổi!", 400);
+    }
+
     // Kiểm tra lương
     if (isNaN(salary) || salary <= 0) {
       throw customError("Lương nhân viên phải là một số nguyên không âm", 400);
     }
 
     // Kiểm tra thời gian ca làm việc
-    if (new Date(shiftStart) >= new Date(shiftEnd)) {
+    const startTime = shiftStart.hour * 60 + shiftStart.minute;
+    const endTime = shiftEnd.hour * 60 + shiftEnd.minute;
+    if (startTime >= endTime) {
       throw customError("Thời gian bắt đầu làm phải trước khi thời gian kết thúc", 400);
     }
 
@@ -350,7 +365,24 @@ export class EmployeeService {
 
   static updateEmployeeById = async (id, updatedata) => {
     try {
-      const { email, phone, salary, shiftStart, shiftEnd } = updatedata;
+      const { email, phone, salary, shiftStart, shiftEnd, birthDate } = updatedata;
+      
+      // Kiểm tra tuổi trên 16 (nếu có cập nhật birthDate)
+      if (birthDate) {
+        const today = new Date();
+        const birth = new Date(birthDate);
+        const age = today.getFullYear() - birth.getFullYear();
+        const isOver16 =
+          age > 16 ||
+          (age === 16 &&
+            (today.getMonth() > birth.getMonth() ||
+              (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate())));
+        if (!isOver16) {
+          return {
+            error: "Nhân viên phải trên 16 tuổi!",
+          };
+        }
+      }
 
       // Kiểm tra lương
       if (salary !== undefined && (isNaN(salary) || salary <= 0)) {
@@ -360,10 +392,14 @@ export class EmployeeService {
       }
 
       // Kiểm tra thời gian ca làm việc
-      if (shiftStart && shiftEnd && new Date(shiftStart) >= new Date(shiftEnd)) {
-        return {
-          error: "Thời gian bắt đầu làm phải trước khi thời gian kết thúc",
-        };
+      if (shiftStart && shiftEnd) {
+        const startTime = shiftStart.hour * 60 + shiftStart.minute;
+        const endTime = shiftEnd.hour * 60 + shiftEnd.minute;
+        if (startTime >= endTime) {
+          return {
+            error: "Thời gian bắt đầu làm phải trước khi thời gian kết thúc",
+          };
+        }
       }
 
       // Kiểm tra định dạng email

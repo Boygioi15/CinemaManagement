@@ -3,6 +3,7 @@ import {
   ParamModel,
   TicketTypeModel
 } from "./param.schema.js";
+import { customError } from "../middlewares/errorHandlers.js";
 
 export class ParamService {
   static createAgeRestriction = async (ageResData) => {
@@ -24,20 +25,24 @@ export class ParamService {
   };
 
   static createTicketType = async (ticketTypeData) => {
-    const {
-      price
-    } = ticketTypeData;
+    const {price, loyalPointRate} = ticketTypeData;
     if (price <= 0) {
       throw customError("Giá cho loại vé phải là một số nguyên không âm", 400);
+    }
+    let convertLoyalPointRate = new Number(loyalPointRate);
+    if (convertLoyalPointRate <= 0 || convertLoyalPointRate >= 100) {
+      throw customError("Điểm tích lũy phải lớn hơn 0 và nhỏ hơn 100", 400);
     }
     return await TicketTypeModel.create(ticketTypeData);
   };
   static updateTicketType = async (id, ticketTypeData) => {
-    const {
-      price
-    } = ticketTypeData;
+    const {price, loyalPointRate} = ticketTypeData;
     if (price <= 0) {
       throw customError("Giá cho loại vé phải là một số nguyên không âm", 400);
+    }
+    let convertLoyalPointRate = new Number(loyalPointRate);
+    if (convertLoyalPointRate <= 0 || convertLoyalPointRate >= 100) {
+      throw customError("Điểm tích lũy phải lớn hơn 0 và nhỏ hơn 100", 400);
     }
     return await TicketTypeModel.findByIdAndUpdate(id, ticketTypeData, {
       new: true,
