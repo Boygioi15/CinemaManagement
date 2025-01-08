@@ -26,10 +26,7 @@ export class PromotionService {
     const promotion = await promotionModel.findByIdAndUpdate(id, updateData, {
       new: true,
     });
-    const oldPromotion = await promotionModel.findByIdAndUpdate(id, {
-      ...rest,
-      updateData,
-    });
+    const oldPromotion = await promotionModel.findByIdAndUpdate(id, updateData);
     //destroy old img
     handleDestroyCloudinary(oldPromotion.public_ID);
     if (!promotion) throw customError("Not found promotion", 400);

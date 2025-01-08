@@ -3,11 +3,12 @@ import UserInfoLayout from "../../layouts/UserSpaceLayout";
 import { FaChevronDown } from "react-icons/fa";
 import { getAllOrderByUserId } from "../../config/api";
 import { FaSpinner } from "react-icons/fa";
+import CustomButton from "../../Components/button";
 
 const UserTransHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [originalTransactions, setOriginalTransactions] = useState([]);
-  const [activeCollapse, setActiveCollapse] = useState(null);
+  const [activeCollapse, setActiveCollapse] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
   const itemsPerPage = 3;
@@ -26,22 +27,43 @@ const UserTransHistory = () => {
   };
 
   const toggleCollapse = (transactionId) => {
-    setActiveCollapse((prev) =>
-      prev === transactionId ? null : transactionId
-    );
+    setActiveCollapse((prev) => {
+      if (prev.includes(transactionId)) {
+        // Nếu đã mở, thì đóng lại
+        return prev.filter((id) => id !== transactionId);
+      } else {
+        // Nếu chưa mở, thêm vào
+        return [...prev, transactionId];
+      }
+    });
   };
 
   const handleFilterChange = () => {
     const fromDate = document.getElementById("fromDateFilter").value;
     const toDate = document.getElementById("toDateFilter").value;
 
+    // Kiểm tra nếu ngày bắt đầu lớn hơn ngày kết thúc
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      alert("Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+      return;
+    }
+
+    // Chuyển đổi fromDate và toDate về định dạng local date (yyyy-mm-dd)
+    const formattedFromDate = fromDate
+      ? new Date(fromDate).toLocaleDateString()
+      : null;
+    const formattedToDate = toDate
+      ? new Date(toDate).toLocaleDateString()
+      : null;
+
     const filteredData = originalTransactions.filter((t) => {
-      const transactionDate = new Date(t.createdDate)
-        .toISOString()
-        .split("T")[0];
+      // Chuyển transactionDate về định dạng local (yyyy-mm-dd)
+      const transactionDate = new Date(t.createdDate).toLocaleDateString();
+
+      // So sánh chỉ phần ngày
       return (
-        (!fromDate || transactionDate >= fromDate) &&
-        (!toDate || transactionDate <= toDate)
+        (!formattedFromDate || transactionDate >= formattedFromDate) &&
+        (!formattedToDate || transactionDate <= formattedToDate)
       );
     });
 
@@ -77,7 +99,15 @@ const UserTransHistory = () => {
             type="date"
             id="fromDateFilter"
             className="p-2 rounded border text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
-            onChange={handleFilterChange}
+            onChange={(e) => {
+              const fromDate = e.target.value;
+              const toDateInput = document.getElementById("toDateFilter");
+
+              // Cập nhật thuộc tính min cho ngày kết thúc
+              toDateInput.min = fromDate;
+
+              handleFilterChange();
+            }}
           />
 
           <label htmlFor="toDateFilter" className="text-white">
@@ -87,15 +117,27 @@ const UserTransHistory = () => {
             type="date"
             id="toDateFilter"
             className="p-2 rounded border text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
-            onChange={handleFilterChange}
-          />
+            onChange={(e) => {
+              const toDate = e.target.value;
+              const fromDateInput = document.getElementById("fromDateFilter");
 
-          <button
+              // Cập nhật thuộc tính max cho ngày bắt đầu
+              fromDateInput.max = toDate;
+
+              handleFilterChange();
+            }}
+          />
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Làm mới bộ lọc"
             onClick={resetFilter}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
-          >
-            Reset bộ lọc
-          </button>
+          />
         </div>
 
         {isLoading ? (
@@ -110,8 +152,9 @@ const UserTransHistory = () => {
               key={transaction.orderId}
               className="bg-white rounded-lg mb-4 p-4 overflow-hidden transition-all duration-500 ease-in-out"
               style={{
-                maxHeight:
-                  activeCollapse === transaction.orderId ? "1000px" : "120px",
+                maxHeight: activeCollapse.includes(transaction.orderId)
+                  ? "1000px"
+                  : "120px",
               }}
             >
               <div className="flex justify-between items-center">
@@ -122,25 +165,20 @@ const UserTransHistory = () => {
 
                   <p className="text-sm text-gray-500">
                     Ngày:{" "}
-                    {new Date(transaction?.createdDate).toLocaleDateString(
-                      "vi-VN",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      }
-                    )}
+                    {new Date(transaction?.createdDate).toLocaleDateString()}
                   </p>
                 </div>
                 <FaChevronDown
                   className={`text-gray-500 cursor-pointer transition-transform duration-500 ease-in-out ${
-                    activeCollapse === transaction.orderId ? "rotate-180" : ""
+                    activeCollapse.includes(transaction.orderId)
+                      ? "rotate-180"
+                      : ""
                   }`}
                   onClick={() => toggleCollapse(transaction.orderId)}
                 />
               </div>
 
-              {activeCollapse === transaction.orderId && (
+              {activeCollapse.includes(transaction.orderId) && (
                 <div className="mt-2">
                   <table className="w-full table-auto border-collapse rounded-lg overflow-hidden text-sm">
                     <thead>
@@ -221,21 +259,32 @@ const UserTransHistory = () => {
         )}
 
         <div className="flex justify-center mt-4">
-          <button
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Trang trước"
             onClick={() => handlePageChange(currentPage - 1)}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50"
             disabled={currentPage === 1}
-          >
-            Trang trước
-          </button>
+          />
+
           <span className="mx-4 mt-2 text-white">Trang {currentPage}</span>
-          <button
+          <CustomButton
+            defaultColor="#663399"
+            gradientFrom="#FF6D00"
+            gradientTo="#ffc107"
+            textColor="#f2ea28"
+            hoverTextColor="#f2ea28" // Màu chữ khi hover
+            borderColor="#f2ea28"
+            className=""
+            text="Trang sau"
             onClick={() => handlePageChange(currentPage + 1)}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50"
             disabled={currentPage * itemsPerPage >= transactions.length}
-          >
-            Trang sau
-          </button>
+          />
         </div>
       </div>
     </UserInfoLayout>

@@ -211,7 +211,7 @@ const TicketPrintListPage = () => {
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
       setOrders(
-        response.data.map((item) => ({
+        response.data.data.map((item) => ({
           ...item,
           date: new Date(item.date).toLocaleDateString(), // Định dạng chuẩn của Việt Nam là dd/mm/yyyy
         }))
@@ -230,6 +230,8 @@ const TicketPrintListPage = () => {
   if (!orders) {
     return;
   }
+
+  console.log(orders);
 
   const itemsPerPage = 7;
 
@@ -333,28 +335,49 @@ const TicketPrintListPage = () => {
       key: "customerName",
       render: (_, row) => row.customerInfo.name,
     },
-    { header: "Tên phim", key: "filmName" },
+    {
+      header: "Tên phim",
+      key: "filmName",
+      render: (_, row) => row.filmShow?.filmName || "Không có dữ liệu",
+    },
     { header: "Verify Code", key: "verifyCode" },
     {
       header: "Ngày chiếu",
-      key: "date",
-      render: (value) => new Date(value).toLocaleDateString(),
+      key: "showDate",
+      render: (_, row) => {
+        const showDate = row.filmShow?.showDate; // Lấy giá trị ngày chiếu
+        return showDate
+          ? new Date(showDate).toLocaleDateString() // Hiển thị ngày nếu hợp lệ
+          : "Không có dữ liệu"; // Hiển thị chuỗi mặc định nếu không có dữ liệu
+      },
     },
-    { header: "Giờ chiếu", key: "time" },
+    {
+      header: "Giờ chiếu",
+      key: "time",
+      render: (_, row) => row.filmShow?.showTime || "Không có dữ liệu",
+    },
     {
       header: "Tổng tiền trước thanh toán(VNĐ)",
-      key: "totalMoney",
-      render: (value) => formatCurrencyNumber(value),
-      style: { textAlign: "center" },
+      key: "totalPrice",
+      render: (_, row) => row.totalPrice.toLocaleString(),
     },
     {
       header: "Tổng tiền sau giảm giá(VNĐ)",
-      key: "totalMoneyAfterDiscount",
-      render: (value) => {
-        if (value) {
-          return formatCurrencyNumber(value);
+      key: "totalPriceAfterDiscount",
+      render: (_, row) => {
+        const totalPrice = row.totalPrice; // Lấy tổng tiền ban đầu
+        const totalPriceAfterDiscount = row.totalPriceAfterDiscount; // Lấy tổng tiền sau giảm giá
+
+        // Nếu không có giảm giá hoặc tổng tiền sau giảm bằng tổng tiền
+        if (
+          !totalPriceAfterDiscount ||
+          totalPriceAfterDiscount === totalPrice
+        ) {
+          return "Không được giảm giá";
         }
-        return "Không được giảm giá";
+
+        // Hiển thị giá trị giảm giá
+        return totalPriceAfterDiscount.toLocaleString();
       },
     },
     {

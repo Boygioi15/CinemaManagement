@@ -154,14 +154,11 @@ const UserAccountManagementPage = () => {
 
   const fetchUser = async () => {
     try {
-      setLoading(true);
-      const response = await axios.get("http://localhost:8000/api/user");
+      const response = await axios.get("http://localhost:8000/api/user/user");
       // Lọc những order có printed === false
       setUsers(response.data);
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
-    } finally {
-      setLoading(false); // End loading when API call is complete
     }
   };
 
@@ -217,7 +214,7 @@ const UserAccountManagementPage = () => {
     { header: "Email", key: "email" },
     { header: "Số điện thoại", key: "phone" },
     {
-      header: "Trạng thái",
+      header: "Bị chặn",
       key: "status",
       render: (_, row) => {
         let statusText = "";

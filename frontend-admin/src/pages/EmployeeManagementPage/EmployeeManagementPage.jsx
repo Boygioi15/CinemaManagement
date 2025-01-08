@@ -319,6 +319,12 @@ const EmployeeManagementPage = () => {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none border"
               />
             </div>
+            <button
+              className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
+              onClick={() => handleDeleteFilter()}
+            >
+              Xóa lọc
+            </button>
           </div>
           <div className="flex items-center gap-4 ml-20">
             <span className="text-xl font-bold text-gray-800 ">Sắp xếp:</span>
@@ -339,12 +345,6 @@ const EmployeeManagementPage = () => {
           </div>
         </div>
         <div>
-          <button
-            className="mr-10 px-4 py-2 text-gray-600 bg-gray-300 rounded-lg hover:bg-gray-400"
-            onClick={() => handleDeleteFilter()}
-          >
-            Xóa lọc
-          </button>
           <button
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             onClick={() => handleAddClick()}

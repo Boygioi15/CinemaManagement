@@ -158,7 +158,7 @@ export default function TicketServeListPage() {
       setLoading(true);
       const response = await axios.get("http://localhost:8000/api/orders");
       // Lọc những order có printed === false
-      const filteredOrders = response.data.filter(
+      const filteredOrders = response.data.data.filter(
         (order) => order.printed === true
       );
       setOrders(filteredOrders);
@@ -221,8 +221,13 @@ export default function TicketServeListPage() {
     { header: "Verify Code", key: "verifyCode" },
     {
       header: "Ngày chiếu",
-      key: "date",
-      render: (value) => new Date(value).toLocaleDateString(),
+      key: "showDate",
+      render: (_, row) => {
+        const showDate = row.filmShow?.showDate; // Lấy giá trị ngày chiếu
+        return showDate
+          ? new Date(showDate).toLocaleDateString() // Hiển thị ngày nếu hợp lệ
+          : "Không có dữ liệu"; // Hiển thị chuỗi mặc định nếu không có dữ liệu
+      },
     },
     {
       header: "Trạng thái",

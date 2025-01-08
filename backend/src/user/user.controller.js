@@ -95,6 +95,23 @@ class UserController {
       data: update,
     });
   });
+
+  blockUser = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const users = await UserService.blockUser(id);
+    res.status(200).json({
+      msg: users,
+      success: true,
+    });
+  });
+  unblockUser = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const users = await UserService.unblockUser(id);
+    res.status(200).json({
+      msg: users,
+      success: true,
+    });
+  });
 }
 class EmployeeController {
   createEmployee = expressAsyncHandler(async (req, res, next) => {
