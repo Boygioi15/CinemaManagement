@@ -33,7 +33,12 @@ const FoodPage = () => {
           selectedFood={selectedFood}
         />
       </div>
-      <PaymentSection selectedFood={selectedFood} />
+      {/* Truyền selectedPromotions và totalDiscount vào PaymentSection */}
+      <PaymentSection
+        selectedFood={selectedFood}
+        selectedPromotions={selectedPromotions}
+        totalDiscount={totalDiscount}
+      />
 
       {/* Sidebar (PromotionList) */}
       <PromotionList
@@ -62,7 +67,7 @@ const FoodPage = () => {
       {!isPromotionListOpen && (
         <button
           onClick={() => setIsPromotionListOpen(true)}
-          className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg  flex items-center justify-center bg-red-500 hover:bg-red-600"
+          className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg flex items-center justify-center bg-red-500 hover:bg-red-600"
         >
           <FaArrowLeft size={20} />
         </button>

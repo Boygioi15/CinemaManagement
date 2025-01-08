@@ -3,7 +3,11 @@ import CustomButton from "../button/index"; // Giả sử bạn đã có CustomB
 import { createPayment, getCurrentPro } from "../../config/api"; // Đảm bảo createPayment được định nghĩa đúng
 import { useAuth } from "../../Context/AuthContext"; // Dùng context cho user
 
-const PaymentSection = ({ selectedFood }) => {
+const PaymentSection = ({
+  selectedFood,
+  selectedPromotions,
+  totalDiscount,
+}) => {
   const [isLoading, setIsLoading] = useState(false); // State quản lý trạng thái loading
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const [pro, setPro] = useState(null);
@@ -26,6 +30,8 @@ const PaymentSection = ({ selectedFood }) => {
   useEffect(() => {
     handleGetPro();
   }, []);
+  // Lấy danh sách ID từ selectedPromotions
+  const promotionIds = selectedPromotions.map((promo) => promo._id);
   // Hàm xử lý thanh toán
   const handleCreatePayment = async () => {
     setIsLoading(true); // Bật trạng thái loading khi bắt đầu gửi yêu cầu
@@ -37,6 +43,7 @@ const PaymentSection = ({ selectedFood }) => {
       const response = await createPayment({
         additionalItemSelections: additionalItems,
         totalPrice,
+        promotionIDs: promotionIds,
       });
 
       if (response && response.payUrl) {
@@ -87,12 +94,12 @@ const PaymentSection = ({ selectedFood }) => {
                 {totalPrice.toLocaleString()} VNĐ
               </p>
               <p className="text-lg">Khuyến mãi</p>
-              <p className="text-xl font-bold">{+pro?.discountRate} %</p>
+              <p className="text-xl font-bold">{+totalDiscount} %</p>
               <p className="text-lg">Tổng tiền</p>
               <p className="text-xl font-bold">
                 {(
                   totalPrice -
-                  (totalPrice * +pro?.discountRate) / 100
+                  (totalPrice * +totalDiscount) / 100
                 ).toLocaleString()}
                 VNĐ
               </p>
