@@ -15,6 +15,7 @@ const AdminParamPage = () => {
   const [tags, setTags] = useState([]);
   const [ticketTypes, setTicketTypes] = useState([]);
   const [accounts, setAccounts] = useState([]);
+  const [type, setType] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState("add");
@@ -25,6 +26,17 @@ const AdminParamPage = () => {
 
   const [dialogData, setDialogData] = useState({ title: "", message: "" });
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const [params, setParams] = useState({
+    addedPriceForVIPSeat: 0,
+    maximumDiscountRate: 0,
+    loyalPoint_MaxiumPointUseInOneGo: 0,
+    loyalPoint_MiniumValueToUseLoyalPoint: 0,
+    loyalPoint_PointToReducedPriceRatio: 0,
+    loyalPoint_OrderToPointRatio: 0,
+  });
+
+  const [originalPrices, setOriginalPrices] = useState({});
   // const [currentPage, setCurrentPage] = useState(1); // Lưu trang hiện tại của bảng
   const [currentPage, setCurrentPage] = useState({
     ticketTypes: 1,
@@ -147,11 +159,22 @@ const AdminParamPage = () => {
     },
   ];
 
+  const fetchParam = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/param");
+      setParams(response.data.data);
+      setOriginalPrices(response.data.data);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
   const handleRefresh = async () => {
     setLoading(true);
     fetchTags();
     fetchTicketTypes();
     fetchAccount();
+    fetchParam();
     setTimeout(() => {
       setLoading(false);
     }, 2000);
@@ -161,6 +184,7 @@ const AdminParamPage = () => {
     fetchTags();
     fetchTicketTypes();
     fetchAccount();
+    fetchParam();
   }, []);
   const [activeModal, setActiveModal] = useState(""); // Xác định modal đang mở
 
@@ -224,141 +248,165 @@ const AdminParamPage = () => {
   const handleConfirmClick = async () => {
     setIsConfirmModalOpen(false);
     try {
-      if (activeModal === "Loại vé") {
-        if (mode === "edit") {
-          await axios.patch(
-            `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`,
-            selectedItem
-          );
-          console.log("data: ", selectedItem);
+      if (activeModal === "Lưu quy định") {
+        // Nếu là thao tác lưu quy định
+        //setIsUpdatingConfig(true); // Đánh dấu thao tác lưu quy định
+        // Logic lưu quy định
+        const response = await axios.put(
+          "http://localhost:8000/api/param",
+          params
+        );
+        if (response.status === 200) {
+          setOriginalPrices((prevPrices) => ({
+            ...prevPrices,
+            [type]: params[type],
+          }));
+        }
 
-          setDialogData({
-            title: "Cập nhật thành công",
-            message: `Loại vé đã được cập nhật thành công.`,
-          });
-        } else {
-          const itemToSend = { ...selectedItem };
-          delete itemToSend._id; // Loại bỏ _id nếu có
-          // Logic cho "add"
-          await axios.post(
-            "http://localhost:8000/api/param/ticket-type",
-            itemToSend
-          );
+        setDialogData({
+          title: "Cập nhật thành công",
+          message: "Quy định đã được cập nhật thành công.",
+        });
+        setIsSuccessModalOpen(true); // Hiển thị modal thành công
+      } else {
+        if (activeModal === "Loại vé") {
+          if (mode === "edit") {
+            await axios.patch(
+              `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`,
+              selectedItem
+            );
+            console.log("data: ", selectedItem);
+
+            setDialogData({
+              title: "Cập nhật thành công",
+              message: `Loại vé đã được cập nhật thành công.`,
+            });
+          } else {
+            const itemToSend = { ...selectedItem };
+            delete itemToSend._id; // Loại bỏ _id nếu có
+            // Logic cho "add"
+            await axios.post(
+              "http://localhost:8000/api/param/ticket-type",
+              itemToSend
+            );
+            setDialogData({
+              title: "Thêm mới thành công",
+              message: `Loại vé mới đã được thêm thành công.`,
+            });
+          }
+        } else if (activeModal === "Thể loại phim") {
+          await axios.post("http://localhost:8000/api/tags", selectedItem);
+          // Logic cho "add" thể loại phim
           setDialogData({
             title: "Thêm mới thành công",
-            message: `Loại vé mới đã được thêm thành công.`,
+            message: `Thể loại phim mới đã được thêm thành công.`,
           });
-        }
-      } else if (activeModal === "Thể loại phim") {
-        await axios.post("http://localhost:8000/api/tags", selectedItem);
-        // Logic cho "add" thể loại phim
-        setDialogData({
-          title: "Thêm mới thành công",
-          message: `Thể loại phim mới đã được thêm thành công.`,
-        });
-      } else if (activeModal === "Tài khoản") {
-        {
-          console.log(selectedItem);
-          const id = selectedItem.name;
-          const requestData = {
-            account: selectedItem.username,
-            password: selectedItem.password,
-          };
+        } else if (activeModal === "Tài khoản") {
+          {
+            console.log(selectedItem);
+            const id = selectedItem.name;
+            const requestData = {
+              account: selectedItem.username,
+              password: selectedItem.password,
+            };
 
-          // Gửi yêu cầu đến API
-          await axios.post(
-            `http://localhost:8000/api/user/employee/update-account/${id}`, // name được truyền vào param
-            requestData // Dữ liệu body
+            // Gửi yêu cầu đến API
+            await axios.post(
+              `http://localhost:8000/api/user/employee/update-account/${id}`, // name được truyền vào param
+              requestData // Dữ liệu body
+            );
+
+            // Logic cho "add" tài khoản
+            setDialogData({
+              title: "Thêm mới thành công",
+              message: `Tài khoản mới đã được thêm thành công.`,
+            });
+          }
+        } else if (activeModal === "Xóa loại vé") {
+          await axios.delete(
+            `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`
           );
-
-          // Logic cho "add" tài khoản
           setDialogData({
-            title: "Thêm mới thành công",
-            message: `Tài khoản mới đã được thêm thành công.`,
+            title: "Thành công",
+            message: "Xóa loại vé thành công",
+          });
+          setTicketTypes((prev) => {
+            const updatedList = prev.filter(
+              (item) => item._id !== selectedItem._id
+            );
+
+            // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
+            const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+            if (currentPage.ticketTypes > totalPages && totalPages > 0) {
+              // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+              setCurrentPage((prev) => ({ ...prev, ticketTypes: totalPages }));
+            } else if (updatedList.length === 0) {
+              // Nếu không còn dữ liệu, quay lại trang 1
+              setCurrentPage((prev) => ({ ...prev, ticketTypes: 1 }));
+            }
+
+            return updatedList;
+          });
+        } else if (activeModal === "Xóa thể loại phim") {
+          await axios.delete(
+            `http://localhost:8000/api/tags/${selectedItem._id}`
+          );
+          setDialogData({
+            title: "Thành công",
+            message: "Xóa thể loại phim thành công",
+          });
+          setTags((prev) => {
+            const updatedList = prev.filter(
+              (item) => item._id !== selectedItem._id
+            );
+
+            const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+            if (currentPage.tags > totalPages && totalPages > 0) {
+              // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+              setCurrentPage((prev) => ({ ...prev, tags: totalPages }));
+            } else if (updatedList.length === 0) {
+              // Nếu không còn dữ liệu, quay lại trang 1
+              setCurrentPage((prev) => ({ ...prev, tags: 1 }));
+            }
+
+            return updatedList;
+          });
+        } else if (activeModal === "Xóa tài khoản") {
+          await axios.delete(
+            `http://localhost:8000/api/user/employee/delete-account/${selectedItem._id}`
+          );
+          setDialogData({
+            title: "Thành công",
+            message: "Xóa tài khoản thành công",
+          });
+          setTags((prev) => {
+            const updatedList = prev.filter(
+              (item) => item._id !== selectedItem._id
+            );
+
+            // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
+            const totalPages = Math.ceil(updatedList.length / itemsPerPage);
+            if (currentPage.accounts > totalPages && totalPages > 0) {
+              // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
+              setCurrentPage((prev) => ({ ...prev, accounts: totalPages }));
+            } else if (updatedList.length === 0) {
+              // Nếu không còn dữ liệu, quay lại trang 1
+              setCurrentPage((prev) => ({ ...prev, accounts: 1 }));
+            }
+
+            return updatedList;
           });
         }
-      } else if (activeModal === "Xóa loại vé") {
-        await axios.delete(
-          `http://localhost:8000/api/param/ticket-type/${selectedItem._id}`
-        );
-        setDialogData({
-          title: "Thành công",
-          message: "Xóa loại vé thành công",
-        });
-        setTicketTypes((prev) => {
-          const updatedList = prev.filter(
-            (item) => item._id !== selectedItem._id
-          );
-
-          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
-          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage.ticketTypes > totalPages && totalPages > 0) {
-            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage((prev) => ({ ...prev, ticketTypes: totalPages }));
-          } else if (updatedList.length === 0) {
-            // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage((prev) => ({ ...prev, ticketTypes: 1 }));
-          }
-
-          return updatedList;
-        });
-      } else if (activeModal === "Xóa thể loại phim") {
-        await axios.delete(
-          `http://localhost:8000/api/tags/${selectedItem._id}`
-        );
-        setDialogData({
-          title: "Thành công",
-          message: "Xóa thể loại phim thành công",
-        });
-        setTags((prev) => {
-          const updatedList = prev.filter(
-            (item) => item._id !== selectedItem._id
-          );
-
-          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage.tags > totalPages && totalPages > 0) {
-            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage((prev) => ({ ...prev, tags: totalPages }));
-          } else if (updatedList.length === 0) {
-            // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage((prev) => ({ ...prev, tags: 1 }));
-          }
-
-          return updatedList;
-        });
-      } else if (activeModal === "Xóa tài khoản") {
-        await axios.delete(
-          `http://localhost:8000/api/user/employee/delete-account/${selectedItem._id}`
-        );
-        setDialogData({
-          title: "Thành công",
-          message: "Xóa tài khoản thành công",
-        });
-        setTags((prev) => {
-          const updatedList = prev.filter(
-            (item) => item._id !== selectedItem._id
-          );
-
-          // Kiểm tra nếu hiện tại không có đủ item cho trang hiện tại
-          const totalPages = Math.ceil(updatedList.length / itemsPerPage);
-          if (currentPage.accounts > totalPages && totalPages > 0) {
-            // Nếu trang hiện tại không có dữ liệu, lùi lại 1 trang
-            setCurrentPage((prev) => ({ ...prev, accounts: totalPages }));
-          } else if (updatedList.length === 0) {
-            // Nếu không còn dữ liệu, quay lại trang 1
-            setCurrentPage((prev) => ({ ...prev, accounts: 1 }));
-          }
-
-          return updatedList;
-        });
       }
-
       await handleRefresh();
       handleCloseModal();
       setIsSuccessModalOpen(true);
     } catch (error) {
       console.log(error);
-      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+      const errorMsg = error.response
+        ? error.response.data.msg
+        : "Đã xảy ra lỗi, vui lòng thử lại.";
+      alert("Thao tác thất bại, lỗi: " + errorMsg);
       //setIsFailModalOpen(true);
     }
   };
@@ -412,26 +460,40 @@ const AdminParamPage = () => {
   };
 
   //xử lí giá vé chi lưu khi thay đổi giá
-  const [prices, setPrices] = useState({
-    vip: 10000,
-    center: 10000,
-  });
-  const [originalPrices] = useState({ ...prices }); // Lưu giá trị ban đầu để so sánh
+
+  console.log(originalPrices);
 
   // Hàm cập nhật giá trị khi nhập liệu
   const handleChange = (type, value) => {
-    setPrices({ ...prices, [type]: value });
+    setParams((prevPrices) => ({
+      ...prevPrices,
+      [type]: value,
+    }));
   };
 
   // Hàm kiểm tra trạng thái nút "Lưu"
   const isChanged = (type) => {
-    return prices[type] !== originalPrices[type];
+    const currentValue = params[type];
+    const originalValue = originalPrices[type];
+
+    // Kiểm tra nếu cả hai giá trị đều là số và so sánh chúng
+    return (
+      currentValue !== undefined &&
+      originalValue !== undefined &&
+      currentValue !== originalValue
+    );
   };
 
   //Hàm xử lý khi nhấn "Lưu"
+
   const handleSavePrice = (type) => {
-    console.log(`Giá vé ${type} đã lưu: ${prices[type]} VNĐ`);
-    // Thực hiện gọi API lưu dữ liệu tại đây
+    setType(type);
+    setActiveModal("Lưu quy định"); // Đặt modal hiện tại là "Lưu quy định"
+    setDialogData({
+      title: "Xác nhận lưu thay đổi",
+      message: "Bạn có muốn lưu các thay đổi quy định không?",
+    });
+    setIsConfirmModalOpen(true);
   };
 
   return (
@@ -503,62 +565,84 @@ const AdminParamPage = () => {
         )}
       </div>
 
-      <div className="p-6 bg-white rounded-lg  max-w-lg">
+      <div className="p-6 bg-white rounded-lg  max-w-4xl">
         <h2 className="text-xl font-bold mb-4">Các số liệu khác</h2>
 
-        <div className="space-y-4">
-          {/* Giá vé cho ghế VIP */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium">
-              Giá vé thêm cho ghế VIP:
-            </label>
-            <input
-              type="number"
-              value={prices.vip}
-              onChange={(e) => handleChange("vip", parseInt(e.target.value))}
-              className="border px-2 py-1 rounded w-24"
-            />
-            <span>VNĐ</span>
-            <button
-              onClick={() => handleSavePrice("vip")}
-              disabled={!isChanged("vip")}
-              className={`px-4 py-2 rounded text-white ${
-                isChanged("vip")
-                  ? "bg-black hover:bg-gray-800"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              Lưu
-            </button>
-          </div>
+        <table className="w-full border-collapse border border-gray-200">
+          <tbody>
+            {/* Giá vé cho ghế VIP */}
 
-          {/* Giá vé cho ghế trung tâm */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium">
-              Giá vé thêm cho ghế trung tâm:
-            </label>
-            <input
-              type="number"
-              value={prices.center}
-              onChange={(e) => handleChange("center", parseInt(e.target.value))}
-              className="border px-2 py-1 rounded w-24"
-            />
-            <span>VNĐ</span>
-            <button
-              onClick={() => handleSavePrice("center")}
-              disabled={!isChanged("center")}
-              className={`px-4 py-2 rounded text-white ${
-                isChanged("center")
-                  ? "bg-black hover:bg-gray-800"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              Lưu
-            </button>
-          </div>
-        </div>
+            {/* Các mục còn lại */}
+            {[
+              {
+                label: "Giá vé thêm cho ghế VIP:",
+                key: "addedPriceForVIPSeat",
+                unit: "VNĐ",
+              },
+              {
+                label: " Mức giảm giá tối đa cho chương trình khuyến mãi:",
+                key: "maximumDiscountRate",
+                unit: "%",
+              },
+              {
+                label: "Điểm sử dụng tối đa trong 1 lần:",
+                key: "loyalPoint_MaxiumPointUseInOneGo",
+                unit: "",
+              },
+              {
+                label: "Giá trị hóa đơn tối thiểu để sử dụng điểm:",
+                key: "loyalPoint_MiniumValueToUseLoyalPoint",
+                unit: "VNĐ",
+              },
+              {
+                label: "Tỷ lệ quy đổi từ điểm sang giảm hóa đơn:",
+                key: "loyalPoint_PointToReducedPriceRatio",
+                unit: "%",
+              },
+              {
+                label: "Tỷ lệ quy đổi từ giá trị hóa đơn sang điểm:",
+                key: "loyalPoint_OrderToPointRatio",
+                unit: "%",
+              },
+            ].map((item, index) => (
+              <tr key={index} className="border-b">
+                <td className="p-2 text-sm font-medium">{item.label}</td>
+                <td className="p-2 flex items-center space-x-2">
+                  <input
+                    type="number"
+                    value={params[item.key]}
+                    onChange={(e) =>
+                      handleChange(`${item.key}`, parseInt(e.target.value))
+                    }
+                    className="border px-2 py-1 rounded w-52"
+                  />
+                  {item.unit && <span>{item.unit}</span>}
+                </td>
+                <td className="p-2">
+                  <button
+                    onClick={() => handleSavePrice(`${item.key}`)}
+                    disabled={!isChanged(`${item.key}`)}
+                    className={`px-4 py-2 rounded text-white ${
+                      isChanged(`${item.key}`)
+                        ? "bg-black hover:bg-gray-800"
+                        : "bg-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    Lưu
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
+      <span className="ml-6 block text-lg text-gray-600 leading-relaxed">
+        Ví dụ về tỷ lệ đổi điểm:
+        <br />- Với tỉ lệ đổi từ giá trị hóa đơn sang điểm = <b>3%</b>: 100,000
+        VNĐ → <b>3,000 điểm</b> (lấy giá trị thật).
+        <br />- Với tỉ lệ đổi từ điểm sang giảm giá trị hóa đơn = <b>50%</b>:
+        <b>3,000 điểm</b> → giảm được <b>1,500 VNĐ</b>.
+      </span>
       {/* Modal cho từng bảng */}
       {activeModal === "Loại vé" && (
         <TicketTypeModal

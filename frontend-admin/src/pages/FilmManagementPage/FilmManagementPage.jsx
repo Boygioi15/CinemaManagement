@@ -291,7 +291,7 @@ const FilmManagementPage = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
         <Table columns={columns} data={paginatedData} />
 
-        {films.length > 0 && (
+        {filteredData.length > 0 && (
           <div className="flex items-center justify-between px-6 py-4 bg-gray-50">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
