@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { X, Plus, Check } from "lucide-react";
-import { getAllPromotion } from "../config/api";
+import { getAllPromotion, getParam } from "../config/api";
+import { toast } from "react-toastify";
 
 const PromotionList = ({ isOpen, setIsOpen, onApplyPromotions }) => {
   const [promotionList, setPromotionList] = useState([]); // Danh sách ưu đãi
   const [selectedPromotions, setSelectedPromotions] = useState([]); // Danh sách chính thức
   const [tempSelectedPromotions, setTempSelectedPromotions] = useState([]); // Danh sách tạm thời
   const [isAnimating, setIsAnimating] = useState(false); // Trạng thái hoạt ảnh
+  const [maxDiscountRate, setMaxDiscountRate] = useState(0); // Tỷ lệ khuyến mãi tối đa
 
   const handleGetAllPromotion = async () => {
     try {
@@ -21,8 +23,19 @@ const PromotionList = ({ isOpen, setIsOpen, onApplyPromotions }) => {
     }
   };
 
+  const handleGetParam = async () => {
+    try {
+      const response = await getParam();
+      console.log("🚀 ~ handleGetParam ~ response:", response)
+      setMaxDiscountRate(response.data.maximumDiscountRate);
+    } catch (error) {
+      console.error("Error fetching max discount rate:", error);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
+      handleGetParam();
       handleGetAllPromotion();
       setTempSelectedPromotions(selectedPromotions); // Đồng bộ danh sách tạm thời
       setIsAnimating(true); // Kích hoạt hiệu ứng mở
@@ -50,16 +63,26 @@ const PromotionList = ({ isOpen, setIsOpen, onApplyPromotions }) => {
   };
 
   const calculateTotalDiscount = () => {
-    return tempSelectedPromotions
+    const total = tempSelectedPromotions
       .map((promo) => parseInt(promo.discountRate, 10))
       .reduce((sum, value) => sum + value, 0);
+
+    return total > maxDiscountRate ? maxDiscountRate : total;
   };
 
   const handleApplyPromotions = () => {
     const totalDiscount = calculateTotalDiscount();
-    setSelectedPromotions(tempSelectedPromotions); // Cập nhật danh sách chính thức
+    if (totalDiscount >= maxDiscountRate) {
+      toast.warn(
+        `Tổng khuyến mãi vượt giới hạn ${maxDiscountRate}%. Giảm giá đã được đặt về tối đa.`
+      );
+    } else {
+      toast.success("Khuyến mãi đã được áp dụng thành công!");
+    }
+
+    setSelectedPromotions(tempSelectedPromotions);
     if (onApplyPromotions) {
-      onApplyPromotions(tempSelectedPromotions, totalDiscount); // Gửi danh sách và tổng discount ra ngoài
+      onApplyPromotions(tempSelectedPromotions, totalDiscount);
     }
     handleClose();
   };
