@@ -1,143 +1,98 @@
 import expressAsyncHandler from "express-async-handler";
 import promotionModel from "./promotion.schema.js";
+import {
+  PromotionService
+} from "./promotion.service.js";
 
 class PromotionController {
   // Create a new promotion
   createPromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { discountRate, name, beginDate, endDate } = req.body;
-
-      const promotion = await promotionModel.create({
-        discountRate,
-        name,
-        beginDate: new Date(beginDate),
-        endDate: new Date(endDate),
-      });
-
-      return res.status(201).json({
-        msg: "Promotion created successfully",
-        success: true,
-        data: promotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+    const promotion = await PromotionService.createPromotion(req.body)
+    return res.status(200).json({
+      msg: "Promotions retrieved successfully",
+      success: true,
+      data: promotion,
+    });
   });
 
-  // Get promotions by date
-  getPromotionByDate = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { date } = req.query;
+  updatePromotion = expressAsyncHandler(async (req, res) => {
+    const {
+      id
+    } = req.params;
 
-      // Chuyển đổi ngày từ FE sang múi giờ Việt Nam (GMT+7)
-      const inputDate = new Date(Number(date));
-      const vnDate = new Date(inputDate.getTime() + 7 * 60 * 60 * 1000); // Thêm 7 giờ
-      console.log("inputDate (VN timezone)", vnDate);
+    const updateData = req.body;
 
-      // Truy vấn dữ liệu khuyến mãi
-      const promotions = await promotionModel.find({
-        beginDate: { $lte: vnDate },
-        endDate: { $gte: vnDate },
-      });
+    const promotion = await PromotionService.updatePromotion(id, updateData)
 
-      const promotionss = await promotionModel.find();
-      console.log(promotionss);
-      console.log(promotions);
-      // Phản hồi kết quả
-      return res.status(200).json({
-        msg: "Promotions retrieved successfully",
-        success: true,
-        data: promotions,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      msg: "Promotions updated successfully",
+      success: true,
+      data: promotion,
+    });
   });
 
-  // Get a promotion by ID
-  getPromotionById = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
+  pausePromotion = expressAsyncHandler(async (req, res) => {
+    const {
+      id
+    } = req.params;
 
-      const promotion = await promotionModel.findById(id);
+    const promotion = await PromotionService.pausePromotion(id)
 
-      if (!promotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
-
-      return res.status(200).json({
-        msg: "Promotion retrieved successfully",
-        success: true,
-        data: promotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      msg: "Promotions updated successfully",
+      success: true,
+      data: promotion,
+    });
   });
 
-  // Update a promotion by ID
-  updatePromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const { discountRate, name, beginDate, endDate } = req.body;
 
-      const updatedPromotion = await promotionModel.findByIdAndUpdate(
-        id,
-        {
-          discountRate,
-          name,
-          beginDate,
-          endDate,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+  resumePromotion = expressAsyncHandler(async (req, res) => {
+    const {
+      id
+    } = req.params;
 
-      if (!updatedPromotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
+    const promotion = await PromotionService.resumePromotion()
 
-      return res.status(200).json({
-        msg: "Promotion updated successfully",
-        success: true,
-        data: updatedPromotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      msg: "Promotions resumed successfully",
+      success: true,
+      data: promotion,
+    });
   });
 
-  // Delete a promotion by ID
-  deletePromotion = expressAsyncHandler(async (req, res, next) => {
-    try {
-      const { id } = req.params;
+  getPromotionById = expressAsyncHandler(async (req, res) => {
+    const {
+      id
+    } = req.params;
 
-      const deletedPromotion = await promotionModel.findByIdAndDelete(id);
+    const promotion = await PromotionService.getPromotionById(id)
 
-      if (!deletedPromotion) {
-        return res.status(404).json({
-          msg: "Promotion not found",
-          success: false,
-        });
-      }
-
-      return res.status(200).json({
-        msg: "Promotion deleted successfully",
-        success: true,
-        data: deletedPromotion,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      msg: " Get promotions by id successfully",
+      success: true,
+      data: promotion,
+    });
   });
+
+  getAllPromotions = expressAsyncHandler(async (req, res) => {
+    const promotion = await PromotionService.getAllPromotions()
+
+    return res.status(200).json({
+      msg: " Get promotions successfully",
+      success: true,
+      data: promotion,
+    });
+  });
+
+  getActivePromotion = expressAsyncHandler(async (req, res) => {
+    const promotion = await PromotionService.getAllPromotions()
+    return res.status(200).json({
+      msg: " Get promotions successfully",
+      success: true,
+      data: promotion,
+    });
+  });
+
 }
 
 export default new PromotionController();
