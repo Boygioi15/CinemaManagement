@@ -120,3 +120,6 @@ export const getAllOrderByUserId = async () => {
 export const getAllPromotion = async () => {
   return await axios.get(`/promotion/active`);
 };
+export const getParam = async () => {
+  return await axios.get(`/param`);
+};
