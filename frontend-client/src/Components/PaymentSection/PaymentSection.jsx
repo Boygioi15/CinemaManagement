@@ -43,7 +43,7 @@ const PaymentSection = ({
       const response = await createPayment({
         additionalItemSelections: additionalItems,
         totalPrice,
-        promotionIds: promotionIds,
+        promotionIDs: promotionIds,
       });
 
       if (response && response.payUrl) {

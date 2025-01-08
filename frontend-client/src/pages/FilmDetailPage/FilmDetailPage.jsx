@@ -1025,7 +1025,7 @@ function BottomBar({
         ),
         totalPrice: calculateTotalPrice(),
         filmShowId: selectedFilmShowId,
-        promotionIds: promotionIds, // Thêm danh sách promotionId vào payload
+        promotionIDs: promotionIds, // Thêm danh sách promotionId vào payload
       });
 
       console.log("Response từ API createPayment:", response);
