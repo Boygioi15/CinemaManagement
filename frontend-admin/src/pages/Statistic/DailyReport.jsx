@@ -20,8 +20,8 @@ const DailyReport = () => {
   const [itemData, setItemData] = useState([]);
 
   const [statistics, setStatistics] = useState({
-    totalTicket: 0,
-    totalRevenue: 0,
+    totalNetRevenue: 0,
+    totalEffectiveRevenue: 0,
     totalTicketRevenue: 0,
     totalOtherItemsRevenue: 0,
   });
@@ -35,7 +35,7 @@ const DailyReport = () => {
       const data = response.data;
       const transformedData = data.map((item) => ({
         name: item.name,
-        value: item.totalQuantity,
+        value: item.totalRevenue,
       }));
       setTicketTypeData(transformedData);
     } catch (error) {
@@ -71,7 +71,7 @@ const DailyReport = () => {
       const data = response.data;
       const transformedData = data.map((item) => ({
         name: item.name,
-        value: item.totalQuantity,
+        value: item.totalRevenue,
       }));
       setItemData(transformedData);
     } catch (error) {
@@ -88,9 +88,10 @@ const DailyReport = () => {
       const data = response.data;
       setStatistics((prev) => ({
         ...prev, // Giữ lại các giá trị cũ
-        totalRevenue: data.totalRevenue,
+        totalNetRevenue: data.totalNetRevenue,
+        totalEffectiveRevenue: data.totalEffectiveRevenue,
         totalTicketRevenue: data.totalTicketRevenue,
-        totalOtherItemsRevenue: data.totalRevenue - data.totalTicketRevenue,
+        totalOtherItemsRevenue: data.totalOtherItemsRevenue,
       }));
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
@@ -193,7 +194,7 @@ const DailyReport = () => {
                 Tổng doanh thu ngày
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.totalRevenue.toLocaleString()}
+                {statistics.totalNetRevenue.toLocaleString()}
               </p>
             </div>
           </div>

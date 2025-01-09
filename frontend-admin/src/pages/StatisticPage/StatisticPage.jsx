@@ -24,8 +24,8 @@ const StatisticPage = () => {
   const [revenueDataByYear, setRevenueDataByYear] = useState({});
 
   const [statistics, setStatistics] = useState({
-    totalTicket: 0,
-    totalRevenue: 0,
+    totalNetRevenue: 0,
+    totalEffectiveRevenue: 0,
     totalTicketRevenue: 0,
     totalOtherItemsRevenue: 0,
   });
@@ -40,7 +40,7 @@ const StatisticPage = () => {
       const data = response.data;
       const transformedData = data.map((item) => ({
         name: item.name,
-        value: item.totalQuantity,
+        value: item.totalRevenue,
       }));
       setTicketTypeData(transformedData);
     } catch (error) {
@@ -78,7 +78,7 @@ const StatisticPage = () => {
       const data = response.data;
       const transformedData = data.map((item) => ({
         name: item.name,
-        value: item.totalQuantity,
+        value: item.totalRevenue,
       }));
       setItemData(transformedData);
     } catch (error) {
@@ -95,9 +95,10 @@ const StatisticPage = () => {
       const data = response.data;
       setStatistics((prev) => ({
         ...prev, // Giữ lại các giá trị cũ
-        totalRevenue: data.totalRevenue,
+        totalNetRevenue: data.totalNetRevenue,
+        totalEffectiveRevenue: data.totalEffectiveRevenue,
         totalTicketRevenue: data.totalTicketRevenue,
-        totalOtherItemsRevenue: data.totalRevenue - data.totalTicketRevenue,
+        totalOtherItemsRevenue: data.totalOtherItemsRevenue,
       }));
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
@@ -182,23 +183,22 @@ const StatisticPage = () => {
   };
 
   useEffect(() => {
-    // fetchView(selectedDate);
+    fetchView(selectedDate);
     fetchTicket(selectedDate);
     fetchticketType(selectedDate);
     fetchticketMovie(selectedDate);
     fetchadditionalItem(selectedDate);
     fetchHotFilm(selectedDate);
     fetchBestSeller(selectedDate);
-    // fetchData(selectedYear);
+    fetchData(selectedYear);
   }, [selectedDate, selectedYear]);
 
   const transformApiDataToRevenueData = (apiData, year) => {
     return apiData.map((item) => {
       const {
         month,
-        totalTicketRevenue,
-        totalPopcornRevenue,
-        totalDrinksRevenue,
+        totalNetRevenue,
+        totalEffectiveRevenue
       } = item;
       const monthName = new Date(0, month - 1).toLocaleString("en-US", {
         month: "2-digit",
@@ -206,20 +206,19 @@ const StatisticPage = () => {
 
       return {
         month: monthName,
-        vé: totalTicketRevenue,
-        sảnphẩmkhác: totalPopcornRevenue + totalDrinksRevenue,
+        thuần: totalNetRevenue,
+        thựctế: totalEffectiveRevenue,
       };
     });
   };
   const handleExport = () => {
     const csvData = revenueDataByYear[selectedYear];
     const csvString = [
-      ["Month", "Tickets", "Popcorn", "Beverages"],
+      ["Month", "Net", "Effective"],
       ...csvData.map((row) => [
         row.month,
-        row.tickets,
-        row.popcorn,
-        row.beverages,
+        row.net,
+        row.effective,
       ]),
     ]
       .map((e) => e.join(","))
@@ -284,7 +283,7 @@ const StatisticPage = () => {
                 Tổng doanh thu ngày (thuần)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.totalRevenue.toLocaleString()}
+                {statistics.totalNetRevenue}
               </p>
             </div>
           </div>
@@ -297,7 +296,7 @@ const StatisticPage = () => {
                 Tổng doanh thu ngày (thực tế)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.totalRevenue.toLocaleString()}
+                {statistics.totalEffectiveRevenue}
               </p>
             </div>
           </div>
@@ -310,7 +309,7 @@ const StatisticPage = () => {
                 Doanh thu từ vé (thuần)
               </h3>
               <p className="text-3xl font-bold text-green-600">
-                {statistics.totalTicketRevenue.toLocaleString()}
+                {statistics.totalTicketRevenue}
               </p>
             </div>
           </div>
@@ -323,7 +322,7 @@ const StatisticPage = () => {
                 Doanh thu từ các sản phẩm ngoài (thuần)
               </h3>
               <p className="text-3xl font-bold text-purple-600">
-                {statistics.totalOtherItemsRevenue.toLocaleString()}
+                {statistics.totalOtherItemsRevenue}
               </p>
             </div>
           </div>

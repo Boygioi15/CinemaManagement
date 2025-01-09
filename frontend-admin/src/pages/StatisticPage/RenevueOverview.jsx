@@ -11,16 +11,18 @@ const AnnualRevenuePage = () => {
   useEffect(() => {
     fetchData(selectedYear); // Fetch dữ liệu cho năm mặc định khi render lần đầu
   }, [selectedYear]);
-
+  
   const fetchData = async (year) => {
     try {
       const response = await axios.get(
         `http://localhost:8000/api/statistics/monthly-statistic?year=${year}`
       );
+      console.log(response.data);  // Debug dữ liệu API trả về
       const transformedData = transformApiDataToRevenueData(
         response.data,
         year
       );
+      console.log(transformedData);  // Debug dữ liệu sau khi transform
       setRevenueDataByYear((prev) => ({
         ...prev,
         [year]: transformedData,
@@ -28,15 +30,14 @@ const AnnualRevenuePage = () => {
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
     }
-  };
+  };  
 
   const transformApiDataToRevenueData = (apiData, year) => {
     return apiData.map((item) => {
       const {
         month,
-        totalTicketRevenue,
-        totalPopcornRevenue,
-        totalDrinksRevenue,
+        totalNetRevenue,
+        totalEffectiveRevenue,
       } = item;
       const monthName = new Date(0, month - 1).toLocaleString("en-US", {
         month: "2-digit",
@@ -44,26 +45,27 @@ const AnnualRevenuePage = () => {
 
       return {
         month: monthName,
-        vé: totalTicketRevenue,
-        sảnphẩmkhác: totalPopcornRevenue + totalDrinksRevenue,
+        thuần: totalNetRevenue,
+        thựctế: totalEffectiveRevenue,
       };
     });
   };
 
   const handleExport = () => {
+    if (!revenueDataByYear[selectedYear]) return;
+  
     const csvData = revenueDataByYear[selectedYear];
     const csvString = [
-      ["Month", "Tickets", "Popcorn", "Beverages"],
+      ["Month", "Net", "Effective"],
       ...csvData.map((row) => [
         row.month,
-        row.tickets,
-        row.popcorn,
-        row.beverages,
+        row.thuần,
+        row.thựctế,
       ]),
     ]
       .map((e) => e.join(","))
       .join("\n");
-
+  
     const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     if (link.download !== undefined) {
@@ -75,18 +77,18 @@ const AnnualRevenuePage = () => {
       link.click();
       document.body.removeChild(link);
     }
-  };
+  };  
 
   return (
     <div className="min-h-auto bg-gray-100 ">
       <div className="flex justify-end">
-        {/* <button
+        {<button
           onClick={handleExport}
           className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
         >
           <FaFileExport />
           <span>Export CSV</span>
-        </button> */}
+        </button>}
       </div>
       <ColumnChart
         revenueDataByYear={revenueDataByYear}

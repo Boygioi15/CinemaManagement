@@ -179,20 +179,40 @@ class StatisticController {
             ],
           },
         },
+        // {
+        //   // Group tickets by name and sum quantities
+        //   $group: {
+        //     _id: "$filmShowData.tickets.name",
+        //     totalQuantity: {
+        //       $sum: { $toInt: "$filmShowData.tickets.quantity" },
+        //     },
+        //   },
+        // },
+        // {
+        //   // Project the final result
+        //   $project: {
+        //     name: "$_id",
+        //     totalQuantity: 1,
+        //     _id: 0,
+        //   },
+        // },
         {
-          // Group tickets by name and sum quantities
           $group: {
             _id: "$filmShowData.tickets.name",
-            totalQuantity: {
-              $sum: { $toInt: "$filmShowData.tickets.quantity" },
+            totalRevenue: {
+              $sum: {
+                $multiply: [
+                  { $toDouble: "$filmShowData.tickets.quantity" },
+                  { $toDouble: "$filmShowData.tickets.price" },
+                ],
+              },
             },
           },
         },
         {
-          // Project the final result
           $project: {
             name: "$_id",
-            totalQuantity: 1,
+            totalRevenue: 1,
             _id: 0,
           },
         },
@@ -267,18 +287,38 @@ class StatisticController {
             ],
           },
         },
+        // {
+        //   $group: {
+        //     _id: "$itemsData.items.name",
+        //     totalQuantity: {
+        //       $sum: { $toInt: "$itemsData.items.quantity" },
+        //     },
+        //   },
+        // },
+        // {
+        //   $project: {
+        //     name: "$_id",
+        //     totalQuantity: 1,
+        //     _id: 0,
+        //   },
+        // },
         {
           $group: {
             _id: "$itemsData.items.name",
-            totalQuantity: {
-              $sum: { $toInt: "$itemsData.items.quantity" },
+            totalRevenue: {
+              $sum: {
+                $multiply: [
+                  { $toDouble: "$itemsData.items.quantity" },
+                  { $toDouble: "$itemsData.items.price" },
+                ],
+              },
             },
           },
         },
         {
           $project: {
             name: "$_id",
-            totalQuantity: 1,
+            totalRevenue: 1,
             _id: 0,
           },
         },
@@ -567,18 +607,415 @@ class StatisticController {
   });
 
   // Tổng doanh số vé và sản phẩm theo từng tháng
+  // getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
+  //   const { year } = req.query;
+
+  //   if (!year) {
+  //     res.status(400);
+  //     throw new Error("Vui lòng cung cấp năm!");
+  //   }
+
+  //   try {
+  //     const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
+  //     const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
+
+  //     const orders = await orderModel.aggregate([
+  //       {
+  //         $match: {
+  //           createdDate: { $gte: startOfYear, $lte: endOfYear },
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_offlines",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "offlineData",
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           $and: [
+  //             { "offlineData.invalidReason_Printed": "" },
+  //             { "offlineData.invalidReason_Served": "" },
+  //           ],
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "ordersdata_filmshows",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "filmShowData",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "orders_data_items",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "itemsData",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_promotions",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "promotionsData",
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_pointusages",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "pointsData",
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           month: { $month: "$createdDate" },
+  //           tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
+  //           items: { $arrayElemAt: ["$itemsData.items", 0] },
+  //           discountRate: {
+  //             $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
+  //           },
+  //           pointUsed: {
+  //             $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
+  //           },
+  //           totalQuantity: {
+  //             $add: [
+  //               { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
+  //               { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           month: 1,
+  //           ticketRevenue: {
+  //             $sum: {
+  //               $map: {
+  //                 input: "$tickets",
+  //                 as: "t",
+  //                 in: {
+  //                   $subtract: [
+  //                     {
+  //                       $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
+  //                     },
+  //                     {
+  //                       $add: [
+  //                         {
+  //                           $multiply: [
+  //                             "$discountRate",
+  //                             {
+  //                               $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
+  //                             },
+  //                             0.01,
+  //                           ],
+  //                         },
+  //                         {
+  //                           $cond: [
+  //                             { $gt: ["$totalQuantity", 0] },
+  //                             { $divide: ["$pointUsed", "$totalQuantity"] },
+  //                             0,
+  //                           ],
+  //                         },
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //               },
+  //             },
+  //           },
+  //           itemsRevenue: {
+  //             $sum: {
+  //               $map: {
+  //                 input: "$items",
+  //                 as: "i",
+  //                 in: {
+  //                   $subtract: [
+  //                     {
+  //                       $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
+  //                     },
+  //                     {
+  //                       $add: [
+  //                         {
+  //                           $multiply: [
+  //                             "$discountRate",
+  //                             {
+  //                               $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
+  //                             },
+  //                             0.01,
+  //                           ],
+  //                         },
+  //                         {
+  //                           $cond: [
+  //                             { $gt: ["$totalQuantity", 0] },
+  //                             { $divide: ["$pointUsed", "$totalQuantity"] },
+  //                             0,
+  //                           ],
+  //                         },
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $group: {
+  //           _id: { month: "$month" },
+  //           totalTicketRevenue: { $sum: "$ticketRevenue" },
+  //           totalItemsRevenue: { $sum: "$itemsRevenue" },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           month: "$_id.month",
+  //           totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
+  //           totalTicketRevenue: 1,
+  //           totalItemsRevenue: 1,
+  //           _id: 0,
+  //         },
+  //       },
+  //       {
+  //         $sort: { month: 1 },
+  //       },
+  //     ]);
+
+  //     res.status(200).json({
+  //       success: true,
+  //       data: orders,
+  //     });
+  //   } catch (error) {
+  //     res.status(500);
+  //     throw new Error(`Có lỗi xảy ra: ${error.message}`);
+  //   }
+  // });
+
+  // Doanh thu từ vé và sản phẩm theo ngày
+  // getDailyStatistics = expressAsyncHandler(async (req, res) => {
+  //   const { selectedDate } = req.query;
+
+  //   if (!selectedDate) {
+  //     res.status(400);
+  //     throw new Error("Please provide a date!");
+  //   }
+
+  //   const selectedDateObj = new Date(selectedDate);
+  //   const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+  //   const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+  //   try {
+  //     const orders = await orderModel.aggregate([
+  //       {
+  //         $match: {
+  //           createdDate: { $gte: startOfDay, $lte: endOfDay },
+  //         },
+  //       },
+  //       // Join with decorators offline
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_offlines",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "offlineData",
+  //         },
+  //       },
+  //       {
+  //         $match: {
+  //           $and: [
+  //             { "offlineData.invalidReason_Printed": "" },
+  //             { "offlineData.invalidReason_Served": "" },
+  //           ],
+  //         },
+  //       },
+  //       // Join with tickets
+  //       {
+  //         $lookup: {
+  //           from: "ordersdata_filmshows",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "filmShowData",
+  //         },
+  //       },
+  //       // Join with items
+  //       {
+  //         $lookup: {
+  //           from: "orders_data_items",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "itemsData",
+  //         },
+  //       },
+  //       // Join with promotions
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_promotions",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "promotionsData",
+  //         },
+  //       },
+  //       // Join with points usage
+  //       {
+  //         $lookup: {
+  //           from: "orders_decorators_pointusages",
+  //           localField: "_id",
+  //           foreignField: "orderRef",
+  //           as: "pointsData",
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
+  //           items: { $arrayElemAt: ["$itemsData.items", 0] },
+  //           discountRate: {
+  //             $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
+  //           },
+  //           pointUsed: {
+  //             $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
+  //           },
+  //           totalQuantity: {
+  //             $add: [
+  //               { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
+  //               { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           ticketRevenue: {
+  //             $sum: {
+  //               $map: {
+  //                 input: "$tickets",
+  //                 as: "t",
+  //                 in: {
+  //                   $subtract: [
+  //                     {
+  //                       $multiply: [
+  //                         { $toDouble: "$$t.price" },
+  //                         { $toDouble: "$$t.quantity" },
+  //                       ],
+  //                     },
+  //                     {
+  //                       $add: [
+  //                         {
+  //                           $multiply: [
+  //                             "$discountRate",
+  //                             {
+  //                               $multiply: [
+  //                                 { $toDouble: "$$t.price" },
+  //                                 { $toDouble: "$$t.quantity" },
+  //                               ],
+  //                             },
+  //                             0.01,
+  //                           ],
+  //                         },
+  //                         {
+  //                           $cond: [
+  //                             { $gt: ["$totalQuantity", 0] },
+  //                             { $divide: ["$pointUsed", "$totalQuantity"] },
+  //                             0,
+  //                           ],
+  //                         },
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //               },
+  //             },
+  //           },
+  //           itemsRevenue: {
+  //             $sum: {
+  //               $map: {
+  //                 input: "$items",
+  //                 as: "i",
+  //                 in: {
+  //                   $subtract: [
+  //                     {
+  //                       $multiply: [
+  //                         { $toDouble: "$$i.price" },
+  //                         { $toDouble: "$$i.quantity" },
+  //                       ],
+  //                     },
+  //                     {
+  //                       $add: [
+  //                         {
+  //                           $multiply: [
+  //                             "$discountRate",
+  //                             {
+  //                               $multiply: [
+  //                                 { $toDouble: "$$i.price" },
+  //                                 { $toDouble: "$$i.quantity" },
+  //                               ],
+  //                             },
+  //                             0.01,
+  //                           ],
+  //                         },
+  //                         {
+  //                           $cond: [
+  //                             { $gt: ["$totalQuantity", 0] },
+  //                             { $divide: ["$pointUsed", "$totalQuantity"] },
+  //                             0,
+  //                           ],
+  //                         },
+  //                       ],
+  //                     },
+  //                   ],
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //       {
+  //         $group: {
+  //           _id: null,
+  //           totalTicketRevenue: { $sum: "$ticketRevenue" },
+  //           totalItemsRevenue: { $sum: "$itemsRevenue" },
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
+  //           totalTicketRevenue: 1,
+  //           totalItemsRevenue: 1,
+  //         },
+  //       },
+  //     ]);
+
+  //     res.status(200).json(
+  //       orders[0] || {
+  //         totalRevenue: 0,
+  //         totalTicketRevenue: 0,
+  //         totalOtherItemsRevenue: 0,
+  //       }
+  //     );
+  //   } catch (error) {
+  //     res.status(500);
+  //     throw new Error(`Error: ${error.message}`);
+  //   }
+  // });
+
   getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
     const { year } = req.query;
-
+  
     if (!year) {
       res.status(400);
       throw new Error("Vui lòng cung cấp năm!");
     }
-
+  
     try {
       const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
       const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
-
+  
       const orders = await orderModel.aggregate([
         {
           $match: {
@@ -602,144 +1039,31 @@ class StatisticController {
           },
         },
         {
-          $lookup: {
-            from: "ordersdata_filmshows",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "filmShowData",
-          },
-        },
-        {
-          $lookup: {
-            from: "orders_data_items",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "itemsData",
-          },
-        },
-        {
-          $lookup: {
-            from: "orders_decorators_promotions",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "promotionsData",
-          },
-        },
-        {
-          $lookup: {
-            from: "orders_decorators_pointusages",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "pointsData",
-          },
-        },
-        {
           $project: {
             month: { $month: "$createdDate" },
-            tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
-            items: { $arrayElemAt: ["$itemsData.items", 0] },
-            discountRate: {
-              $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
-            },
-            pointUsed: {
-              $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
-            },
-            totalQuantity: {
-              $add: [
-                { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
-                { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
+            totalPrice: 1,
+            totalPriceAfterDiscount: 1,
+            effectiveRevenue: {
+              $cond: [
+                { $ifNull: ["$totalPriceAfterDiscount", false] },
+                { $toDouble: "$totalPriceAfterDiscount" },
+                { $toDouble: "$totalPrice" },
               ],
-            },
-          },
-        },
-        {
-          $project: {
-            month: 1,
-            ticketRevenue: {
-              $sum: {
-                $map: {
-                  input: "$tickets",
-                  as: "t",
-                  in: {
-                    $subtract: [
-                      {
-                        $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
-                      },
-                      {
-                        $add: [
-                          {
-                            $multiply: [
-                              "$discountRate",
-                              {
-                                $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
-                              },
-                              0.01,
-                            ],
-                          },
-                          {
-                            $cond: [
-                              { $gt: ["$totalQuantity", 0] },
-                              { $divide: ["$pointUsed", "$totalQuantity"] },
-                              0,
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            itemsRevenue: {
-              $sum: {
-                $map: {
-                  input: "$items",
-                  as: "i",
-                  in: {
-                    $subtract: [
-                      {
-                        $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
-                      },
-                      {
-                        $add: [
-                          {
-                            $multiply: [
-                              "$discountRate",
-                              {
-                                $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
-                              },
-                              0.01,
-                            ],
-                          },
-                          {
-                            $cond: [
-                              { $gt: ["$totalQuantity", 0] },
-                              { $divide: ["$pointUsed", "$totalQuantity"] },
-                              0,
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                },
-              },
             },
           },
         },
         {
           $group: {
             _id: { month: "$month" },
-            totalTicketRevenue: { $sum: "$ticketRevenue" },
-            totalItemsRevenue: { $sum: "$itemsRevenue" },
+            totalNetRevenue: { $sum: { $toDouble: "$totalPrice" } },
+            totalEffectiveRevenue: { $sum: "$effectiveRevenue" },
           },
         },
         {
           $project: {
             month: "$_id.month",
-            totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
-            totalTicketRevenue: 1,
-            totalItemsRevenue: 1,
+            totalNetRevenue: 1,
+            totalEffectiveRevenue: 1,
             _id: 0,
           },
         },
@@ -747,38 +1071,34 @@ class StatisticController {
           $sort: { month: 1 },
         },
       ]);
-
-      res.status(200).json({
-        success: true,
-        data: orders,
-      });
+  
+      res.status(200).json(orders);
     } catch (error) {
       res.status(500);
       throw new Error(`Có lỗi xảy ra: ${error.message}`);
     }
   });
-
-  // Doanh thu từ vé và sản phẩm theo ngày
+  
   getDailyStatistics = expressAsyncHandler(async (req, res) => {
     const { selectedDate } = req.query;
-
+  
     if (!selectedDate) {
       res.status(400);
-      throw new Error("Please provide a date!");
+      throw new Error("Vui lòng cung cấp ngày!");
     }
-
+  
     const selectedDateObj = new Date(selectedDate);
     const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
     const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-
+  
     try {
-      const orders = await orderModel.aggregate([
+      // Tính doanh thu thuần và thực tế
+      const revenueData = await orderModel.aggregate([
         {
           $match: {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        // Join with decorators offline
         {
           $lookup: {
             from: "orders_decorators_offlines",
@@ -795,7 +1115,42 @@ class StatisticController {
             ],
           },
         },
-        // Join with tickets
+        {
+          $project: {
+            totalPrice: 1,
+            totalPriceAfterDiscount: 1,
+            effectiveRevenue: {
+              $cond: [
+                { $ifNull: ["$totalPriceAfterDiscount", false] },
+                { $toDouble: "$totalPriceAfterDiscount" },
+                { $toDouble: "$totalPrice" },
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalNetRevenue: { $sum: { $toDouble: "$totalPrice" } },
+            totalEffectiveRevenue: { $sum: "$effectiveRevenue" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalNetRevenue: 1,
+            totalEffectiveRevenue: 1,
+          },
+        },
+      ]);
+  
+      // Tính doanh thu vé
+      const ticketRevenueData = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
         {
           $lookup: {
             from: "ordersdata_filmshows",
@@ -804,7 +1159,42 @@ class StatisticController {
             as: "filmShowData",
           },
         },
-        // Join with items
+        {
+          $unwind: {
+            path: "$filmShowData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$filmShowData.tickets",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalTicketRevenue: {
+              $sum: {
+                $multiply: [
+                  { $toDouble: "$filmShowData.tickets.quantity" },
+                  { $toDouble: "$filmShowData.tickets.price" },
+                ],
+              },
+            },
+          },
+        },
+      ]);
+  
+      const totalTicketRevenue = ticketRevenueData[0]?.totalTicketRevenue || 0;
+  
+      // Tính doanh thu sản phẩm
+      const itemsRevenueData = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
         {
           $lookup: {
             from: "orders_data_items",
@@ -813,156 +1203,49 @@ class StatisticController {
             as: "itemsData",
           },
         },
-        // Join with promotions
         {
-          $lookup: {
-            from: "orders_decorators_promotions",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "promotionsData",
-          },
-        },
-        // Join with points usage
-        {
-          $lookup: {
-            from: "orders_decorators_pointusages",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "pointsData",
+          $unwind: {
+            path: "$itemsData",
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
-          $project: {
-            tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
-            items: { $arrayElemAt: ["$itemsData.items", 0] },
-            discountRate: {
-              $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
-            },
-            pointUsed: {
-              $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
-            },
-            totalQuantity: {
-              $add: [
-                { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
-                { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
-              ],
-            },
-          },
-        },
-        {
-          $project: {
-            ticketRevenue: {
-              $sum: {
-                $map: {
-                  input: "$tickets",
-                  as: "t",
-                  in: {
-                    $subtract: [
-                      {
-                        $multiply: [
-                          { $toDouble: "$$t.price" },
-                          { $toDouble: "$$t.quantity" },
-                        ],
-                      },
-                      {
-                        $add: [
-                          {
-                            $multiply: [
-                              "$discountRate",
-                              {
-                                $multiply: [
-                                  { $toDouble: "$$t.price" },
-                                  { $toDouble: "$$t.quantity" },
-                                ],
-                              },
-                              0.01,
-                            ],
-                          },
-                          {
-                            $cond: [
-                              { $gt: ["$totalQuantity", 0] },
-                              { $divide: ["$pointUsed", "$totalQuantity"] },
-                              0,
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            itemsRevenue: {
-              $sum: {
-                $map: {
-                  input: "$items",
-                  as: "i",
-                  in: {
-                    $subtract: [
-                      {
-                        $multiply: [
-                          { $toDouble: "$$i.price" },
-                          { $toDouble: "$$i.quantity" },
-                        ],
-                      },
-                      {
-                        $add: [
-                          {
-                            $multiply: [
-                              "$discountRate",
-                              {
-                                $multiply: [
-                                  { $toDouble: "$$i.price" },
-                                  { $toDouble: "$$i.quantity" },
-                                ],
-                              },
-                              0.01,
-                            ],
-                          },
-                          {
-                            $cond: [
-                              { $gt: ["$totalQuantity", 0] },
-                              { $divide: ["$pointUsed", "$totalQuantity"] },
-                              0,
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                },
-              },
-            },
+          $unwind: {
+            path: "$itemsData.items",
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
           $group: {
             _id: null,
-            totalTicketRevenue: { $sum: "$ticketRevenue" },
-            totalItemsRevenue: { $sum: "$itemsRevenue" },
-          },
-        },
-        {
-          $project: {
-            totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
-            totalTicketRevenue: 1,
-            totalItemsRevenue: 1,
+            totalItemsRevenue: {
+              $sum: {
+                $multiply: [
+                  { $toDouble: "$itemsData.items.quantity" },
+                  { $toDouble: "$itemsData.items.price" },
+                ],
+              },
+            },
           },
         },
       ]);
-
-      res.status(200).json(
-        orders[0] || {
-          totalRevenue: 0,
-          totalTicketRevenue: 0,
-          totalOtherItemsRevenue: 0,
-        }
-      );
+  
+      const totalOtherItemsRevenue = itemsRevenueData[0]?.totalItemsRevenue || 0;
+  
+      // Kết hợp dữ liệu
+      const result = {
+        totalNetRevenue: revenueData[0]?.totalNetRevenue || 0,
+        totalEffectiveRevenue: revenueData[0]?.totalEffectiveRevenue || 0,
+        totalTicketRevenue,
+        totalOtherItemsRevenue,
+      };
+  
+      res.status(200).json(result);
     } catch (error) {
       res.status(500);
-      throw new Error(`Error: ${error.message}`);
+      throw new Error(`Có lỗi xảy ra: ${error.message}`);
     }
-  });
+  });      
 
   getFilmStatisticsByDate = async (req, res) => {
     const {
