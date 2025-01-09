@@ -291,10 +291,10 @@ const StatisticPage = () => {
                 Tổng doanh thu ngày (thực tế)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {/* {Number(
+                {Number(
                   statistics.totalEffectiveRevenue.toFixed(0)
-                ).toLocaleString("vi-VN")} */}
-                {statistics.totalEffectiveRevenue.toLocaleString("vi-VN")}
+                ).toLocaleString("vi-VN")}
+              
               </p>
             </div>
           </div>
