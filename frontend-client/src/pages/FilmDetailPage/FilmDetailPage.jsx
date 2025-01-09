@@ -1078,11 +1078,23 @@ function BottomBar({
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await getCurrentPoint();
-      setLoyalPoint(response.data.currentLoyalPoint);
+      try {
+        const pointResponse = await getCurrentPoint();
+        if (pointResponse?.data?.currentLoyalPoint) {
+          setLoyalPoint(pointResponse.data.currentLoyalPoint);
+        } else {
+          console.error("Invalid pointResponse:", pointResponse);
+        }
 
-      const param = await getParam();
-      setParam(param.data);
+        const paramResponse = await getParam();
+        if (paramResponse?.data) {
+          setParam(paramResponse.data);
+        } else {
+          console.error("Invalid paramResponse:", paramResponse);
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      }
     };
 
     fetchData();
