@@ -54,7 +54,6 @@ const StatisticPage = () => {
       const response = await axios.get(
         `http://localhost:8000/api/statistics/ticket-rate-by-film?selectedDate=${day}`
       );
-      console.log(response.data);
 
       const data = response.data;
       const transformedData = data.map((item) => ({
@@ -195,11 +194,7 @@ const StatisticPage = () => {
 
   const transformApiDataToRevenueData = (apiData, year) => {
     return apiData.map((item) => {
-      const {
-        month,
-        totalNetRevenue,
-        totalEffectiveRevenue
-      } = item;
+      const { month, totalNetRevenue, totalEffectiveRevenue } = item;
       const monthName = new Date(0, month - 1).toLocaleString("en-US", {
         month: "2-digit",
       });
@@ -215,11 +210,7 @@ const StatisticPage = () => {
     const csvData = revenueDataByYear[selectedYear];
     const csvString = [
       ["Month", "Net", "Effective"],
-      ...csvData.map((row) => [
-        row.month,
-        row.net,
-        row.effective,
-      ]),
+      ...csvData.map((row) => [row.month, row.net, row.effective]),
     ]
       .map((e) => e.join(","))
       .join("\n");
@@ -236,6 +227,8 @@ const StatisticPage = () => {
       document.body.removeChild(link);
     }
   };
+
+  // console.log(statistics);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -283,7 +276,9 @@ const StatisticPage = () => {
                 Tổng doanh thu ngày (thuần)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.totalNetRevenue}
+                {Number(statistics.totalNetRevenue.toFixed(0)).toLocaleString(
+                  "vi-VN"
+                )}
               </p>
             </div>
           </div>
@@ -296,7 +291,10 @@ const StatisticPage = () => {
                 Tổng doanh thu ngày (thực tế)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
-                {statistics.totalEffectiveRevenue}
+                {/* {Number(
+                  statistics.totalEffectiveRevenue.toFixed(0)
+                ).toLocaleString("vi-VN")} */}
+                {statistics.totalEffectiveRevenue.toLocaleString("vi-VN")}
               </p>
             </div>
           </div>
@@ -309,7 +307,9 @@ const StatisticPage = () => {
                 Doanh thu từ vé (thuần)
               </h3>
               <p className="text-3xl font-bold text-green-600">
-                {statistics.totalTicketRevenue}
+                {Number(
+                  statistics.totalTicketRevenue.toFixed(0)
+                ).toLocaleString("vi-VN")}
               </p>
             </div>
           </div>
@@ -322,7 +322,9 @@ const StatisticPage = () => {
                 Doanh thu từ các sản phẩm ngoài (thuần)
               </h3>
               <p className="text-3xl font-bold text-purple-600">
-                {statistics.totalOtherItemsRevenue}
+                {Number(
+                  statistics.totalOtherItemsRevenue.toFixed(0)
+                ).toLocaleString("vi-VN")}
               </p>
             </div>
           </div>

@@ -20,11 +20,15 @@ const LineChartComponent = ({
   const [availableYears, setAvailableYears] = useState([]);
   const [hasData, setHasData] = useState(true);
 
+  console.log(revenueDataByYear);
+
   useEffect(() => {
     const fetchYears = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/orders");
-        const years = extractYears(response.data);
+
+        const years = extractYears(response.data.data);
+
         setAvailableYears(
           years.length > 0 ? years : [new Date().getFullYear()]
         );
@@ -95,12 +99,27 @@ const LineChartComponent = ({
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={revenueDataByYear[selectedYear]}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
+            <XAxis
+              dataKey="month"
+              tickFormatter={(value) => `Tháng ${value}`}
+            />
+            <YAxis
+              tickFormatter={(value) => `${(value / 1_000_000).toFixed(1)}M`}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Line type="monotone" dataKey="Thuần" stroke="#8884d8" />
-            <Line type="monotone" dataKey="Thực tế" stroke="#82ca9d" />
+            <Line
+              type="monotone"
+              dataKey="thuần"
+              stroke="#8884d8"
+              name="Doanh thu (thuần)"
+            />
+            <Line
+              type="monotone"
+              dataKey="thựctế"
+              stroke="#82ca9d"
+              name="Doanh thu (thực tế)"
+            />
           </LineChart>
         </ResponsiveContainer>
       ) : (
