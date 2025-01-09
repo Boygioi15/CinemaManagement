@@ -189,7 +189,6 @@ const AdditionalItemManagementPage = () => {
       key: "price",
       render: (_, row) => row.price.toLocaleString(),
     },
-    { header: "Điểm tích lũy (%)", key: "loyalPointRate" },
     {
       header: "Hành động",
       key: "actions",
