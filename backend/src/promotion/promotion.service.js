@@ -1,16 +1,8 @@
-import {
-  customError
-} from "../middlewares/errorHandlers.js";
+import { customError } from "../middlewares/errorHandlers.js";
 import promotionModel from "./promotion.schema.js";
-import {
-  handleDestroyCloudinary
-} from "../ulitilities/cloudinary.js";
-import {
-  ParamModel
-} from "../param/param.schema.js";
-import {
-  ParamService
-} from "../param/param.service.js";
+import { handleDestroyCloudinary } from "../ulitilities/cloudinary.js";
+import { ParamModel } from "../param/param.schema.js";
+import { ParamService } from "../param/param.service.js";
 export class PromotionService {
   // Hàm tạo phòng và tạo ghế liên kết
   static createPromotion = async ({
@@ -35,15 +27,20 @@ export class PromotionService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (releaseDate < today) {
-      throw customError("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại", 400);
+      throw customError(
+        "Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại",
+        400
+      );
     }
-    // Kiểm tra ngày bắt đầu và ngày kết thúc
+    //So sánh ngày bắt đầu và ngày kết thúc
     const beginDateTemp = new Date(beginDate);
     const endDateTemp = new Date(endDate);
     if (beginDateTemp > endDateTemp) {
-      throw customError("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc", 400);
+      throw customError(
+        "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc",
+        400
+      );
     }
-
     const newPromotion = await promotionModel.create({
       name,
       thumbnailURL,
@@ -59,7 +56,10 @@ export class PromotionService {
     const { name, beginDate, endDate, discountRate } = updateData;
     //Kiểm tra tên sự kiện
     if (name) {
-      const existingPromotion = await promotionModel.findOne({ name, _id: { $ne: id } });
+      const existingPromotion = await promotionModel.findOne({
+        name,
+        _id: { $ne: id },
+      });
       if (existingPromotion) {
         throw customError("Đã có chương trình sự kiện khác có tên này", 400);
       }
@@ -73,15 +73,20 @@ export class PromotionService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (releaseDate < today) {
-      throw customError("Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại", 400);
+      throw customError(
+        "Ngày bắt đầu phải lớn hơn hoặc bằng ngày hiện tại",
+        400
+      );
     }
-    // Kiểm tra ngày bắt đầu và ngày kết thúc
+    //So sánh ngày bắt đầu và ngày kết thúc
     const beginDateTemp = new Date(beginDate);
     const endDateTemp = new Date(endDate);
     if (beginDateTemp > endDateTemp) {
-      throw customError("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc", 400);
+      throw customError(
+        "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc",
+        400
+      );
     }
-
     const promotion = await promotionModel.findByIdAndUpdate(id, updateData, {
       new: true,
     });
@@ -94,9 +99,11 @@ export class PromotionService {
 
   static pausePromotion = async (id) => {
     const promotion = await promotionModel.findByIdAndUpdate(
-      id, {
+      id,
+      {
         paused: true,
-      }, {
+      },
+      {
         new: true,
       }
     );
@@ -108,9 +115,11 @@ export class PromotionService {
 
   static resumePromotion = async (id) => {
     const promotion = await promotionModel.findByIdAndUpdate(
-      id, {
+      id,
+      {
         paused: false,
-      }, {
+      },
+      {
         new: true,
       }
     );
@@ -158,31 +167,36 @@ export class PromotionService {
 
     let totalDiscountRate = 0;
 
-    await Promise.all(promotionIDs.map(async (id) => {
-      const promotion = await promotionModel.findById(id)
-      totalDiscountRate += promotion.discountRate
-    }))
+    await Promise.all(
+      promotionIDs.map(async (id) => {
+        const promotion = await promotionModel.findById(id);
+        totalDiscountRate += promotion.discountRate;
+      })
+    );
 
     const param = await ParamService.getParams();
 
-    totalDiscountRate = param.maximumDiscountRate > totalDiscountRate ? totalDiscountRate : param.maximumDiscountRate;
+    totalDiscountRate =
+      param.maximumDiscountRate > totalDiscountRate
+        ? totalDiscountRate
+        : param.maximumDiscountRate;
 
-    return totalPrice * totalDiscountRate
-  }
+    return totalPrice * totalDiscountRate;
+  };
 
   static getDetailPromotionByIds = async (promotionIDs) => {
+    const data = await Promise.all(
+      promotionIDs.map(async (id) => {
+        const promotion = await promotionModel.findById(id);
+        if (!promotion) throw customError("Not found promotion");
 
-    const data = await Promise.all(promotionIDs.map(async (id) => {
-      const promotion = await promotionModel.findById(id)
-      if (!promotion) throw customError("Not found promotion")
+        return {
+          name: promotion.name,
+          discountRate: promotion.discountRate,
+        };
+      })
+    );
 
-      return {
-        name: promotion.name,
-        discountRate: promotion.discountRate
-      }
-    }))
-
-    return data
-
-  }
+    return data;
+  };
 }

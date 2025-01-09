@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import ColumnChart from "../../components/Statistic/ColumnChart";
+import LineChartComponent from "../../components/Statistic/ColumnChart";
 import PieCharts from "../../components/Statistic/PieChart";
 import axios from "axios";
 
@@ -30,6 +30,7 @@ const StatisticPage = () => {
     totalOtherItemsRevenue: 0,
   });
 
+  //biểu đồ loại vé
   const fetchticketType = async (day) => {
     try {
       const response = await axios.get(
@@ -47,6 +48,7 @@ const StatisticPage = () => {
     }
   };
 
+  //biểu đồ phim
   const fetchticketMovie = async (day) => {
     try {
       const response = await axios.get(
@@ -66,6 +68,7 @@ const StatisticPage = () => {
     }
   };
 
+  //biểu đồ snar phẩm kahcs
   const fetchadditionalItem = async (day) => {
     try {
       const response = await axios.get(
@@ -101,8 +104,11 @@ const StatisticPage = () => {
     }
   };
 
+  //vé đã bán
   const fetchTicket = async (day) => {
     try {
+      console.log(day);
+
       const response = await axios.get(
         `http://localhost:8000/api/statistics/ticket-serve-rate?selectedDate=${day}`
       );
@@ -111,6 +117,46 @@ const StatisticPage = () => {
       setStatistics((prev) => ({
         ...prev, // Giữ lại các giá trị cũ
         totalTicket: data.servedTickets,
+      }));
+    } catch (error) {
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    }
+  };
+
+  //phim hot nhất nagfy
+  const fetchHotFilm = async (day) => {
+    try {
+      console.log(day);
+
+      const response = await axios.get(
+        `http://localhost:8000/api/statistics/hot-movie?selectedDate=${day}`
+      );
+
+      const data = response.data;
+      setStatistics((prev) => ({
+        ...prev, // Giữ lại các giá trị cũ
+        hotFilmName: data.filmName,
+        hotFilmTotalSeat: data.totalSeats,
+      }));
+    } catch (error) {
+      alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
+    }
+  };
+
+  //sản phẩm hot nhất nagfy
+  const fetchBestSeller = async (day) => {
+    try {
+      console.log(day);
+
+      const response = await axios.get(
+        `http://localhost:8000/api/statistics/best-seller?selectedDate=${day}`
+      );
+
+      const data = response.data;
+      setStatistics((prev) => ({
+        ...prev, // Giữ lại các giá trị cũ
+        bestSellerName: data.productName,
+        bestSellerTotal: data.totalQuantity,
       }));
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
@@ -136,12 +182,14 @@ const StatisticPage = () => {
   };
 
   useEffect(() => {
-    fetchView(selectedDate);
+    // fetchView(selectedDate);
     fetchTicket(selectedDate);
     fetchticketType(selectedDate);
     fetchticketMovie(selectedDate);
     fetchadditionalItem(selectedDate);
-    fetchData(selectedYear);
+    fetchHotFilm(selectedDate);
+    fetchBestSeller(selectedDate);
+    // fetchData(selectedYear);
   }, [selectedDate, selectedYear]);
 
   const transformApiDataToRevenueData = (apiData, year) => {
@@ -214,13 +262,13 @@ const StatisticPage = () => {
           </button> */}
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div className="bg-blue-50 p-6 rounded-lg">
           <div className="flex items-center space-x-4">
             <FaFilm className="text-4xl text-blue-600" />
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Tổng vé đã bán
+                Số vé đã bán ra
               </h3>
               <p className="text-3xl font-bold text-blue-600">
                 {statistics.totalTicket}
@@ -233,7 +281,20 @@ const StatisticPage = () => {
             <FaShopify className="text-4xl text-yellow-600" />
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Tổng doanh thu ngày
+                Tổng doanh thu ngày (thuần)
+              </h3>
+              <p className="text-3xl font-bold text-yellow-600">
+                {statistics.totalRevenue.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-blue-50 p-6 rounded-lg">
+          <div className="flex items-center space-x-4">
+            <FaShopify className="text-4xl text-yellow-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Tổng doanh thu ngày (thực tế)
               </h3>
               <p className="text-3xl font-bold text-yellow-600">
                 {statistics.totalRevenue.toLocaleString()}
@@ -246,7 +307,7 @@ const StatisticPage = () => {
             <FaCreditCard className="text-4xl text-green-600" />
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Doanh thu từ vé
+                Doanh thu từ vé (thuần)
               </h3>
               <p className="text-3xl font-bold text-green-600">
                 {statistics.totalTicketRevenue.toLocaleString()}
@@ -259,7 +320,7 @@ const StatisticPage = () => {
             <FaUtensils className="text-4xl text-purple-600" />
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
-                Sản phẩm khác
+                Doanh thu từ các sản phẩm ngoài (thuần)
               </h3>
               <p className="text-3xl font-bold text-purple-600">
                 {statistics.totalOtherItemsRevenue.toLocaleString()}
@@ -268,12 +329,25 @@ const StatisticPage = () => {
           </div>
         </div>
       </div>
+      <div className="my-4 text-lg font-medium text-gray-800">
+        <p>
+          Phim <span className="text-red-600 font-bold">hot</span> nhất ngày:
+          <span className="font-bold"> {statistics.hotFilmName}</span> -
+          <span> {statistics.hotFilmTotalSeat} ghế đặt.</span>
+        </p>
+        <p>
+          Sản phẩm bán chạy:
+          <span className="font-bold"> {statistics.bestSellerName}</span> -
+          <span> {statistics.bestSellerTotal} bán ra.</span>
+        </p>
+      </div>
+
       <PieCharts
         movieData={ticketMovieData}
         ticketStatusData={itemData}
         ticketTypeData={ticketTypeData}
       />
-      <ColumnChart
+      <LineChartComponent
         revenueDataByYear={revenueDataByYear}
         selectedYear={selectedYear}
         setSelectedYear={setSelectedYear}

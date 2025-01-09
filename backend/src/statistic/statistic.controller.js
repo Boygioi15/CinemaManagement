@@ -7,354 +7,719 @@ import roomModel from "../room/room.controller.js";
 import filmModel from "../film/film.schema.js";
 
 class StatisticController {
-  //Tỷ lệ vé đã phục vụ hoặc in theo ngày
+  //Tỷ lệ vé theo ngày
   getTicketServeRate = expressAsyncHandler(async (req, res) => {
-    const {
-      selectedDate
-    } = req.query;
+    const { selectedDate } = req.query;
+
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = {
-      $or: [{
-        printed: true
-      }, {
-        served: true
-      }]
-    };
-    if (selectedDate) {
-      const selectedDateObj = new Date(selectedDate);
-      const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-      const formattedStartDate = startOfDay.toString();
-      const formattedEndDate = endOfDay.toString();
-      matchCondition.date = {
-        $gte: formattedStartDate,
-        $lte: formattedEndDate,
-      };
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const result = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
+        {
+          $lookup: {
+            from: "ordersdata_filmshows",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_decorators_offlines",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_data_items",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "itemsData",
+          },
+        },
+        {
+          $unwind: {
+            path: "$filmShowData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$filmShowData.tickets",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$offlineData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$itemsData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            totalTickets: {
+              $sum: { $toInt: "$filmShowData.tickets.quantity" },
+            },
+            servedTickets: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ["$offlineData.invalidReason_Printed", ""] },
+                      { $eq: ["$offlineData.invalidReason_Served", ""] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalTickets: { $sum: "$totalTickets" },
+            servedTickets: { $sum: "$servedTickets" },
+          },
+        },
+      ]);
+
+      // Prepare response
+      res.json({
+        totalTickets: result[0]?.totalTickets || 0,
+        servedTickets: result[0]?.servedTickets || 0,
+      });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi tính toán dữ liệu!");
     }
-    const totalTickets = await orderModel.aggregate([{
-        $unwind: "$tickets"
-      },
-      {
-        $group: {
-          _id: null,
-          totalQuantity: {
-            $sum: {
-              $toInt: "$tickets.quantity"
-            }
-          },
-        },
-      },
-    ]);
-    const servedTickets = await orderModel.aggregate([{
-        $match: {
-          ...matchCondition,
-          $or: [{
-            printed: true
-          }, {
-            served: true
-          }],
-        },
-      },
-      {
-        $unwind: "$tickets"
-      },
-      {
-        $group: {
-          _id: null,
-          totalQuantity: {
-            $sum: {
-              $toInt: "$tickets.quantity"
-            }
-          },
-        },
-      },
-    ]);
-    res.json({
-      totalTickets: totalTickets[0]?.totalQuantity || 0,
-      servedTickets: servedTickets[0]?.totalQuantity || 0,
-    });
   });
 
-  // Tỷ lệ các thể loại vé đã phục vụ hoặc in theo ngày
+  // Tỷ lệ các thể loại vé theo ngày
   getTicketCategoryRate = expressAsyncHandler(async (req, res) => {
-    const {
-      selectedDate
-    } = req.query;
+    const { selectedDate } = req.query;
+
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = {
-      $or: [{
-        printed: true
-      }, {
-        served: true
-      }]
-    };
-    if (selectedDate) {
-      const selectedDateObj = new Date(selectedDate);
-      const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-      const formattedStartDate = startOfDay.toString();
-      const formattedEndDate = endOfDay.toString();
-      matchCondition.date = {
-        $gte: formattedStartDate,
-        $lte: formattedEndDate,
-      };
-    }
-    const tickets = await orderModel.aggregate([{
-        $match: matchCondition
-      },
-      {
-        $unwind: "$tickets"
-      },
-      {
-        $group: {
-          _id: "$tickets.name",
-          totalQuantity: {
-            $sum: {
-              $toInt: "$tickets.quantity"
-            }
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const tickets = await orderModel.aggregate([
+        {
+          // Match orders by createdDate
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-      },
-      {
-        $project: {
-          name: "$_id",
-          totalQuantity: 1,
-          _id: 0
-        }
-      },
-    ]);
-    res.json(tickets);
+        {
+          // Lookup offline decorator data
+          $lookup: {
+            from: "orders_decorators_offlines", // Collection name (lowercase + pluralized)
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          // Lookup tickets from Orders_Data_FilmShow
+          $lookup: {
+            from: "ordersdata_filmshows", // Collection name (lowercase + pluralized)
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        {
+          // Unwind filmShowData to access tickets
+          $unwind: {
+            path: "$filmShowData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Unwind tickets array
+          $unwind: {
+            path: "$filmShowData.tickets",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Filter tickets based on invalidReason_Printed and invalidReason_Served
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          // Group tickets by name and sum quantities
+          $group: {
+            _id: "$filmShowData.tickets.name",
+            totalQuantity: {
+              $sum: { $toInt: "$filmShowData.tickets.quantity" },
+            },
+          },
+        },
+        {
+          // Project the final result
+          $project: {
+            name: "$_id",
+            totalQuantity: 1,
+            _id: 0,
+          },
+        },
+      ]);
+
+      // Respond with ticket categories and quantities
+      res.json(tickets);
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi xử lý dữ liệu!");
+    }
   });
 
-  // Tỷ lệ các sản phẩm đi kèm trong tất cả các vé đã phục vụ hoặc in theo ngày
+  //Tỷ lệ các sản phẩm đi kèm trong tất cả các vé theo ngày
   getAdditionalItemsRate = expressAsyncHandler(async (req, res) => {
-    const {
-      selectedDate
-    } = req.query;
+    const { selectedDate } = req.query;
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = {
-      $or: [{
-        printed: true
-      }, {
-        served: true
-      }]
-    };
-    if (selectedDate) {
-      const selectedDateObj = new Date(selectedDate);
-      const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-      const formattedStartDate = startOfDay.toString();
-      const formattedEndDate = endOfDay.toString();
-      matchCondition.date = {
-        $gte: formattedStartDate,
-        $lte: formattedEndDate,
-      };
-    }
-    const items = await orderModel.aggregate([{
-        $match: matchCondition
-      },
-      {
-        $unwind: "$items"
-      },
-      {
-        $group: {
-          _id: "$items.name",
-          totalQuantity: {
-            $sum: {
-              $toInt: "$items.quantity"
-            }
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const itemsRate = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-      },
-      {
-        $project: {
-          name: "$_id",
-          totalQuantity: 1,
-          _id: 0
-        }
-      },
-    ]);
-    res.json(items);
+        {
+          $lookup: {
+            from: "orders_decorators_offlines",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_data_items",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "itemsData",
+          },
+        },
+        {
+          $unwind: {
+            path: "$offlineData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$itemsData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$itemsData.items",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: "$itemsData.items.name",
+            totalQuantity: {
+              $sum: { $toInt: "$itemsData.items.quantity" },
+            },
+          },
+        },
+        {
+          $project: {
+            name: "$_id",
+            totalQuantity: 1,
+            _id: 0,
+          },
+        },
+      ]);
+
+      res.json(itemsRate);
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi xử lý dữ liệu!");
+    }
   });
 
   // Tỷ lệ vé theo phim đã phục vụ hoặc in theo ngày
   getTicketRateByFilm = expressAsyncHandler(async (req, res) => {
-    const {
-      selectedDate
-    } = req.query;
+    const { selectedDate } = req.query;
+
     if (!selectedDate) {
       res.status(400);
       throw new Error("Vui lòng cung cấp ngày!");
     }
-    let matchCondition = {
-      $or: [{
-        printed: true
-      }, {
-        served: true
-      }]
-    };
-    if (selectedDate) {
-      const selectedDateObj = new Date(selectedDate);
-      const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-      const formattedStartDate = startOfDay.toString();
-      const formattedEndDate = endOfDay.toString();
-      matchCondition.date = {
-        $gte: formattedStartDate,
-        $lte: formattedEndDate,
-      };
-    }
-    const tickets = await orderModel.aggregate([{
-        $match: matchCondition
-      },
-      {
-        $unwind: "$tickets"
-      },
-      {
-        $group: {
-          _id: "$filmName",
-          totalTickets: {
-            $sum: {
-              $toInt: "$tickets.quantity"
-            }
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const tickets = await orderModel.aggregate([
+        {
+          // Match orders by createdDate
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-      },
-      {
-        $project: {
-          filmName: "$_id",
-          totalTickets: 1,
-          _id: 0
-        }
-      },
-    ]);
+        {
+          // Lookup offline decorator data
+          $lookup: {
+            from: "orders_decorators_offlines", // Collection name (lowercase + pluralized)
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          // Lookup film show data
+          $lookup: {
+            from: "ordersdata_filmshows", // Collection name (lowercase + pluralized)
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        {
+          // Unwind filmShowData to access tickets
+          $unwind: {
+            path: "$filmShowData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Unwind tickets array
+          $unwind: {
+            path: "$filmShowData.tickets",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Filter tickets based on invalidReason_Printed and invalidReason_Served
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          // Group tickets by film name and sum quantities
+          $group: {
+            _id: "$filmShowData.filmName",
+            totalTickets: {
+              $sum: { $toInt: "$filmShowData.tickets.quantity" },
+            },
+          },
+        },
+        {
+          // Project the final result
+          $project: {
+            filmName: "$_id",
+            totalTickets: 1,
+            _id: 0,
+          },
+        },
+      ]);
 
-    res.json(tickets);
+      // Respond with ticket rates by film
+      res.json(tickets);
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi xử lý dữ liệu!");
+    }
   });
 
-  // Tổng doanh số vé, bắp, đồ uống đã phục vụ hoặc in theo từng tháng
+  // Phim hot nhất ngày
+  getHotMovieOfDay = expressAsyncHandler(async (req, res) => {
+    const { selectedDate } = req.query;
+
+    if (!selectedDate) {
+      res.status(400);
+      throw new Error("Vui lòng cung cấp ngày!");
+    }
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const result = await orderModel.aggregate([
+        {
+          // Match orders by createdDate
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
+        {
+          // Lookup offline decorator data
+          $lookup: {
+            from: "orders_decorators_offlines", // Collection name
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          // Lookup film show data
+          $lookup: {
+            from: "ordersdata_filmshows", // Collection name
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        {
+          // Unwind filmShowData to access seatNames
+          $unwind: {
+            path: "$filmShowData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Unwind seatNames array
+          $unwind: {
+            path: "$filmShowData.seatNames",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Filter based on invalidReason_Printed and invalidReason_Served
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          // Group by filmName and count seatNames
+          $group: {
+            _id: "$filmShowData.filmName",
+            totalSeats: { $sum: 1 },
+          },
+        },
+        {
+          // Sort by totalSeats in descending order to get the most booked film
+          $sort: {
+            totalSeats: -1,
+          },
+        },
+        {
+          // Limit to the top 1 film
+          $limit: 1,
+        },
+        {
+          // Project the final result
+          $project: {
+            filmName: "$_id",
+            totalSeats: 1,
+            _id: 0,
+          },
+        },
+      ]);
+
+      // Respond with the most booked film of the day
+      res.json(result[0] || { filmName: null, totalSeats: 0 });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi xử lý dữ liệu!");
+    }
+  });
+
+  // Sản phẩm bán chạy nhất ngày
+  getBestSellingProductOfDay = expressAsyncHandler(async (req, res) => {
+    const { selectedDate } = req.query;
+
+    if (!selectedDate) {
+      res.status(400);
+      throw new Error("Vui lòng cung cấp ngày!");
+    }
+
+    const selectedDateObj = new Date(selectedDate);
+    const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
+
+    try {
+      const bestSellingProduct = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
+        {
+          // Lookup offline decorator data
+          $lookup: {
+            from: "orders_decorators_offlines", // Collection name
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          // Lookup items data
+          $lookup: {
+            from: "orders_data_items", // Collection name
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "itemsData",
+          },
+        },
+        {
+          $unwind: {
+            path: "$itemsData",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$itemsData.items",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          // Filter based on invalidReason_Printed and invalidReason_Served
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: "$itemsData.items.name",
+            totalQuantity: {
+              $sum: { $toInt: "$itemsData.items.quantity" },
+            },
+          },
+        },
+        {
+          $sort: { totalQuantity: -1 },
+        },
+        {
+          $limit: 1,
+        },
+        {
+          $project: {
+            productName: "$_id",
+            totalQuantity: 1,
+            _id: 0,
+          },
+        },
+      ]);
+
+      res.json(bestSellingProduct.length ? bestSellingProduct[0] : { message: "Không có dữ liệu sản phẩm trong ngày!" });
+    } catch (error) {
+      res.status(500);
+      throw new Error("Có lỗi xảy ra khi tìm sản phẩm bán chạy nhất!");
+    }
+  });
+
+  // Tổng doanh số vé và sản phẩm theo từng tháng
   getMonthlyStatistics = expressAsyncHandler(async (req, res) => {
-    const {
-      year
-    } = req.query;
+    const { year } = req.query;
+
     if (!year) {
       res.status(400);
       throw new Error("Vui lòng cung cấp năm!");
     }
-    const monthlyStats = await orderModel.aggregate([{
-        $match: {
-          $or: [{
-            printed: true
-          }, {
-            served: true
-          }],
-        },
-      },
-      {
-        $project: {
-          month: {
-            $month: "$createdAt"
+
+    try {
+      const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
+      const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
+
+      const orders = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfYear, $lte: endOfYear },
           },
-          year: {
-            $year: "$createdAt"
-          },
-          tickets: "$tickets",
-          items: "$items",
         },
-      },
-      {
-        $match: {
-          year: parseInt(year)
-        }
-      },
-      {
-        $group: {
-          _id: "$month",
-          // Tính doanh thu từ vé theo từng loại vé
-          totalTicketRevenue: {
-            $sum: {
+        {
+          $lookup: {
+            from: "orders_decorators_offlines",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
+        },
+        {
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "ordersdata_filmshows",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_data_items",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "itemsData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_decorators_promotions",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "promotionsData",
+          },
+        },
+        {
+          $lookup: {
+            from: "orders_decorators_pointusages",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "pointsData",
+          },
+        },
+        {
+          $project: {
+            month: { $month: "$createdDate" },
+            tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
+            items: { $arrayElemAt: ["$itemsData.items", 0] },
+            discountRate: {
+              $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
+            },
+            pointUsed: {
+              $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
+            },
+            totalQuantity: {
+              $add: [
+                { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
+                { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            month: 1,
+            ticketRevenue: {
               $sum: {
                 $map: {
                   input: "$tickets",
                   as: "t",
                   in: {
-                    $multiply: [{
-                        $toDouble: "$$t.quantity"
-                      }, // Chuyển quantity thành số nguyên
+                    $subtract: [
                       {
-                        $toDouble: "$$t.unitPrice"
-                      }, // Chuyển unitPrice thành số thực
+                        $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
+                      },
+                      {
+                        $add: [
+                          {
+                            $multiply: [
+                              "$discountRate",
+                              {
+                                $multiply: [{ $toDouble: "$$t.price" }, { $toDouble: "$$t.quantity" }],
+                              },
+                              0.01,
+                            ],
+                          },
+                          {
+                            $cond: [
+                              { $gt: ["$totalQuantity", 0] },
+                              { $divide: ["$pointUsed", "$totalQuantity"] },
+                              0,
+                            ],
+                          },
+                        ],
+                      },
                     ],
                   },
                 },
               },
             },
-          },
-          // Tính doanh thu từ bỏng ngô (bao gồm các tên như "Bắp rang bơ")
-          totalPopcornRevenue: {
-            $sum: {
+            itemsRevenue: {
               $sum: {
                 $map: {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [{
-                        $regexMatch: {
-                          input: "$$i.name",
-                          regex: "Bắp",
-                          options: "i",
-                        },
+                    $subtract: [
+                      {
+                        $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
                       },
                       {
-                        $multiply: [{
-                            $toDouble: "$$i.quantity"
+                        $add: [
+                          {
+                            $multiply: [
+                              "$discountRate",
+                              {
+                                $multiply: [{ $toDouble: "$$i.price" }, { $toDouble: "$$i.quantity" }],
+                              },
+                              0.01,
+                            ],
                           },
                           {
-                            $toDouble: "$$i.unitPrice"
+                            $cond: [
+                              { $gt: ["$totalQuantity", 0] },
+                              { $divide: ["$pointUsed", "$totalQuantity"] },
+                              0,
+                            ],
                           },
                         ],
                       },
-                      0,
-                    ],
-                  },
-                },
-              },
-            },
-          },
-          // Tính doanh thu từ đồ uống (bao gồm các tên như "Nước coca")
-          totalDrinksRevenue: {
-            $sum: {
-              $sum: {
-                $map: {
-                  input: "$items",
-                  as: "i",
-                  in: {
-                    $cond: [{
-                        $regexMatch: {
-                          input: "$$i.name",
-                          regex: "Nước",
-                          options: "i",
-                        },
-                      },
-                      {
-                        $multiply: [{
-                            $toDouble: "$$i.quantity"
-                          },
-                          {
-                            $toDouble: "$$i.unitPrice"
-                          },
-                        ],
-                      },
-                      0,
                     ],
                   },
                 },
@@ -362,162 +727,207 @@ class StatisticController {
             },
           },
         },
-      },
-      {
-        $project: {
-          month: "$_id",
-          totalTicketRevenue: 1,
-          totalPopcornRevenue: 1,
-          totalDrinksRevenue: 1,
-          _id: 0,
+        {
+          $group: {
+            _id: { month: "$month" },
+            totalTicketRevenue: { $sum: "$ticketRevenue" },
+            totalItemsRevenue: { $sum: "$itemsRevenue" },
+          },
         },
-      },
-      {
-        $sort: {
-          month: 1
-        }
-      },
-    ]);
-    res.json(monthlyStats);
+        {
+          $project: {
+            month: "$_id.month",
+            totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
+            totalTicketRevenue: 1,
+            totalItemsRevenue: 1,
+            _id: 0,
+          },
+        },
+        {
+          $sort: { month: 1 },
+        },
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: orders,
+      });
+    } catch (error) {
+      res.status(500);
+      throw new Error(`Có lỗi xảy ra: ${error.message}`);
+    }
   });
 
-  // Tổng doanh thu ngày tính dựa vào tổng tiền (totalMoney) cho tất cả các đơn hàng đã phục vụ hoặc in
-  // Doanh thu từ vé theo ngày và số lượng sản phẩm khác "bắp" và "nước" theo ngày
+  // Doanh thu từ vé và sản phẩm theo ngày
   getDailyStatistics = expressAsyncHandler(async (req, res) => {
-    const {
-      selectedDate
-    } = req.query;
+    const { selectedDate } = req.query;
+
     if (!selectedDate) {
       res.status(400);
-      throw new Error("Vui lòng cung cấp ngày!");
+      throw new Error("Please provide a date!");
     }
+
     const selectedDateObj = new Date(selectedDate);
     const startOfDay = new Date(selectedDateObj.setHours(0, 0, 0, 0));
     const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
-    const formattedStartDate = startOfDay.toString();
-    const formattedEndDate = endOfDay.toString();
-    // Tính tổng doanh thu (totalMoney), doanh thu từ vé, và sản phẩm khác "bắp" và "nước"
-    const dailyStats = await orderModel.aggregate([{
-        $match: {
-          $or: [{
-            printed: true
-          }, {
-            served: true
-          }],
-          date: {
-            $gte: formattedStartDate,
-            $lte: formattedEndDate
+
+    try {
+      const orders = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-      },
-      {
-        $project: {
-          totalMoney: 1,
-          tickets: 1,
-          items: 1,
+        // Join with decorators offline
+        {
+          $lookup: {
+            from: "orders_decorators_offlines",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "offlineData",
+          },
         },
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: {
-            $sum: "$totalMoney"
-          }, // Tổng doanh thu từ tất cả các đơn hàng
-          totalTicketRevenue: {
-            $sum: {
+        {
+          $match: {
+            $and: [
+              { "offlineData.invalidReason_Printed": "" },
+              { "offlineData.invalidReason_Served": "" },
+            ],
+          },
+        },
+        // Join with tickets
+        {
+          $lookup: {
+            from: "ordersdata_filmshows",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "filmShowData",
+          },
+        },
+        // Join with items
+        {
+          $lookup: {
+            from: "orders_data_items",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "itemsData",
+          },
+        },
+        // Join with promotions
+        {
+          $lookup: {
+            from: "orders_decorators_promotions",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "promotionsData",
+          },
+        },
+        // Join with points usage
+        {
+          $lookup: {
+            from: "orders_decorators_pointusages",
+            localField: "_id",
+            foreignField: "orderRef",
+            as: "pointsData",
+          },
+        },
+        {
+          $project: {
+            tickets: { $arrayElemAt: ["$filmShowData.tickets", 0] },
+            items: { $arrayElemAt: ["$itemsData.items", 0] },
+            discountRate: {
+              $ifNull: [{ $arrayElemAt: ["$promotionsData.promotions.discountRate", 0] }, 0],
+            },
+            pointUsed: {
+              $ifNull: [{ $arrayElemAt: ["$pointsData.pointUsed", 0] }, 0],
+            },
+            totalQuantity: {
+              $add: [
+                { $sum: { $map: { input: { $arrayElemAt: ["$filmShowData.tickets", 0] }, as: "t", in: { $toInt: "$$t.quantity" } } } },
+                { $sum: { $map: { input: { $arrayElemAt: ["$itemsData.items", 0] }, as: "i", in: { $toInt: "$$i.quantity" } } } },
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            ticketRevenue: {
               $sum: {
                 $map: {
                   input: "$tickets",
                   as: "t",
                   in: {
-                    $multiply: [{
-                        $toDouble: "$$t.quantity"
-                      }, // quantity của vé
+                    $subtract: [
                       {
-                        $toDouble: "$$t.unitPrice"
-                      }, // đơn giá vé
+                        $multiply: [
+                          { $toDouble: "$$t.price" },
+                          { $toDouble: "$$t.quantity" },
+                        ],
+                      },
+                      {
+                        $add: [
+                          {
+                            $multiply: [
+                              "$discountRate",
+                              {
+                                $multiply: [
+                                  { $toDouble: "$$t.price" },
+                                  { $toDouble: "$$t.quantity" },
+                                ],
+                              },
+                              0.01,
+                            ],
+                          },
+                          {
+                            $cond: [
+                              { $gt: ["$totalQuantity", 0] },
+                              { $divide: ["$pointUsed", "$totalQuantity"] },
+                              0,
+                            ],
+                          },
+                        ],
+                      },
                     ],
                   },
                 },
               },
             },
-          },
-          totalOtherItemsRevenue: {
-            $sum: {
+            itemsRevenue: {
               $sum: {
                 $map: {
                   input: "$items",
                   as: "i",
                   in: {
-                    $cond: [{
-                        $and: [{
-                            $not: {
-                              $regexMatch: {
-                                input: "$$i.name",
-                                regex: "Bắp",
-                                options: "i",
-                              },
-                            },
-                          },
-                          {
-                            $not: {
-                              $regexMatch: {
-                                input: "$$i.name",
-                                regex: "Nước",
-                                options: "i",
-                              },
-                            },
-                          },
+                    $subtract: [
+                      {
+                        $multiply: [
+                          { $toDouble: "$$i.price" },
+                          { $toDouble: "$$i.quantity" },
                         ],
                       },
                       {
-                        $multiply: [{
-                            $toDouble: "$$i.quantity"
+                        $add: [
+                          {
+                            $multiply: [
+                              "$discountRate",
+                              {
+                                $multiply: [
+                                  { $toDouble: "$$i.price" },
+                                  { $toDouble: "$$i.quantity" },
+                                ],
+                              },
+                              0.01,
+                            ],
                           },
                           {
-                            $toDouble: "$$i.unitPrice"
+                            $cond: [
+                              { $gt: ["$totalQuantity", 0] },
+                              { $divide: ["$pointUsed", "$totalQuantity"] },
+                              0,
+                            ],
                           },
                         ],
                       },
-                      0,
-                    ],
-                  },
-                },
-              },
-            },
-          },
-          otherItemsQuantity: {
-            $sum: {
-              $sum: {
-                $map: {
-                  input: "$items",
-                  as: "i",
-                  in: {
-                    $cond: [{
-                        $and: [{
-                            $not: {
-                              $regexMatch: {
-                                input: "$$i.name",
-                                regex: "Bắp",
-                                options: "i",
-                              },
-                            },
-                          },
-                          {
-                            $not: {
-                              $regexMatch: {
-                                input: "$$i.name",
-                                regex: "Nước",
-                                options: "i",
-                              },
-                            },
-                          },
-                        ],
-                      },
-                      {
-                        $toDouble: "$$i.quantity"
-                      },
-                      0,
                     ],
                   },
                 },
@@ -525,23 +935,33 @@ class StatisticController {
             },
           },
         },
-      },
-      {
-        $project: {
-          totalRevenue: 1,
-          totalTicketRevenue: 1,
-          totalOtherItemsRevenue: 1,
-          otherItemsQuantity: 1,
-          _id: 0,
+        {
+          $group: {
+            _id: null,
+            totalTicketRevenue: { $sum: "$ticketRevenue" },
+            totalItemsRevenue: { $sum: "$itemsRevenue" },
+          },
         },
-      },
-    ]);
-    res.json({
-      totalRevenue: dailyStats[0]?.totalRevenue || 0,
-      totalTicketRevenue: dailyStats[0]?.totalTicketRevenue || 0,
-      totalOtherItemsRevenue: dailyStats[0]?.totalOtherItemsRevenue || 0,
-      otherItemsQuantity: dailyStats[0]?.otherItemsQuantity || 0,
-    });
+        {
+          $project: {
+            totalRevenue: { $add: ["$totalTicketRevenue", "$totalItemsRevenue"] },
+            totalTicketRevenue: 1,
+            totalItemsRevenue: 1,
+          },
+        },
+      ]);
+
+      res.status(200).json(
+        orders[0] || {
+          totalRevenue: 0,
+          totalTicketRevenue: 0,
+          totalOtherItemsRevenue: 0,
+        }
+      );
+    } catch (error) {
+      res.status(500);
+      throw new Error(`Error: ${error.message}`);
+    }
   });
 
   getFilmStatisticsByDate = async (req, res) => {

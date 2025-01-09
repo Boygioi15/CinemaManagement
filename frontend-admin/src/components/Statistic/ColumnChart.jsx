@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,7 +12,11 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
+const LineChartComponent = ({
+  revenueDataByYear,
+  selectedYear,
+  setSelectedYear,
+}) => {
   const [availableYears, setAvailableYears] = useState([]);
   const [hasData, setHasData] = useState(true);
 
@@ -89,15 +93,15 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
       </div>
       {hasData ? (
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={revenueDataByYear[selectedYear]}>
+          <LineChart data={revenueDataByYear[selectedYear]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="vé" fill="#8884d8" />
-            <Bar dataKey="sảnphẩmkhác" fill="#82ca9d" />
-          </BarChart>
+            <Line type="monotone" dataKey="Thuần" stroke="#8884d8" />
+            <Line type="monotone" dataKey="Thực tế" stroke="#82ca9d" />
+          </LineChart>
         </ResponsiveContainer>
       ) : (
         <div className="text-xl text-center text-gray-700">
@@ -108,4 +112,4 @@ const ColumnChart = ({ revenueDataByYear, selectedYear, setSelectedYear }) => {
   );
 };
 
-export default ColumnChart;
+export default LineChartComponent;

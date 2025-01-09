@@ -92,7 +92,7 @@ export class FilmService {
     // Kiểm tra ngày khởi chiếu
     const releaseDate = new Date(beginDate);
     const today = new Date();
-    today.setHours(23, 59, 59, 59);
+    today.setHours(23, 59, 59, 999);
     if (releaseDate <= today) {
       throw customError("Ngày khởi chiếu phải lớn hơn ngày hiện tại", 400);
     }
@@ -183,7 +183,7 @@ export class FilmService {
     // Kiểm tra ngày khởi chiếu
     const releaseDate = new Date(beginDate);
     const today = new Date();
-    today.setHours(23, 59, 59, 59);
+    today.setHours(23, 59, 59, 999);
     if (releaseDate <= today) {
       throw customError("Ngày khởi chiếu phải lớn hơn ngày hiện tại", 400);
     }
