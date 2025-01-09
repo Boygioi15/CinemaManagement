@@ -1107,12 +1107,15 @@ class StatisticController {
         };
       });
   
+      // Sắp xếp lại theo thứ tự tháng từ 1 đến 12
+      combinedData.sort((a, b) => a.month - b.month);
+  
       res.status(200).json(combinedData);
     } catch (error) {
       res.status(500);
       throw new Error(`Có lỗi xảy ra: ${error.message}`);
     }
-  });  
+  });    
   
   getDailyStatistics = expressAsyncHandler(async (req, res) => {
     const { selectedDate } = req.query;
