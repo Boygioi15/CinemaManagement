@@ -292,7 +292,9 @@ export class OrderService {
           }
         : query;
 
-      const orders = await orderModel.find(searchQuery);
+      const orders = await orderModel
+        .find(searchQuery)
+        .sort({ createdDate: 1 });
 
       const ordersWithDetails = await Promise.all(
         orders.map(async (order) => {

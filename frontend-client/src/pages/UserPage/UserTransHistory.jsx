@@ -8,6 +8,10 @@ import CustomButton from "../../Components/button";
 const UserTransHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [originalTransactions, setOriginalTransactions] = useState([]);
+  console.log(
+    "🚀 ~ UserTransHistory ~ originalTransactions:",
+    originalTransactions
+  );
   const [activeCollapse, setActiveCollapse] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
@@ -20,10 +24,23 @@ const UserTransHistory = () => {
 
   const handleGetAllOrder = async () => {
     setIsLoading(true); // Bắt đầu loading
-    const response = await getAllOrderByUserId();
-    setTransactions(response.data);
-    setOriginalTransactions(response.data);
-    setIsLoading(false); // Kết thúc loading
+    try {
+      const response = await getAllOrderByUserId();
+
+      // Sắp xếp theo ngày mới nhất (giả sử trường 'date' chứa thông tin ngày tháng)
+      const sortedTransactions = response.data.sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB - dateA; // Ngày mới nhất trước
+      });
+
+      setTransactions(sortedTransactions);
+      setOriginalTransactions(sortedTransactions);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setIsLoading(false); // Kết thúc loading
+    }
   };
 
   const toggleCollapse = (transactionId) => {
@@ -58,7 +75,7 @@ const UserTransHistory = () => {
 
     const filteredData = originalTransactions.filter((t) => {
       // Chuyển transactionDate về định dạng local (yyyy-mm-dd)
-      const transactionDate = new Date(t.createdDate).toLocaleDateString();
+      const transactionDate = new Date(t.createdAt).toLocaleDateString();
 
       // So sánh chỉ phần ngày
       return (
@@ -165,7 +182,7 @@ const UserTransHistory = () => {
 
                   <p className="text-sm text-gray-500">
                     Ngày:{" "}
-                    {new Date(transaction?.createdDate).toLocaleDateString()}
+                    {new Date(transaction?.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <FaChevronDown
