@@ -1,10 +1,19 @@
-const calculateTotalAfterDiscount = (totalPrice, totalDiscount, pointUsage, param) => {
+const calculateTotalAfterDiscount = (
+  totalPrice,
+  totalDiscount,
+  pointUsage,
+  param
+) => {
   if (!param) return 0;
 
-  let discountedPrice = totalPrice - (totalPrice * totalDiscount) / 100;
+  let discountedPrice = Math.floor(
+    totalPrice - (totalPrice * totalDiscount) / 100
+  );
 
   if (pointUsage && param?.loyalPoint_PointToReducedPriceRatio) {
-    discountedPrice -= (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100;
+    discountedPrice -= Math.floor(
+      (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100
+    );
   }
 
   return discountedPrice < 0 ? 0 : discountedPrice;
@@ -109,7 +118,8 @@ const PaymentSection = ({
     }
     const data = Math.min(
       totalPrice -
-        (totalPrice * totalDiscount) / 100 /
+        (totalPrice * totalDiscount) /
+          100 /
           param?.loyalPoint_PointToReducedPriceRatio,
       param?.loyalPoint_MaxiumPointUseInOneGo
     );
@@ -197,7 +207,9 @@ const PaymentSection = ({
                   <p className="text-xl font-bold">
                     {
                       +Math.floor(
-                        (totalAfterDiscount * param?.loyalPoint_OrderToPointRatio) / 100
+                        (totalAfterDiscount *
+                          param?.loyalPoint_OrderToPointRatio) /
+                          100
                       )
                     }
                   </p>

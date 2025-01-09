@@ -40,7 +40,7 @@ export class PaymentService {
       }
 
       let amount = req.body.totalPriceAfterDiscount || req.body.totalPrice;
-      // console.log("🚀 ~ PaymentService ~ createPayment= ~ amount:", amount);
+      console.log("🚀 ~ PaymentService ~ createPayment= ~ amount:", amount)
 
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
@@ -99,9 +99,14 @@ export class PaymentService {
         },
         data: requestBody,
       });
+      console.log(result);
       await Order_1Service.createNewEntry(orderId, signature);
 
-      const { filmShowId, seatSelections } = req.body;
+      const {
+        filmShowId,
+        seatSelections
+      } = req.body;
+      console.log("🚀 ~ PaymentService ~ createPayment= ~ seatSelections:", seatSelections)
 
       if (filmShowId && seatSelections) {
         await FilmShowService.appendLockedSeats(filmShowId, seatSelections);

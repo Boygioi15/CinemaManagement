@@ -6,6 +6,7 @@ import { getCurrentPoint } from "../config/api";
 const Sidebar = ({ userName, menuItems }) => {
   const location = useLocation();
   const [loyalPoint, setLoyalPoint] = useState(0);
+  console.log("🚀 ~ Sidebar ~ loyalPoint:", loyalPoint)
   useEffect(() => {
     const fetchLoyalPoint = async () => {
       const response = await getCurrentPoint();
