@@ -49,9 +49,9 @@ const PieCharts = ({ movieData, ticketStatusData, ticketTypeData }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 overflow-visible">
-      {renderPieChart(movieData, "Tỉ lệ vé theo phim (thuần)")}
-      {renderPieChart(ticketStatusData, "Tỉ lệ sản phẩm khác (thuần)")}
-      {renderPieChart(ticketTypeData, "Tỉ lệ vé theo loại (thuần)")}
+      {renderPieChart(movieData, "Tỉ lệ vé theo phim (số lượng)")}
+      {renderPieChart(ticketStatusData, "Tỉ lệ sản phẩm khác (doanh thu) (thuần)")}
+      {renderPieChart(ticketTypeData, "Tỉ lệ vé theo loại (doanh thu) (thuần)")}
     </div>
   );
 };
