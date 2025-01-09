@@ -1,311 +1,366 @@
 import mongoose from "mongoose";
 
-const orderSchemaV1 = new mongoose.Schema({
-  verifyCode: {
-    type: String,
-  },
-  filmName: {
-    type: String,
-    required: false,
-  },
-  ageRestriction: {
-    type: String,
-    required: false,
-  },
-  date: {
-    type: String,
-    required: false,
-  },
-  time: {
-    type: String,
-    required: false,
-  },
-  roomName: {
-    type: String,
-    required: false,
-  },
-  seatNames: [{
-    type: String,
-  }, ],
-  totalMoney: {
-    type: Number,
-    required: true,
-  },
-  totalMoneyAfterDiscount: {
-    type: Number,
-    required: true,
-  },
-  tickets: [{
-    name: {
+const orderSchemaV1 = new mongoose.Schema(
+  {
+    verifyCode: {
+      type: String,
+    },
+    filmName: {
       type: String,
       required: false,
     },
-    quantity: {
+    ageRestriction: {
       type: String,
       required: false,
     },
-    unitPrice: {
+    date: {
       type: String,
       required: false,
     },
-  }, ],
-  items: [{
-    name: {
+    time: {
       type: String,
       required: false,
     },
-    quantity: {
+    roomName: {
       type: String,
       required: false,
     },
-    unitPrice: {
-      type: String,
-      required: false,
-    },
-  }, ],
-  customerID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-  },
-  customerInfo: {
-    name: {
-      type: String,
+    seatNames: [
+      {
+        type: String,
+      },
+    ],
+    totalMoney: {
+      type: Number,
       required: true,
     },
-    email: {
-      type: String,
+    totalMoneyAfterDiscount: {
+      type: Number,
       required: true,
     },
-    phone: {
+    tickets: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        unitPrice: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
+    items: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        unitPrice: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
+    customerID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
+    customerInfo: {
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
+    online: {
+      type: Boolean,
+      default: true,
+    },
+    printed: {
+      type: Boolean,
+      default: false,
+    },
+    served: {
+      type: Boolean,
+      default: false,
+    },
+    invalidReason_Printed: {
       type: String,
-      required: true,
+      default: "",
+    },
+    invalidReason_Served: {
+      type: String,
+      default: "",
+    },
+    promotionID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "promotions",
     },
   },
-  online: {
-    type: Boolean,
-    default: true,
-  },
-  printed: {
-    type: Boolean,
-    default: false,
-  },
-  served: {
-    type: Boolean,
-    default: false,
-  },
-  invalidReason_Printed: {
-    type: String,
-    default: "",
-  },
-  invalidReason_Served: {
-    type: String,
-    default: "",
-  },
-  promotionID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "promotions",
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
-const orderSchemaV2 = new mongoose.Schema({
-  verifyCode: {
-    type: String,
+const orderSchemaV2 = new mongoose.Schema(
+  {
+    verifyCode: {
+      type: String,
+    },
+    createdDate: {
+      type: Date,
+      default: Date.now(),
+    },
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    totalPriceAfterDiscount: {
+      type: Number,
+    },
+    customerInfo: {
+      customerRef: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+    },
   },
-  createdDate: {
-    type: Date,
-    required: true,
-  },
-  totalPrice: {
-    type: Number,
-    required: true,
-  },
-  totalPriceAfterDiscount: {
-    type: Number,
-  },
-  customerInfo: {
-    customerRef: {
+  {
+    timestamps: true,
+  }
+);
+
+const Orders_Decorators_Offline = new mongoose.Schema(
+  {
+    orderRef: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
-    name: {
-      type: String,
-      required: true,
+    printed: {
+      type: Boolean,
+      default: false,
     },
-    email: {
-      type: String,
-      required: true,
+    served: {
+      type: Boolean,
+      default: false,
     },
-    phone: {
+    invalidReason_Printed: {
       type: String,
-      required: true,
-    }
+      default: "",
+    },
+    invalidReason_Served: {
+      type: String,
+      default: "",
+    },
+  },
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true,
-});
+);
 
-const Orders_Decorators_Offline = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+const Orders_Data_FilmShow = new mongoose.Schema(
+  {
+    orderRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    filmName: {
+      type: String,
+      required: false,
+    },
+    ageRestriction: {
+      type: String,
+      required: false,
+    },
+    showDate: {
+      type: String,
+      required: false,
+    },
+    showTime: {
+      type: String,
+      required: false,
+    },
+    roomName: {
+      type: String,
+      required: false,
+    },
+    seatNames: [
+      {
+        type: String,
+      },
+    ],
+    tickets: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        price: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
   },
-  printed: {
-    type: Boolean,
-    default: false,
-  },
-  served: {
-    type: Boolean,
-    default: false,
-  },
-  invalidReason_Printed: {
-    type: String,
-    default: "",
-  },
-  invalidReason_Served: {
-    type: String,
-    default: "",
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true,
-});
+);
 
-const Orders_Data_FilmShow = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  filmName: {
-    type: String,
-    required: false,
-  },
-  ageRestriction: {
-    type: String,
-    required: false,
-  },
-  showDate: {
-    type: String,
-    required: false,
-  },
-  showTime: {
-    type: String,
-    required: false,
-  },
-  roomName: {
-    type: String,
-    required: false,
-  },
-  seatNames: [{
-    type: String,
-  }, ],
-  tickets: [{
-    name: {
-      type: String,
-      required: false,
+const Orders_Data_Items = new mongoose.Schema(
+  {
+    orderRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
     },
-    quantity: {
-      type: String,
-      required: false,
-    },
-    price: {
-      type: String,
-      required: false,
-    },
-  }, ]
+    items: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        price: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
 
-}, {
-  timestamps: true,
-});
-
-const Orders_Data_Items = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+const Orders_Data_Others = new mongoose.Schema(
+  {
+    orderRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    items: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        quantity: {
+          type: String,
+          required: false,
+        },
+        price: {
+          type: String,
+          required: false,
+        },
+      },
+    ],
   },
-  items: [{
-    name: {
-      type: String,
-      required: false,
-    },
-    quantity: {
-      type: String,
-      required: false,
-    },
-    price: {
-      type: String,
-      required: false,
-    },
-  }, ],
+  {
+    timestamps: true,
+  }
+);
 
-}, {
-  timestamps: true,
-});
-
-const Orders_Data_Others = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+const Orders_Decorators_Promotions = new mongoose.Schema(
+  {
+    orderRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    promotions: [
+      {
+        name: {
+          type: String,
+          required: false,
+        },
+        discountRate: {
+          type: Number,
+          required: false,
+        },
+      },
+    ],
   },
-  items: [{
-    name: {
-      type: String,
-      required: false,
-    },
-    quantity: {
-      type: String,
-      required: false,
-    },
-    price: {
-      type: String,
-      required: false,
-    },
-  }, ],
+  {
+    timestamps: true,
+  }
+);
 
-}, {
-  timestamps: true,
-});
-
-const Orders_Decorators_Promotions = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  promotions: [{
-    name: {
-      type: String,
-      required: false,
+const Orders_Decorators_PointUsage = new mongoose.Schema(
+  {
+    orderRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
     },
-    discountRate: {
+    pointUsed: {
       type: Number,
-      required: false,
-    }
-  }, ],
-}, {
-  timestamps: true,
-});
-
-const Orders_Decorators_PointUsage = new mongoose.Schema({
-  orderRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+      required: true,
+    },
+    param_PointToMoneyRatio: {
+      type: Number,
+      required: true,
+    },
   },
-  pointUsed: {
-    type: Number,
-    required: true
-  },
-  param_PointToMoneyRatio: {
-    type: Number,
-    required: true
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true,
-});
+);
 
 export const orderModel = mongoose.model("orders", orderSchemaV2);
-export const ordersDataFilmShowModel = mongoose.model("ordersData_FilmShow", Orders_Data_FilmShow);
-export const ordersDecoratorsPointUsageModel = mongoose.model("orders_Decorators_PointUsage", Orders_Decorators_PointUsage);
-export const ordersDecoratorsPromotionsModel = mongoose.model("orders_Decorators_Promotions", Orders_Decorators_Promotions);
-export const ordersDataItemsModel = mongoose.model("orders_Data_Items", Orders_Data_Items);
-export const ordersDataOthersModel = mongoose.model("orders_Data_Others", Orders_Data_Others);
-export const ordersDecoratorsOfflineModel = mongoose.model("orders_Decorators_Offline", Orders_Decorators_Offline);
+export const ordersDataFilmShowModel = mongoose.model(
+  "ordersData_FilmShow",
+  Orders_Data_FilmShow
+);
+export const ordersDecoratorsPointUsageModel = mongoose.model(
+  "orders_Decorators_PointUsage",
+  Orders_Decorators_PointUsage
+);
+export const ordersDecoratorsPromotionsModel = mongoose.model(
+  "orders_Decorators_Promotions",
+  Orders_Decorators_Promotions
+);
+export const ordersDataItemsModel = mongoose.model(
+  "orders_Data_Items",
+  Orders_Data_Items
+);
+export const ordersDataOthersModel = mongoose.model(
+  "orders_Data_Others",
+  Orders_Data_Others
+);
+export const ordersDecoratorsOfflineModel = mongoose.model(
+  "orders_Decorators_Offline",
+  Orders_Decorators_Offline
+);
