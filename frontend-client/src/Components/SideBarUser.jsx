@@ -1,10 +1,20 @@
 // Sidebar.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { getCurrentPoint } from "../config/api";
 
 const Sidebar = ({ userName, menuItems }) => {
   const location = useLocation();
-
+  const [loyalPoint, setLoyalPoint] = useState(0);
+  console.log("🚀 ~ Sidebar ~ loyalPoint:", loyalPoint)
+  useEffect(() => {
+    const fetchLoyalPoint = async () => {
+      const response = await getCurrentPoint();
+      console.log(response)
+      setLoyalPoint(response.data.currentLoyalPoint);
+    };
+    fetchLoyalPoint();
+  }, []);
   return (
     <div
       style={{ fontSize: "18px" }}
@@ -22,7 +32,7 @@ const Sidebar = ({ userName, menuItems }) => {
           </div>
           <div>
             <p style={{ fontSize: "20px" }} className="font-medium text-lg">
-              {userName}   <span className="text-sm">123 points</span>
+              {userName} <span className="text-sm">{loyalPoint} points</span>
             </p>
           </div>
         </div>

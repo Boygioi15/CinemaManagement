@@ -90,6 +90,8 @@ const ShowTimePage = () => {
   return (
     <div className=" text-white px-[160px] gap-20 py-10 min-h-[800px]">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8 mx-20">
+        <h1 className="col-span-2 text-center font-bold">Lịch chiếu</h1>
+
         <div className="relative border border-white-400 rounded-lg p-2">
           <label
             className="block mb-2 text-2xl font-bold"

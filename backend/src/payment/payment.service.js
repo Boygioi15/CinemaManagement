@@ -1,23 +1,13 @@
 import config from "./config.js";
 import crypto from "crypto";
 import axios from "axios";
-import {
-  OrderService
-} from "../order/order.service.js";
+import { OrderService } from "../order/order.service.js";
 import mongoose from "mongoose";
-import {
-  Order_1Service
-} from "./Order_1/Order_1.service.js";
-import {
-  FilmShowService
-} from "../filmShow/filmShow.service.js";
-import {
-  EmailService
-} from "../email/email.service.js";
+import { Order_1Service } from "./Order_1/Order_1.service.js";
+import { FilmShowService } from "../filmShow/filmShow.service.js";
+import { EmailService } from "../email/email.service.js";
 import expressAsyncHandler from "express-async-handler";
-import {
-  orderModel
-} from "../order/order.schema.js";
+import { orderModel } from "../order/order.schema.js";
 import promotionModel from "../promotion/promotion.schema.js";
 export class PaymentService {
   static createPayment = async (req, res) => {
@@ -50,6 +40,7 @@ export class PaymentService {
       }
 
       let amount = req.body.totalPriceAfterDiscount || req.body.totalPrice;
+      console.log("🚀 ~ PaymentService ~ createPayment= ~ amount:", amount)
 
       // Ensure all required fields are present and valid
       if (!amount || amount <= 0) {
@@ -58,14 +49,14 @@ export class PaymentService {
           message: "Invalid amount",
         });
       }
-
+      let roundedAmount = Math.floor(amount);
       const orderId = new mongoose.Types.ObjectId();
       const requestId = orderId;
 
       // Prepare signature components carefully
       let rawSignature = [
         `accessKey=${accessKey}`,
-        `amount=${amount}`,
+        `amount=${roundedAmount}`,
         `extraData=${JSON.stringify(transactionData)}`,
         `ipnUrl=${ipnUrl}`,
         `orderId=${orderId}`,
@@ -82,13 +73,12 @@ export class PaymentService {
         .createHmac("sha256", secretKey)
         .update(rawSignature)
         .digest("hex");
-
       const requestBody = JSON.stringify({
         partnerCode,
         partnerName: "Nhóm 22 - Quản lý hệ thống rạp chiếu phim",
         storeId: "CinemaStore",
         requestId,
-        amount,
+        amount: roundedAmount,
         orderId,
         orderInfo: "Thanh toán vé xem phim với MOMO",
         redirectUrl,
@@ -109,6 +99,7 @@ export class PaymentService {
         },
         data: requestBody,
       });
+      console.log(result);
       await Order_1Service.createNewEntry(orderId, signature);
 
       const {
@@ -136,12 +127,7 @@ export class PaymentService {
     }
   };
   static momoCallBackService = async (req, res) => {
-    const {
-      resultCode,
-      amount,
-      orderId,
-      extraData
-    } = req.body;
+    const { resultCode, amount, orderId, extraData } = req.body;
 
     const extraDataObj = JSON.parse(extraData);
     //success
@@ -154,7 +140,6 @@ export class PaymentService {
         if (!newOrder) throw customError("Tạo đơn hàng thất bại");
         // cuưa dăng nhap ma mua
 
-
         // user da dăng nhap
         const orderDetail = await OrderService.getDetailOrder(newOrder._id);
 
@@ -166,20 +151,14 @@ export class PaymentService {
 
         return res.status(204).json(newOrder);
       } catch (error) {
-        const {
-          filmShowId,
-          seatSelections
-        } = extraDataObj;
+        const { filmShowId, seatSelections } = extraDataObj;
         if (filmShowId && seatSelections) {
           await FilmShowService.releaseLockedSeats(filmShowId, seatSelections);
         }
       }
     } else {
       // fail
-      const {
-        filmShowId,
-        seatSelections
-      } = extraDataObj;
+      const { filmShowId, seatSelections } = extraDataObj;
       if (filmShowId && seatSelections) {
         await FilmShowService.releaseLockedSeats(filmShowId, seatSelections);
       }

@@ -165,10 +165,19 @@ export class EmailService {
                 </tr>`
               ).join("") || "";
             })()}
+
+          
+             <tr style="background-color: #6b3fa4; color: white">
+              <td colspan="4">Khuyến mãi</td>
+              <td>${(ticket?.totalPrice-ticket.totalPriceAfterDiscount)|| 0 }</td>
+            </tr>
+            
+         
             <tr style="background-color: #6b3fa4; color: white">
               <td colspan="4">TỔNG TIỀN (VND)</td>
-              <td>${ticket.totalPrice}</td>
+              <td>${ticket.totalPriceAfterDiscount ||ticket.totalPrice}</td>
             </tr>
+
           </table>`;
       })()
     : ""

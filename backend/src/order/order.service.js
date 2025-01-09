@@ -8,24 +8,16 @@ import {
   ordersDecoratorsOfflineModel,
   ordersDataOthersModel,
 } from "./order.schema.js";
-import {
-  generateRandomVerifyCode
-} from "../ulitilities/ultilitiesFunction.js";
+import { generateRandomVerifyCode } from "../ulitilities/ultilitiesFunction.js";
 
 import filmModel from "../film/film.schema.js";
 import roomModel from "../room/room.schema.js";
-import {
-  TicketTypeModel
-} from "../param/param.schema.js";
+import { TicketTypeModel } from "../param/param.schema.js";
 import additionalItemModel from "../additionalItem/additionalItem.schema.js";
 import mongoose from "mongoose";
-import {
-  PromotionService
-} from "../promotion/promotion.service.js";
+import { PromotionService } from "../promotion/promotion.service.js";
 import LoyalPointService from "../loyalpoint/loyalPoint.service.js";
-import {
-  ParamService
-} from "../param/param.service.js";
+import { ParamService } from "../param/param.service.js";
 export class OrderService {
   // static getAllOrders = async () => {
   //   return await orderModel.find().sort({
@@ -55,9 +47,8 @@ export class OrderService {
     totalPriceAfterDiscount,
     user,
     otherDatas,
-    pointUsage
+    pointUsage,
   }) => {
-
     let filmShow = {};
     let film = {};
     let roomName = null;
@@ -70,16 +61,16 @@ export class OrderService {
       if (!filmShow) throw new Error("Film Show not found");
       roomName = (await roomModel.findById(filmShow.roomId)).roomName;
       film = await filmModel.findById(filmShow.film);
-      seatNames = seatSelections.map((seat) => seat.seatName);
+      seatNames = await seatSelections.map((seat) => seat.seatName);
     }
-
+    console.log("Reach here-9");
     const ageRestriction = film?.ageRestriction || null;
     const dataFilmShow = {
       filmName: filmShow?.film?.name || null,
       showDate: filmShow?.showDate || null,
       showTime: filmShow?.showTime || null,
     };
-
+    console.log("Reach here-8");
     if (additionalItemSelections.length > 0) {
       nItems = await Promise.all(
         additionalItemSelections.map(async (items) => {
@@ -92,7 +83,7 @@ export class OrderService {
         })
       );
     }
-
+    console.log("Reach here-7");
     if (ticketSelections) {
       nTickets = await Promise.all(
         ticketSelections.map(async (ticket) => {
@@ -105,25 +96,25 @@ export class OrderService {
         })
       );
     }
-
-    const vietnamTime = new Date();
-    vietnamTime.setHours(vietnamTime.getHours() + 7); // Vietnam is UTC+7
-
-    const newOrder = await orderModel.create({
-      createdDate: vietnamTime,
-      totalPrice: totalPrice,
-      totalPriceAfterDiscount: totalPriceAfterDiscount || null,
-      customerInfo: {
-        customerRef: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      },
-    });
+    console.log("Reach here-6");
+    let newOrder;
+    try {
+      newOrder = await orderModel.create({
+        totalPrice: totalPrice,
+        totalPriceAfterDiscount: totalPriceAfterDiscount || null,
+        customerInfo: {
+          customerRef: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     newOrder.verifyCode = generateRandomVerifyCode();
-
-
+    console.log("Reach here-5");
     // create
     if (filmShowId) {
       await OrderHelper.createFilmShowOrder({
@@ -135,44 +126,59 @@ export class OrderService {
         tickets: nTickets,
       });
     }
-
+    console.log("Reach here-4");
     await OrderHelper.createOfflineServiceOrder({
       orderRef: newOrder._id,
     });
-
+    console.log("Reach here-3");
     if (additionalItemSelections.length > 0) {
       await OrderHelper.createItemsOrder({
         orderRef: newOrder._id,
         items: nItems,
       });
     }
-
+    console.log("Reach here-2");
     if (otherDatas) {
       await OrderHelper.createOrdersDataOthers({
         orderRef: newOrder._id,
         items: otherDatas,
-      })
+      });
     }
-
+    console.log("Reach here-1");
     if (promotionIDs) {
       await OrderHelper.createPromotionDecorator({
         orderRef: newOrder._id,
-        promotion: await PromotionService.getDetailPromotionByIds(promotionIDs)
-      })
+        promotions: await PromotionService.getDetailPromotionByIds(
+          promotionIDs
+        ),
+      });
     }
-
+    console.log("Reach here0");
+    if (pointUsage) {
+      const param = await ParamService.getParams();
+      await OrderHelper.createPointUsageDecorator({
+        orderRef: newOrder._id,
+        pointUsed: pointUsage,
+        param_PointToMoneyRatio: param.loyalPoint_PointToReducedPriceRatio,
+      });
+    }
+    console.log("Reach here1");
     // clear point
     if (pointUsage) {
-      await LoyalPointService.addLoyalPoint(user._id, -pointUsage)
+      console.log("🚀 ~ OrderService ~ pointUsage:", pointUsage);
+      await LoyalPointService.addLoyalPoint(user._id, -pointUsage);
     }
-
-
+    console.log("Reach here2");
     // earn point
     const param = await ParamService.getParams();
     const loyalPoint_OrderToPointRatio = param.loyalPoint_OrderToPointRatio;
-    console.log("🚀 ~ OrderService ~ loyalPoint_OrderToPointRatio:", loyalPoint_OrderToPointRatio)
-    let accPoint = (totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio;
-    await LoyalPointService.addLoyalPoint(user._id, accPoint)
+    let accPoint = Math.floor(
+      ((totalPriceAfterDiscount || totalPrice) * loyalPoint_OrderToPointRatio) /
+        100
+    );
+    console.log("Point: ", accPoint);
+    console.log("User id: ", user._id);
+    await LoyalPointService.addLoyalPoint(user._id, accPoint);
 
     return await newOrder.save();
   };
@@ -233,15 +239,17 @@ export class OrderService {
           invalidReason_Served: offlineService.invalidReason_Served,
         },
         // Film show details if exists
-        filmShow: filmShowData ? {
-          filmName: filmShowData.filmName,
-          ageRestriction: filmShowData.ageRestriction,
-          showDate: filmShowData.showDate,
-          showTime: filmShowData.showTime,
-          roomName: filmShowData.roomName,
-          seatNames: filmShowData.seatNames,
-          tickets: filmShowData.tickets,
-        } : null,
+        filmShow: filmShowData
+          ? {
+              filmName: filmShowData.filmName,
+              ageRestriction: filmShowData.ageRestriction,
+              showDate: filmShowData.showDate,
+              showTime: filmShowData.showTime,
+              roomName: filmShowData.roomName,
+              seatNames: filmShowData.seatNames,
+              tickets: filmShowData.tickets,
+            }
+          : null,
         otherDatas: otherDatas?.items,
         // Items if exists
         items: itemsData?.items || [],
@@ -250,10 +258,12 @@ export class OrderService {
         promotions: promotionsData?.promotions || [],
 
         // Point usage if exists
-        pointUsage: pointUsageData ? {
-          pointUsed: pointUsageData.pointUsed,
-          pointToMoneyRatio: pointUsageData.param_PointToMoneyRatio,
-        } : null,
+        pointUsage: pointUsageData
+          ? {
+              pointUsed: pointUsageData.pointUsed,
+              pointToMoneyRatio: pointUsageData.param_PointToMoneyRatio,
+            }
+          : null,
 
         // Add timestamps
         createdAt: order.createdAt,
@@ -275,13 +285,16 @@ export class OrderService {
   // Function to get all orders with details
   static getAllOrders = async (query = {}, userId = null) => {
     try {
-      const searchQuery = userId ? {
-          ...query,
-          "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
-        } :
-        query;
+      const searchQuery = userId
+        ? {
+            ...query,
+            "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
+          }
+        : query;
 
-      const orders = await orderModel.find(searchQuery);
+      const orders = await orderModel
+        .find(searchQuery)
+        .sort({ createdDate: 1 });
 
       const ordersWithDetails = await Promise.all(
         orders.map(async (order) => {
@@ -309,7 +322,7 @@ export class OrderService {
           "customerInfo.customerRef": new mongoose.Types.ObjectId(userId),
         })
         .sort({
-          createdAt: 1
+          createdAt: 1,
         });
 
       const ordersWithDetails = await Promise.all(
@@ -356,14 +369,18 @@ export class OrderHelper {
         throw new Error("Invalid order reference");
       }
 
-      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate({
-        orderRef,
-      }, {
-        printed: false,
-        invalidReason_Printed: reason,
-      }, {
-        new: true,
-      });
+      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate(
+        {
+          orderRef,
+        },
+        {
+          printed: false,
+          invalidReason_Printed: reason,
+        },
+        {
+          new: true,
+        }
+      );
 
       return {
         success: true,
@@ -384,14 +401,18 @@ export class OrderHelper {
         throw new Error("Invalid order reference");
       }
 
-      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate({
-        orderRef,
-      }, {
-        served: false,
-        invalidReason_Served: reason,
-      }, {
-        new: true,
-      });
+      const order = await ordersDecoratorsOfflineModel.findOneAndUpdate(
+        {
+          orderRef,
+        },
+        {
+          served: false,
+          invalidReason_Served: reason,
+        },
+        {
+          new: true,
+        }
+      );
 
       return {
         success: true,
@@ -430,14 +451,18 @@ export class OrderHelper {
         };
       }
 
-      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate({
-        orderRef,
-      }, {
-        printed: true,
-        invalidReason_Printed: "", // Clear any previous invalid reason
-      }, {
-        new: true,
-      });
+      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate(
+        {
+          orderRef,
+        },
+        {
+          printed: true,
+          invalidReason_Printed: "", // Clear any previous invalid reason
+        },
+        {
+          new: true,
+        }
+      );
 
       return {
         success: true,
@@ -476,14 +501,18 @@ export class OrderHelper {
         };
       }
 
-      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate({
-        orderRef,
-      }, {
-        served: true,
-        invalidReason_Served: "",
-      }, {
-        new: true,
-      });
+      const updatedOrder = await ordersDecoratorsOfflineModel.findOneAndUpdate(
+        {
+          orderRef,
+        },
+        {
+          served: true,
+          invalidReason_Served: "",
+        },
+        {
+          new: true,
+        }
+      );
 
       return {
         success: true,

@@ -16,7 +16,12 @@ import ShowtimeChooseBox from "../../Components/ShowtimeChooseBox";
 import TicketType from "../../Components/TicketType";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { getCurrentPro, getShowTimeOfDateByFilmId } from "../../config/api";
+import {
+  getCurrentPoint,
+  getCurrentPro,
+  getParam,
+  getShowTimeOfDateByFilmId,
+} from "../../config/api";
 import formatCurrencyNumber from "../../utils/FormatCurrency";
 import QuantitySelectorV2 from "../../Components/QuantitySelectorV2";
 import { use } from "react";
@@ -716,8 +721,8 @@ const FilmDetailPage = () => {
           selectedPromotions={selectedPromotions} // Truyền danh sách khuyến mãi
         />
       )}
-      {selectedFilmShow && 
-        (<PromotionList
+      {selectedFilmShow && (
+        <PromotionList
           isOpen={isPromotionListOpen}
           setIsOpen={setIsPromotionListOpen}
           onApplyPromotions={(selectedPromotions, totalDiscount) => {
@@ -726,15 +731,20 @@ const FilmDetailPage = () => {
             console.log("Các khuyến mãi đã chọn:", selectedPromotions);
             console.log("Tổng khuyến mãi:", totalDiscount, "%");
           }}
-        />)
-      }
-      
+        />
+      )}
 
       {/* Nút mở sidebar PromotionList */}
-      {selectedFilmShow &&  !isPromotionListOpen && (
+      {selectedFilmShow && !isPromotionListOpen && (
         <button
           onClick={() => setIsPromotionListOpen(true)}
           className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg flex items-center justify-center"
+          style={{
+            position: "fixed",
+            top: "30%",
+            right: "0",
+            transform: "translateY(-50%)",
+          }}
         >
           <FaArrowLeft size={20} />
         </button>
@@ -973,37 +983,14 @@ function BottomBar({
   selectedPromotions, // Thêm prop
 }) {
   const [usePoints, setUsePoints] = useState(false);
-
-  const handleTogglePoints = () => {
-    setUsePoints(!usePoints);
-  };
-  const calculateTotalPrice = () => {
-    let total = 0;
-    let vCount = 0;
-    for (let i = 0; i < ticketSelections.length; i++) {
-      total += ticketSelections[i].quantity * ticketSelections[i].price;
-    }
-    for (let i = 0; i < seatSelections.length; i++) {
-      for (let j = 0; j < seatSelections[i].length; j++) {
-        if (seatSelections[i][j].selected) {
-          //console.log(seatSelections[i][j].seatType)
-          if (seatSelections[i][j].seatType === "V") {
-            vCount++;
-          }
-        }
-      }
-    }
-    total += vCount * 20000;
-    for (let i = 0; i < additionalItemSelections.length; i++) {
-      total +=
-        additionalItemSelections[i].quantity *
-        additionalItemSelections[i].price;
-    }
-    return total;
-  };
+  const [loyalPoint, setLoyalPoint] = useState(0);
   const { user } = useAuth(); // Lấy user từ context
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
+  const [param, setParam] = useState(null);
+  const [pointUsage, setPointUsage] = useState(null);
+  const [priceAfterAll, setPriceAfterAll] = useState(0);
   const navigate = useNavigate();
+
   const handleCreatePayment = async () => {
     if (!localStorage.getItem("accessToken")) {
       alert("Bạn cần phải đăng nhập trước khi thực hiện thanh toán");
@@ -1029,9 +1016,8 @@ function BottomBar({
         totalPrice: calculateTotalPrice(),
         filmShowId: selectedFilmShowId,
         promotionIDs: promotionIds, // Thêm danh sách promotionId vào payload
+        pointUsage: usePoints ? pointUsage : null,
       });
-
-      console.log("Response từ API createPayment:", response);
 
       if (response && response.payUrl) {
         setPaymentUrl(response.payUrl);
@@ -1044,6 +1030,135 @@ function BottomBar({
       alert("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
+
+  useEffect(() => {
+    if (!param) return;
+    if (usePoints === false) setPointUsage(null);
+
+    const pointUsage = Math.min(
+      param.loyalPoint_MaxiumPointUseInOneGo,
+      loyalPoint
+    );
+
+    setPointUsage(pointUsage);
+  }, [usePoints]);
+
+  const handleTogglePoints = () => {
+    if (usePoints === false && loyalPoint === 0) {
+      alert(`Bạn không có điểm để sử dụng`);
+      return;
+    }
+
+    if (
+      usePoints === false &&
+      calculateTotalPrice() < param.loyalPoint_MiniumValueToUseLoyalPoint
+    ) {
+      alert(
+        `Bạn có thể sử dụng điểm cho hóa hóa đơn từ : ${param.loyalPoint_MiniumValueToUseLoyalPoint.toLocaleString()} VNĐ`
+      );
+      return;
+    }
+
+    if (
+      usePoints === false &&
+      loyalPoint > param.loyalPoint_MaxiumPointUseInOneGo
+    ) {
+      alert(
+        `Điểm sử dụng tối đa trong một lần là ${param.loyalPoint_MaxiumPointUseInOneGo}. Phần dư ra có thể được sử dụng lại cho lần sau.`
+      );
+      setUsePoints(!usePoints);
+      return;
+    }
+    setUsePoints(!usePoints);
+  };
+
+  useEffect(() => {
+    setUsePoints(false);
+  }, [seatSelections, ticketSelections, additionalItemSelections]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const pointResponse = await getCurrentPoint();
+        if (pointResponse?.data?.currentLoyalPoint) {
+          setLoyalPoint(pointResponse.data.currentLoyalPoint);
+        } else {
+          console.error("Invalid pointResponse:", pointResponse);
+        }
+
+        const paramResponse = await getParam();
+        if (paramResponse?.data) {
+          setParam(paramResponse.data);
+        } else {
+          console.error("Invalid paramResponse:", paramResponse);
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const calculateTotalPrice = () => {
+    let total = 0;
+    let vCount = 0;
+    for (let i = 0; i < ticketSelections.length; i++) {
+      total += ticketSelections[i].quantity * ticketSelections[i].price;
+    }
+    for (let i = 0; i < seatSelections.length; i++) {
+      for (let j = 0; j < seatSelections[i].length; j++) {
+        if (seatSelections[i][j].selected) {
+          //console.log(seatSelections[i][j].seatType)
+          if (seatSelections[i][j].seatType === "V") {
+            vCount++;
+          }
+        }
+      }
+    }
+    if (param) {
+      console.log;
+      total += vCount * param.addedPriceForVIPSeat;
+    }
+
+    for (let i = 0; i < additionalItemSelections.length; i++) {
+      total +=
+        additionalItemSelections[i].quantity *
+        additionalItemSelections[i].price;
+    }
+    return total;
+  };
+
+  useEffect(() => {
+    if (!param) return;
+    if (usePoints === false) setPointUsage(null);
+
+    const pointUsage = Math.min(
+      param.loyalPoint_MaxiumPointUseInOneGo,
+      loyalPoint
+    );
+
+    setPointUsage(pointUsage);
+
+    const price = !usePoints
+      ? calculateTotalPrice() - (calculateTotalPrice() * totalDiscount) / 100
+      : calculateTotalPrice() -
+          (calculateTotalPrice() * totalDiscount) / 100 -
+          (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100 <
+        0
+      ? 0
+      : calculateTotalPrice() -
+        (calculateTotalPrice() * totalDiscount) / 100 -
+        (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100;
+
+    setPriceAfterAll(price);
+  }, [
+    usePoints,
+    seatSelections,
+    additionalItemSelections,
+    totalDiscount,
+    param,
+  ]);
 
   return (
     <div
@@ -1188,11 +1303,17 @@ function BottomBar({
           <div className="flex justify-between">
             <p className="text-lg">Tổng tiền</p>
             <p className="text-xl font-bold">
-              {(
-                calculateTotalPrice() -
-                (calculateTotalPrice() * +totalDiscount) / 100
-              ).toLocaleString()}{" "}
+              {priceAfterAll.toLocaleString()}
               VNĐ
+            </p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-lg">Điểm tích được </p>
+            <p className="text-xl font-bold">
+              +{" "}
+              {Math.floor(
+                (priceAfterAll * param?.loyalPoint_OrderToPointRatio) / 100
+              ).toLocaleString()}
             </p>
           </div>
           <div className="flex justify-between items-center">
@@ -1215,9 +1336,19 @@ function BottomBar({
                   }`}
                 ></span>
               </span>
-              <span className="ml-3 text-lg">{123123} điểm</span>
+              <span className="ml-3 text-lg">
+                {loyalPoint.toLocaleString()} điểm
+              </span>
             </label>
           </div>
+          {usePoints && (
+            <div className="flex justify-between">
+              <p className="text-lg">Đã sử dụng </p>
+              <p className="text-xl font-bold">
+                {pointUsage?.toLocaleString()}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="w-full mt-2">

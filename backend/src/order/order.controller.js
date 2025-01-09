@@ -1,4 +1,7 @@
-import { OrderHelper, OrderService } from "./order.service.js";
+import {
+  OrderHelper,
+  OrderService
+} from "./order.service.js";
 import expressAsyncHandler from "express-async-handler";
 
 class OrderController {
@@ -16,7 +19,9 @@ class OrderController {
 
   getAllOrders = expressAsyncHandler(async (req, res) => {
     try {
-      const { userId } = req.query;
+      const {
+        userId
+      } = req.query;
       const orders = await OrderService.getAllOrders({}, userId);
       res.status(200).json(orders);
     } catch (error) {
@@ -38,7 +43,9 @@ class OrderController {
   });
 
   getOrderById = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     try {
       const order = await OrderService.getDetailOrder(_id);
       if (!order) {
@@ -55,8 +62,12 @@ class OrderController {
   });
 
   disapprovePrinted = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
-    const { reason } = req.body;
+    const {
+      _id
+    } = req.params;
+    const {
+      reason
+    } = req.body;
 
     if (!reason) {
       return res.status(400).json({
@@ -72,9 +83,14 @@ class OrderController {
     }
     res.status(200).json(order);
   });
+
   disapproveServed = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
-    const { reason } = req.body;
+    const {
+      _id
+    } = req.params;
+    const {
+      reason
+    } = req.body;
 
     if (!reason) {
       return res.status(400).json({
@@ -92,7 +108,9 @@ class OrderController {
   });
 
   markOrderPrinted = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     const order = await OrderHelper.markOrderPrinted(_id);
     if (!order) {
       return res.status(404).json({
@@ -101,8 +119,11 @@ class OrderController {
     }
     res.status(200).json(order);
   });
+
   markOrderServed = expressAsyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const {
+      _id
+    } = req.params;
     const order = await OrderHelper.markOrderServed(_id);
     if (!order) {
       return res.status(404).json({

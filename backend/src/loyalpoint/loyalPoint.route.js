@@ -3,10 +3,13 @@ import express from "express";
 import {
   loyalPointController
 } from "./loyalPoint.controller.js";
+import {
+  validateToken
+} from "../middlewares/verifyToken.js";
 
 const router = express.Router();
 
-router.get("/:customerId", loyalPointController.getLoyalPoint);
+router.get("", validateToken, loyalPointController.getLoyalPoint);
 
 router.put("/:customerId/reset", loyalPointController.resetLoyalPoint);
 

@@ -8,10 +8,14 @@ import CustomButton from "../../Components/button";
 const UserTransHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [originalTransactions, setOriginalTransactions] = useState([]);
+  console.log(
+    "🚀 ~ UserTransHistory ~ originalTransactions:",
+    originalTransactions
+  );
   const [activeCollapse, setActiveCollapse] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     handleGetAllOrder();
@@ -20,10 +24,23 @@ const UserTransHistory = () => {
 
   const handleGetAllOrder = async () => {
     setIsLoading(true); // Bắt đầu loading
-    const response = await getAllOrderByUserId();
-    setTransactions(response.data);
-    setOriginalTransactions(response.data);
-    setIsLoading(false); // Kết thúc loading
+    try {
+      const response = await getAllOrderByUserId();
+
+      // Sắp xếp theo ngày mới nhất (giả sử trường 'date' chứa thông tin ngày tháng)
+      const sortedTransactions = response.data.sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB - dateA; // Ngày mới nhất trước
+      });
+
+      setTransactions(sortedTransactions);
+      setOriginalTransactions(sortedTransactions);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setIsLoading(false); // Kết thúc loading
+    }
   };
 
   const toggleCollapse = (transactionId) => {
@@ -58,7 +75,7 @@ const UserTransHistory = () => {
 
     const filteredData = originalTransactions.filter((t) => {
       // Chuyển transactionDate về định dạng local (yyyy-mm-dd)
-      const transactionDate = new Date(t.createdDate).toLocaleDateString();
+      const transactionDate = new Date(t.createdAt).toLocaleDateString();
 
       // So sánh chỉ phần ngày
       return (
@@ -165,7 +182,7 @@ const UserTransHistory = () => {
 
                   <p className="text-sm text-gray-500">
                     Ngày:{" "}
-                    {new Date(transaction?.createdDate).toLocaleDateString()}
+                    {new Date(transaction?.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <FaChevronDown
@@ -239,7 +256,51 @@ const UserTransHistory = () => {
                         </tr>
                       ))}
 
-                      <tr className="bg-gray-100 font-bold">
+                      {transaction?.pointUsage !== null && (
+                        <tr className="bg-gray-100 font-bold ">
+                          <td
+                            colSpan={4}
+                            className="p-2 text-right text-gray-700"
+                          >
+                            Tổng điểm sử dụng (VND)
+                          </td>
+                          <td className="p-2 text-right text-gray-700">
+                            {(transaction?.pointUsage?.pointUsed).toLocaleString()}
+                            (
+                            {(
+                              -(
+                                transaction?.pointUsage?.pointUsed *
+                                transaction?.pointUsage?.pointToMoneyRatio
+                              ) / 100
+                            ).toLocaleString()}
+                            VNĐ)
+                          </td>
+                        </tr>
+                      )}
+
+                      {transaction?.totalPriceAfterDiscount !== null && (
+                        <tr className="bg-gray-100 font-bold ">
+                          <td
+                            colSpan={4}
+                            className="p-2 text-right text-gray-700"
+                          >
+                            Tổng khuyến mãi (VND)
+                          </td>
+                          <td className="p-2 text-right text-gray-700">
+                            -
+                            {(
+                              (transaction?.totalPrice || 0) -
+                              (transaction?.totalPriceAfterDiscount || 0) -
+                              ((transaction?.pointUsage?.pointUsed || 0) *
+                                (transaction?.pointUsage?.pointToMoneyRatio ||
+                                  0)) /
+                                100
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      )}
+
+                      <tr className="bg-gray-100 font-bold ">
                         <td
                           colSpan={4}
                           className="p-2 text-right text-gray-700"
@@ -247,7 +308,8 @@ const UserTransHistory = () => {
                           Tổng tiền (VND)
                         </td>
                         <td className="p-2 text-right text-gray-700">
-                          {transaction?.totalPrice.toLocaleString()}
+                          {transaction?.totalPriceAfterDiscount?.toLocaleString() ||
+                            transaction?.totalPrice.toLocaleString()}
                         </td>
                       </tr>
                     </tbody>
