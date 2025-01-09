@@ -1152,7 +1152,13 @@ function BottomBar({
         (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100;
 
     setPriceAfterAll(price);
-  }, [usePoints, seatSelections, totalDiscount, param]);
+  }, [
+    usePoints,
+    seatSelections,
+    additionalItemSelections,
+    totalDiscount,
+    param,
+  ]);
 
   return (
     <div
