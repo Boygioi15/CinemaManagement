@@ -739,6 +739,12 @@ const FilmDetailPage = () => {
         <button
           onClick={() => setIsPromotionListOpen(true)}
           className="fixed inset-y-1/2 right-0 transform -translate-y-1/2 text-white px-4 py-2 rounded-l-lg shadow-lg flex items-center justify-center"
+          style={{
+            position: "fixed",
+            top: "30%",
+            right: "0",
+            transform: "translateY(-50%)",
+          }}
         >
           <FaArrowLeft size={20} />
         </button>
