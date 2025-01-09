@@ -11,7 +11,7 @@ const UserTransHistory = () => {
   const [activeCollapse, setActiveCollapse] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true); // Thêm trạng thái loading
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     handleGetAllOrder();
