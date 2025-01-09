@@ -65,17 +65,24 @@ const UserTransHistory = () => {
       return;
     }
 
-    // Chuyển đổi fromDate và toDate về định dạng local date (yyyy-mm-dd)
+    // Chuyển đổi fromDate và toDate về định dạng yyyy-mm-dd
     const formattedFromDate = fromDate
-      ? new Date(fromDate).toLocaleDateString()
+      ? new Date(fromDate).toISOString().split("T")[0]
       : null;
     const formattedToDate = toDate
-      ? new Date(toDate).toLocaleDateString()
+      ? new Date(toDate).toISOString().split("T")[0]
       : null;
 
+    console.log(
+      "🚀 ~ handleFilterChange ~ formattedFromDate:",
+      formattedFromDate
+    );
+    console.log("🚀 ~ handleFilterChange ~ formattedToDate:", formattedToDate);
+
     const filteredData = originalTransactions.filter((t) => {
-      // Chuyển transactionDate về định dạng local (yyyy-mm-dd)
-      const transactionDate = new Date(t.createdAt).toLocaleDateString();
+      // Chuyển transactionDate về định dạng yyyy-mm-dd
+      const transactionDate = new Date(t.createdAt).toISOString().split("T")[0];
+      console.log("🚀 ~ filteredData ~ transactionDate:", transactionDate);
 
       // So sánh chỉ phần ngày
       return (
