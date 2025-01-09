@@ -232,32 +232,6 @@ const UserTransHistory = () => {
                         </tr>
                       ))}
 
-                      {transaction?.otherDatas?.map((otherData, index) => (
-                        <tr
-                          key={`otherData-${index}`}
-                          className="hover:bg-gray-50"
-                        >
-                          <td className="p-2 border-b text-gray-700 text-center">
-                            {index + 1}
-                          </td>
-                          <td className="p-2 border-b text-gray-700 text-left">
-                            {otherData?.name}
-                          </td>
-                          <td className="p-2 border-b text-gray-700 text-center">
-                            {otherData?.quantity}
-                          </td>
-                          <td className="p-2 border-b text-gray-700 text-right">
-                            {Number(otherData?.price).toLocaleString()}
-                          </td>
-
-                          <td className="p-2 border-b text-gray-700 text-right">
-                            {(
-                              otherData?.quantity * otherData.price
-                            ).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-
                       {transaction?.items.map((detail, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="p-2 border-b text-gray-700 text-center">
@@ -277,6 +251,35 @@ const UserTransHistory = () => {
                           <td className="p-2 border-b text-gray-700 text-right">
                             {(
                               detail?.quantity * detail?.price
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {transaction?.otherDatas?.map((otherData, index) => (
+                        <tr
+                          key={`otherData-${index}`}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="p-2 border-b text-gray-700 text-center">
+                            {index +
+                              1 +
+                              (transaction?.filmShow?.tickets?.length || 0) +
+                              transaction?.items?.length || 0}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-left">
+                            {otherData?.name}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-center">
+                            {otherData?.quantity}
+                          </td>
+                          <td className="p-2 border-b text-gray-700 text-right">
+                            {Number(otherData?.price).toLocaleString()}
+                          </td>
+
+                          <td className="p-2 border-b text-gray-700 text-right">
+                            {(
+                              otherData?.quantity * otherData.price
                             ).toLocaleString()}
                           </td>
                         </tr>
