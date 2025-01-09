@@ -221,6 +221,16 @@ export default function TicketServeListPage() {
     },
     { header: "Verify Code", key: "verifyCode" },
     {
+      header: "Ngày đặt",
+      key: "createdAt",
+      render: (_, row) => {
+        const createdAt = row.createdAt; // Lấy giá trị ngày chiếu
+        return createdAt
+          ? new Date(createdAt).toLocaleDateString() // Hiển thị ngày nếu hợp lệ
+          : "Không có dữ liệu"; // Hiển thị chuỗi mặc định nếu không có dữ liệu
+      },
+    },
+    {
       header: "Ngày chiếu",
       key: "showDate",
       render: (_, row) => {
