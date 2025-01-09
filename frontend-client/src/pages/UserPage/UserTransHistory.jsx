@@ -248,11 +248,15 @@ const UserTransHistory = () => {
                             Tổng điểm sử dụng (VND)
                           </td>
                           <td className="p-2 text-right text-gray-700">
+                            {(transaction?.pointUsage?.pointUsed).toLocaleString()}
+                            (
                             {(
-                              (transaction?.pointUsage?.pointUsed *
-                                transaction?.pointUsage?.pointToMoneyRatio) /
-                              100
+                              -(
+                                transaction?.pointUsage?.pointUsed *
+                                transaction?.pointUsage?.pointToMoneyRatio
+                              ) / 100
                             ).toLocaleString()}
+                            VNĐ)
                           </td>
                         </tr>
                       )}

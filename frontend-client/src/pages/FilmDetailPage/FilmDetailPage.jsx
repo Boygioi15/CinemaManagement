@@ -1038,6 +1038,11 @@ function BottomBar({
   }, [usePoints]);
 
   const handleTogglePoints = () => {
+    if (usePoints === false && loyalPoint === 0) {
+      alert(`Bạn không có điểm để sử dụng`);
+      return;
+    }
+
     if (
       usePoints === false &&
       calculateTotalPrice() < param.loyalPoint_MiniumValueToUseLoyalPoint
@@ -1312,7 +1317,6 @@ function BottomBar({
             <div className="flex justify-between">
               <p className="text-lg">Đã sử dụng </p>
               <p className="text-xl font-bold">
-                {" "}
                 {pointUsage?.toLocaleString()}
               </p>
             </div>

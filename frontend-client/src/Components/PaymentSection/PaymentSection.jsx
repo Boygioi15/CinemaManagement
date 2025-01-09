@@ -98,6 +98,11 @@ const PaymentSection = ({
   }, [usePoints, totalPrice, totalDiscount, param]);
 
   const handleTogglePoints = () => {
+    if (usePoints === false && loyalPoint === 0) {
+      alert(`Bạn không có điểm để sử dụng`);
+      return;
+    }
+
     if (
       !usePoints &&
       totalPrice < param?.loyalPoint_MiniumValueToUseLoyalPoint
