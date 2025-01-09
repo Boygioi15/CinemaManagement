@@ -1,3 +1,15 @@
+const calculateTotalAfterDiscount = (totalPrice, totalDiscount, pointUsage, param) => {
+  if (!param) return 0;
+
+  let discountedPrice = totalPrice - (totalPrice * totalDiscount) / 100;
+
+  if (pointUsage && param?.loyalPoint_PointToReducedPriceRatio) {
+    discountedPrice -= (pointUsage * param.loyalPoint_PointToReducedPriceRatio) / 100;
+  }
+
+  return discountedPrice < 0 ? 0 : discountedPrice;
+};
+
 import React, { useEffect, useState } from "react";
 import CustomButton from "../button/index"; // Giả sử bạn đã có CustomButton component
 import { createPayment, getCurrentPoint, getParam } from "../../config/api"; // Đảm bảo các API được định nghĩa đúng
@@ -13,6 +25,7 @@ const PaymentSection = ({
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const [loyalPoint, setLoyalPoint] = useState(0); // Điểm tích lũy hiện tại
   const [param, setParam] = useState(null); // Tham số từ hệ thống
+  console.log("🚀 ~ param:", param);
   const [usePoints, setUsePoints] = useState(false); // Sử dụng điểm
   const [pointUsage, setPointUsage] = useState(null); // Số điểm sẽ sử dụng
 
@@ -66,11 +79,23 @@ const PaymentSection = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      const pointResponse = await getCurrentPoint();
-      setLoyalPoint(pointResponse.data.currentLoyalPoint);
+      try {
+        const pointResponse = await getCurrentPoint();
+        if (pointResponse?.data?.currentLoyalPoint) {
+          setLoyalPoint(pointResponse.data.currentLoyalPoint);
+        } else {
+          console.error("Invalid pointResponse:", pointResponse);
+        }
 
-      const paramResponse = await getParam();
-      setParam(paramResponse.data);
+        const paramResponse = await getParam();
+        if (paramResponse?.data) {
+          setParam(paramResponse.data);
+        } else {
+          console.error("Invalid paramResponse:", paramResponse);
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      }
     };
 
     fetchData();
@@ -84,8 +109,7 @@ const PaymentSection = ({
     }
     const data = Math.min(
       totalPrice -
-        (totalPrice * totalDiscount) /
-          100 /
+        (totalPrice * totalDiscount) / 100 /
           param?.loyalPoint_PointToReducedPriceRatio,
       param?.loyalPoint_MaxiumPointUseInOneGo
     );
@@ -119,6 +143,13 @@ const PaymentSection = ({
     }
     setUsePoints(!usePoints);
   };
+
+  const totalAfterDiscount = calculateTotalAfterDiscount(
+    totalPrice,
+    totalDiscount,
+    pointUsage,
+    param
+  );
 
   return (
     <>
@@ -156,25 +187,7 @@ const PaymentSection = ({
                   </p>
                   <p className="text-lg">Tổng tiền</p>
                   <p className="text-xl font-bold">
-                    {!usePoints
-                      ? (
-                          totalPrice -
-                          (totalPrice * totalDiscount) / 100
-                        ).toLocaleString()
-                      : (totalPrice -
-                          (totalPrice * totalDiscount) / 100 -
-                          (pointUsage *
-                            param?.loyalPoint_PointToReducedPriceRatio) /
-                            100 <
-                        0
-                          ? 0
-                          : totalPrice -
-                            (totalPrice * totalDiscount) / 100 -
-                            (pointUsage *
-                              param?.loyalPoint_PointToReducedPriceRatio) /
-                              100
-                        ).toLocaleString()}
-                    VNĐ
+                    {totalAfterDiscount.toLocaleString()} VNĐ
                   </p>
                 </div>
                 <div className="flex flex-col w-full">
@@ -184,7 +197,7 @@ const PaymentSection = ({
                   <p className="text-xl font-bold">
                     {
                       +Math.floor(
-                        (totalPrice * param?.loyalPoint_OrderToPointRatio) / 100
+                        (totalAfterDiscount * param?.loyalPoint_OrderToPointRatio) / 100
                       )
                     }
                   </p>
