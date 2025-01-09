@@ -9,6 +9,7 @@ const Sidebar = ({ userName, menuItems }) => {
   useEffect(() => {
     const fetchLoyalPoint = async () => {
       const response = await getCurrentPoint();
+      console.log(response)
       setLoyalPoint(response.data.currentLoyalPoint);
     };
     fetchLoyalPoint();

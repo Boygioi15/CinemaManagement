@@ -1104,7 +1104,11 @@ function BottomBar({
         }
       }
     }
-    total += vCount * 20000;
+    if(param){
+      console.log
+      total += vCount * param.addedPriceForVIPSeat;
+    }
+    
     for (let i = 0; i < additionalItemSelections.length; i++) {
       total +=
         additionalItemSelections[i].quantity *
