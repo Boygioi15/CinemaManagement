@@ -86,8 +86,8 @@ const PaymentSection = ({
       totalPrice -
         (totalPrice * totalDiscount) /
           100 /
-          param.loyalPoint_PointToReducedPriceRatio,
-      param.loyalPoint_MaxiumPointUseInOneGo
+          param?.loyalPoint_PointToReducedPriceRatio,
+      param?.loyalPoint_MaxiumPointUseInOneGo
     );
 
     const calculatedPointUsage = Math.min(data, loyalPoint);
@@ -106,15 +106,15 @@ const PaymentSection = ({
       totalPrice < param?.loyalPoint_MiniumValueToUseLoyalPoint
     ) {
       alert(
-        `Để có thể sử dụng điểm tích lũy, đơn hàng tối thiểu phải là: ${param.loyalPoint_MiniumValueToUseLoyalPoint.toLocaleString()} VNĐ`
+        `Để có thể sử dụng điểm tích lũy, đơn hàng tối thiểu phải là: ${param?.loyalPoint_MiniumValueToUseLoyalPoint.toLocaleString()} VNĐ`
       );
       return;
     } else if (
-      loyalPoint > param.loyalPoint_MaxiumPointUseInOneGo &&
+      loyalPoint > param?.loyalPoint_MaxiumPointUseInOneGo &&
       !usePoints
     ) {
       alert(
-        `Điểm sử dụng tối đa trong một lần là ${param.loyalPoint_MaxiumPointUseInOneGo}. Phần dư ra có thể được sử dụng lại cho lần sau.`
+        `Điểm sử dụng tối đa trong một lần là ${param?.loyalPoint_MaxiumPointUseInOneGo}. Phần dư ra có thể được sử dụng lại cho lần sau.`
       );
     }
     setUsePoints(!usePoints);
@@ -164,14 +164,14 @@ const PaymentSection = ({
                       : (totalPrice -
                           (totalPrice * totalDiscount) / 100 -
                           (pointUsage *
-                            param.loyalPoint_PointToReducedPriceRatio) /
+                            param?.loyalPoint_PointToReducedPriceRatio) /
                             100 <
                         0
                           ? 0
                           : totalPrice -
                             (totalPrice * totalDiscount) / 100 -
                             (pointUsage *
-                              param.loyalPoint_PointToReducedPriceRatio) /
+                              param?.loyalPoint_PointToReducedPriceRatio) /
                               100
                         ).toLocaleString()}
                     VNĐ
@@ -184,7 +184,7 @@ const PaymentSection = ({
                   <p className="text-xl font-bold">
                     {
                       +Math.floor(
-                        (totalPrice * param.loyalPoint_OrderToPointRatio) / 100
+                        (totalPrice * param?.loyalPoint_OrderToPointRatio) / 100
                       )
                     }
                   </p>
