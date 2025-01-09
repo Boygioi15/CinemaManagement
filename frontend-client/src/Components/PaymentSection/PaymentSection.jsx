@@ -13,10 +13,8 @@ const PaymentSection = ({
   const [paymentUrl, setPaymentUrl] = useState(null); // State quản lý URL thanh toán
   const [loyalPoint, setLoyalPoint] = useState(0); // Điểm tích lũy hiện tại
   const [param, setParam] = useState(null); // Tham số từ hệ thống
-  console.log("🚀 ~ param:", param);
   const [usePoints, setUsePoints] = useState(false); // Sử dụng điểm
   const [pointUsage, setPointUsage] = useState(null); // Số điểm sẽ sử dụng
-  console.log("🚀 ~ pointUsage:", pointUsage);
 
   const { user } = useAuth(); // Lấy thông tin user từ context
   const navigate = useNavigate();
