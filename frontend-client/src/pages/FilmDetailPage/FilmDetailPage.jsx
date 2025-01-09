@@ -1016,7 +1016,7 @@ function BottomBar({
         totalPrice: calculateTotalPrice(),
         filmShowId: selectedFilmShowId,
         promotionIDs: promotionIds, // Thêm danh sách promotionId vào payload
-        pointUsage: pointUsage,
+        pointUsage: usePoints ? pointUsage : null,
       });
 
       if (response && response.payUrl) {
@@ -1116,11 +1116,11 @@ function BottomBar({
         }
       }
     }
-    if(param){
-      console.log
+    if (param) {
+      console.log;
       total += vCount * param.addedPriceForVIPSeat;
     }
-    
+
     for (let i = 0; i < additionalItemSelections.length; i++) {
       total +=
         additionalItemSelections[i].quantity *
