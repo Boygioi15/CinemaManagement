@@ -138,19 +138,18 @@ class StatisticController {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        {
-          // Lookup offline decorator data
-          $lookup: {
-            from: "orders_decorators_offlines", // Collection name (lowercase + pluralized)
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "offlineData",
-          },
-        },
+        // {
+        //   // Lookup offline decorator data
+        //   $lookup: {
+        //     from: "orders_decorators_offlines",
+        //     foreignField: "orderRef",
+        //     as: "offlineData",
+        //   },
+        // },
         {
           // Lookup tickets from Orders_Data_FilmShow
           $lookup: {
-            from: "ordersdata_filmshows", // Collection name (lowercase + pluralized)
+            from: "ordersdata_filmshows",
             localField: "_id",
             foreignField: "orderRef",
             as: "filmShowData",
@@ -170,15 +169,15 @@ class StatisticController {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          // Filter tickets based on invalidReason_Printed and invalidReason_Served
-          $match: {
-            $and: [
-              { "offlineData.invalidReason_Printed": "" },
-              { "offlineData.invalidReason_Served": "" },
-            ],
-          },
-        },
+        // {
+        //   // Filter tickets based on invalidReason_Printed and invalidReason_Served
+        //   $match: {
+        //     $and: [
+        //       { "offlineData.invalidReason_Printed": "" },
+        //       { "offlineData.invalidReason_Served": "" },
+        //     ],
+        //   },
+        // },
         // {
         //   // Group tickets by name and sum quantities
         //   $group: {
@@ -245,14 +244,14 @@ class StatisticController {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        {
-          $lookup: {
-            from: "orders_decorators_offlines",
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "offlineData",
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "orders_decorators_offlines",
+        //     localField: "_id",
+        //     foreignField: "orderRef",
+        //     as: "offlineData",
+        //   },
+        // },
         {
           $lookup: {
             from: "orders_data_items",
@@ -279,14 +278,14 @@ class StatisticController {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          $match: {
-            $and: [
-              { "offlineData.invalidReason_Printed": "" },
-              { "offlineData.invalidReason_Served": "" },
-            ],
-          },
-        },
+        // {
+        //   $match: {
+        //     $and: [
+        //       { "offlineData.invalidReason_Printed": "" },
+        //       { "offlineData.invalidReason_Served": "" },
+        //     ],
+        //   },
+        // },
         // {
         //   $group: {
         //     _id: "$itemsData.items.name",
@@ -352,19 +351,19 @@ class StatisticController {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        {
-          // Lookup offline decorator data
-          $lookup: {
-            from: "orders_decorators_offlines", // Collection name (lowercase + pluralized)
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "offlineData",
-          },
-        },
+        // {
+        //   // Lookup offline decorator data
+        //   $lookup: {
+        //     from: "orders_decorators_offlines",
+        //     localField: "_id",
+        //     foreignField: "orderRef",
+        //     as: "offlineData",
+        //   },
+        // },
         {
           // Lookup film show data
           $lookup: {
-            from: "ordersdata_filmshows", // Collection name (lowercase + pluralized)
+            from: "ordersdata_filmshows",
             localField: "_id",
             foreignField: "orderRef",
             as: "filmShowData",
@@ -384,15 +383,15 @@ class StatisticController {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          // Filter tickets based on invalidReason_Printed and invalidReason_Served
-          $match: {
-            $and: [
-              { "offlineData.invalidReason_Printed": "" },
-              { "offlineData.invalidReason_Served": "" },
-            ],
-          },
-        },
+        // {
+        //   // Filter tickets based on invalidReason_Printed and invalidReason_Served
+        //   $match: {
+        //     $and: [
+        //       { "offlineData.invalidReason_Printed": "" },
+        //       { "offlineData.invalidReason_Served": "" },
+        //     ],
+        //   },
+        // },
         {
           // Group tickets by film name and sum quantities
           $group: {
@@ -441,15 +440,15 @@ class StatisticController {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        {
-          // Lookup offline decorator data
-          $lookup: {
-            from: "orders_decorators_offlines", // Collection name
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "offlineData",
-          },
-        },
+        // {
+        //   // Lookup offline decorator data
+        //   $lookup: {
+        //     from: "orders_decorators_offlines", // Collection name
+        //     localField: "_id",
+        //     foreignField: "orderRef",
+        //     as: "offlineData",
+        //   },
+        // },
         {
           // Lookup film show data
           $lookup: {
@@ -473,15 +472,15 @@ class StatisticController {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          // Filter based on invalidReason_Printed and invalidReason_Served
-          $match: {
-            $and: [
-              { "offlineData.invalidReason_Printed": "" },
-              { "offlineData.invalidReason_Served": "" },
-            ],
-          },
-        },
+        // {
+        //   // Filter based on invalidReason_Printed and invalidReason_Served
+        //   $match: {
+        //     $and: [
+        //       { "offlineData.invalidReason_Printed": "" },
+        //       { "offlineData.invalidReason_Served": "" },
+        //     ],
+        //   },
+        // },
         {
           // Group by filmName and count seatNames
           $group: {
@@ -537,15 +536,15 @@ class StatisticController {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
           },
         },
-        {
-          // Lookup offline decorator data
-          $lookup: {
-            from: "orders_decorators_offlines", // Collection name
-            localField: "_id",
-            foreignField: "orderRef",
-            as: "offlineData",
-          },
-        },
+        // {
+        //   // Lookup offline decorator data
+        //   $lookup: {
+        //     from: "orders_decorators_offlines", // Collection name
+        //     localField: "_id",
+        //     foreignField: "orderRef",
+        //     as: "offlineData",
+        //   },
+        // },
         {
           // Lookup items data
           $lookup: {
@@ -567,15 +566,15 @@ class StatisticController {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          // Filter based on invalidReason_Printed and invalidReason_Served
-          $match: {
-            $and: [
-              { "offlineData.invalidReason_Printed": "" },
-              { "offlineData.invalidReason_Served": "" },
-            ],
-          },
-        },
+        // {
+        //   // Filter based on invalidReason_Printed and invalidReason_Served
+        //   $match: {
+        //     $and: [
+        //       { "offlineData.invalidReason_Printed": "" },
+        //       { "offlineData.invalidReason_Served": "" },
+        //     ],
+        //   },
+        // },
         {
           $group: {
             _id: "$itemsData.items.name",
@@ -1016,7 +1015,36 @@ class StatisticController {
       const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
       const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
   
-      const orders = await orderModel.aggregate([
+      // Tính doanh thu thuần
+      const netRevenueData = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfYear, $lte: endOfYear },
+          },
+        },
+        {
+          $project: {
+            month: { $month: "$createdDate" },
+            totalPrice: { $toDouble: "$totalPrice" },
+          },
+        },
+        {
+          $group: {
+            _id: { month: "$month" },
+            totalNetRevenue: { $sum: "$totalPrice" },
+          },
+        },
+        {
+          $project: {
+            month: "$_id.month",
+            totalNetRevenue: 1,
+            _id: 0,
+          },
+        },
+      ]);
+  
+      // Tính doanh thu thực tế
+      const effectiveRevenueData = await orderModel.aggregate([
         {
           $match: {
             createdDate: { $gte: startOfYear, $lte: endOfYear },
@@ -1055,29 +1083,36 @@ class StatisticController {
         {
           $group: {
             _id: { month: "$month" },
-            totalNetRevenue: { $sum: { $toDouble: "$totalPrice" } },
             totalEffectiveRevenue: { $sum: "$effectiveRevenue" },
           },
         },
         {
           $project: {
             month: "$_id.month",
-            totalNetRevenue: 1,
             totalEffectiveRevenue: 1,
             _id: 0,
           },
         },
-        {
-          $sort: { month: 1 },
-        },
       ]);
   
-      res.status(200).json(orders);
+      // Kết hợp dữ liệu doanh thu thuần và thực tế
+      const combinedData = netRevenueData.map((net) => {
+        const effective = effectiveRevenueData.find(
+          (eff) => eff.month === net.month
+        );
+        return {
+          month: net.month,
+          totalNetRevenue: net.totalNetRevenue,
+          totalEffectiveRevenue: effective?.totalEffectiveRevenue || 0,
+        };
+      });
+  
+      res.status(200).json(combinedData);
     } catch (error) {
       res.status(500);
       throw new Error(`Có lỗi xảy ra: ${error.message}`);
     }
-  });
+  });  
   
   getDailyStatistics = expressAsyncHandler(async (req, res) => {
     const { selectedDate } = req.query;
@@ -1092,8 +1127,30 @@ class StatisticController {
     const endOfDay = new Date(selectedDateObj.setHours(23, 59, 59, 999));
   
     try {
-      // Tính doanh thu thuần và thực tế
-      const revenueData = await orderModel.aggregate([
+      // Tính doanh thu thuần
+      const netRevenueData = await orderModel.aggregate([
+        {
+          $match: {
+            createdDate: { $gte: startOfDay, $lte: endOfDay },
+          },
+        },
+        {
+          $project: {
+            totalPrice: { $toDouble: "$totalPrice" },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalNetRevenue: { $sum: "$totalPrice" },
+          },
+        },
+      ]);
+  
+      const totalNetRevenue = netRevenueData[0]?.totalNetRevenue || 0;
+  
+      // Tính doanh thu thực tế
+      const effectiveRevenueData = await orderModel.aggregate([
         {
           $match: {
             createdDate: { $gte: startOfDay, $lte: endOfDay },
@@ -1117,8 +1174,8 @@ class StatisticController {
         },
         {
           $project: {
-            totalPrice: 1,
             totalPriceAfterDiscount: 1,
+            totalPrice: 1,
             effectiveRevenue: {
               $cond: [
                 { $ifNull: ["$totalPriceAfterDiscount", false] },
@@ -1131,18 +1188,12 @@ class StatisticController {
         {
           $group: {
             _id: null,
-            totalNetRevenue: { $sum: { $toDouble: "$totalPrice" } },
             totalEffectiveRevenue: { $sum: "$effectiveRevenue" },
           },
         },
-        {
-          $project: {
-            _id: 0,
-            totalNetRevenue: 1,
-            totalEffectiveRevenue: 1,
-          },
-        },
       ]);
+  
+      const totalEffectiveRevenue = effectiveRevenueData[0]?.totalEffectiveRevenue || 0;
   
       // Tính doanh thu vé
       const ticketRevenueData = await orderModel.aggregate([
@@ -1234,8 +1285,8 @@ class StatisticController {
   
       // Kết hợp dữ liệu
       const result = {
-        totalNetRevenue: revenueData[0]?.totalNetRevenue || 0,
-        totalEffectiveRevenue: revenueData[0]?.totalEffectiveRevenue || 0,
+        totalNetRevenue,
+        totalEffectiveRevenue,
         totalTicketRevenue,
         totalOtherItemsRevenue,
       };
@@ -1245,7 +1296,7 @@ class StatisticController {
       res.status(500);
       throw new Error(`Có lỗi xảy ra: ${error.message}`);
     }
-  });      
+  });        
 
   getFilmStatisticsByDate = async (req, res) => {
     const {

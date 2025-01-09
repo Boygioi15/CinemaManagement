@@ -116,7 +116,7 @@ const StatisticPage = () => {
       const data = response.data;
       setStatistics((prev) => ({
         ...prev, // Giữ lại các giá trị cũ
-        totalTicket: data.servedTickets,
+        totalTicket: data.totalTickets,
       }));
     } catch (error) {
       alert("Thao tác thất bại, lỗi: " + error.response.data.msg);
