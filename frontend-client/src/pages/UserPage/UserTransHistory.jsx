@@ -270,6 +270,7 @@ const UserTransHistory = () => {
                             Tổng khuyến mãi (VND)
                           </td>
                           <td className="p-2 text-right text-gray-700">
+                            -
                             {(
                               (transaction?.totalPrice || 0) -
                               (transaction?.totalPriceAfterDiscount || 0) -
