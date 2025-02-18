@@ -17,6 +17,7 @@ Along side developing the project, we also analyze and the design the system wit
  - Payment integration with Momo
  - Film show query & selection
  - Able to create custom room layout
+ - Detailed ticket management
 
 ## Tech stack
  - Frontend: ReactJS, TailwindCSS
