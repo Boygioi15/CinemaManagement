@@ -6,13 +6,13 @@
  - Truong Dac Dien
  - Hoang Tien Dat
 
- ### Main features
+ ### System analyzing
 Along side developing the project, we also analyze and the design the system with: 
  - Use case diagram for specifying use cases
  - Class & model diagram and State & sequence diagram  for analyzing code 
  - UI roadmap
 
-Remarkable features: 
+### Remarkable features: 
  - Authentication using JWT
  - Payment integration with Momo
  - Film show query & selection
